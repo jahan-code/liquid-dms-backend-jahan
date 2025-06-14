@@ -18,11 +18,16 @@ const startServer = async () => {
     await connectRedis(); // ✅ Redis connected
 
     // ✅ Middleware setup
-    app.use(cors());
+    app.use(
+      cors({
+        origin: "http://localhost:3000",
+        credentials: true, // if you're using cookies or sessions
+      })
+    );
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    app.use(getSessionMiddleware()); // ✅ Session middleware from utils
+    app.use(getSessionMiddleware());
 
     app.use(requestValidator);
     app.use("/", router);
