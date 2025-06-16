@@ -1,15 +1,15 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-import express from "express";
-import cors from "cors";
+import express from 'express';
+import cors from 'cors';
 
-import { connectRedis } from "./config/redis.js";
-import { getSessionMiddleware } from "./utils/session.js";
+import { connectRedis } from './config/redis.js';
+import { getSessionMiddleware } from './utils/session.js';
 
-import ApiErrorMiddleware from "./middleware/ApiError.middleware.js";
-import requestValidator from "./middleware/requestValidator.middleware.js";
-import router from "./router/index.js";
+import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
+import requestValidator from './middleware/requestValidator.middleware.js';
+import router from './router/index.js';
 
 const app = express();
 
@@ -20,7 +20,7 @@ const startServer = async () => {
     // ✅ Middleware setup
     app.use(
       cors({
-        origin: "http://localhost:3000",
+        origin: 'http://localhost:3000',
         credentials: true, // if you're using cookies or sessions
       })
     );
@@ -30,14 +30,16 @@ const startServer = async () => {
     app.use(getSessionMiddleware());
 
     app.use(requestValidator);
-    app.use("/", router);
-    app.use(ApiErrorMiddleware);
 
-    app.get("/ping", (req, res) => {
-      res.send("pong");
+    app.get('/health', (req, res) => {
+      res.json({
+        message: 'OK',
+      });
     });
+    app.use('/', router);
+    app.use(ApiErrorMiddleware);
   } catch (err) {
-    console.error("❌ Failed to start server:", err);
+    console.error('❌ Failed to start server:', err);
     process.exit(1);
   }
 };
