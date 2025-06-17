@@ -1,21 +1,24 @@
-import nodemailer from "nodemailer";
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-import fs from "fs/promises";
-import processTemplate from "./processTemplate.js";
-import dotenv from "dotenv";
+import nodemailer from 'nodemailer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs/promises';
+import processTemplate from './processTemplate.js';
+import dotenv from 'dotenv';
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "465"),
+  port: parseInt(process.env.SMTP_PORT || '465'),
   secure: false, // Use secure for port 465
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
@@ -29,17 +32,17 @@ export const sendEmail = async ({
     // Validate inputs
     if (!to || !subject || !templateName) {
       throw new Error(
-        "Missing required parameters: to, subject, or templateName"
+        'Missing required parameters: to, subject, or templateName'
       );
     }
     if (!process.env.SENDER_EMAIL) {
-      throw new Error("SENDER_EMAIL environment variable is not set");
+      throw new Error('SENDER_EMAIL environment variable is not set');
     }
 
     // Construct and validate template path
     const templatePath = path.join(
       __dirname,
-      "../templates",
+      '../templates',
       `${templateName}.html`
     );
     try {

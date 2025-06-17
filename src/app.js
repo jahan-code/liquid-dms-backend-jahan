@@ -20,7 +20,7 @@ const startServer = async () => {
     // ✅ Middleware setup
     app.use(
       cors({
-        origin: 'http://localhost:3000',
+        origin: '*',
         credentials: true, // if you're using cookies or sessions
       })
     );
