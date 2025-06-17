@@ -7,7 +7,7 @@ const emailSchema = Joi.string().email().required().messages({
   'any.required': errorConstants.AUTHENTICATION.EMAIL_REQUIRED,
 });
 
-const usernameSchema = Joi.string().trim().min(2).max(50).required().messages({
+const fullnameSchema = Joi.string().trim().min(2).max(50).required().messages({
   'string.base': errorConstants.AUTHENTICATION.NAME_MUST_BE_STRING,
   'string.empty': errorConstants.AUTHENTICATION.NAME_REQUIRED,
   'string.min': errorConstants.AUTHENTICATION.NAME_MIN_LENGTH,
@@ -54,7 +54,7 @@ const otpSchema = Joi.string()
   });
 
 const registerSchema = Joi.object({
-  username: usernameSchema,
+  fullname: fullnameSchema,
   email: emailSchema,
   password: passwordSchema,
 });

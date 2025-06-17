@@ -10,7 +10,7 @@ import { getSessionMiddleware } from './utils/session.js';
 import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
 import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
-
+import cookieParser from 'cookie-parser';
 const app = express();
 
 const startServer = async () => {
@@ -24,6 +24,7 @@ const startServer = async () => {
         credentials: true, // if you're using cookies or sessions
       })
     );
+    app.use(cookieParser());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
