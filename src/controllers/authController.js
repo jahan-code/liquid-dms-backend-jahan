@@ -33,7 +33,7 @@ const register = async (req, res, next) => {
       .lean();
     if (existingUser) {
       return next(
-        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS, 400)
+        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS, 409)
       );
     }
 
@@ -338,8 +338,9 @@ const verifyOtp = async (req, res, next) => {
     const { error, value } = verifyOtpSchema.validate(req.body, {
       abortEarly: false,
     });
-    if (error) return next(new ApiError(error.details[0].message, 400));
-
+    if (error) {
+      return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
+    }
     const { otp } = value;
     const email = req.session?.email;
     const context = req.session?.otpContext;

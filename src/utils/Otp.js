@@ -93,15 +93,15 @@ const trackRequest = (email) => {
 const verifyOTP = (email, inputOtp) => {
   email = email.toLowerCase();
   const stored = otpStore.get(email);
-  if (!stored) return { valid: false, reason: "OTP not found or expired" };
+  if (!stored) return { valid: false, reason: 'OTP not found or expired' };
 
   if (Date.now() > stored.expiresAt) {
     otpStore.delete(email);
-    return { valid: false, reason: "OTP expired" };
+    return { valid: false, reason: 'OTP expired' };
   }
 
   if (stored.otp !== inputOtp.toString()) {
-    return { valid: false, reason: "Invalid OTP" };
+    return { valid: false, reason: 'Invalid OTP' };
   }
 
   // OTP is valid — delete it to prevent reuse
