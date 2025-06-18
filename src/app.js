@@ -21,14 +21,13 @@ const startServer = async () => {
     app.use(
       cors({
         origin: '*',
-        credentials: true, // if you're using cookies or sessions
+        credentials: true,
       })
     );
     app.use(cookieParser());
+    app.use(getSessionMiddleware());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-
-    app.use(getSessionMiddleware());
 
     app.use(requestValidator);
 

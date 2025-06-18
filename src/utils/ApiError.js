@@ -5,15 +5,15 @@ class ApiError extends Error {
     this.message = message;
   }
   // In ApiError class
-  static conflict(message = "Conflict!") {
+  static conflict(message = 'Conflict!') {
     return new ApiError(message, 409);
   }
 
-  static wrongCredentials(message = "Username or Password is wrong!") {
+  static wrongCredentials(message = 'Username or Password is wrong!') {
     return new ApiError(message, 401);
   }
 
-  static unAuthorized(message = "unAuthorized Access") {
+  static unAuthorized(message = 'unAuthorized Access') {
     return new ApiError(message, 401);
   }
 }

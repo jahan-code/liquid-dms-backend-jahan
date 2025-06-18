@@ -1,10 +1,15 @@
 const SuccessHandler = (data, statusCode, message, res) => {
-  return res.status(statusCode).json({
+  const response = {
     statusCode,
-    message: message,
-    data: data || null,
+    message,
     success: true,
-  });
+  };
+
+  if (data !== null) {
+    response.data = data;
+  }
+
+  return res.status(statusCode).json(response);
 };
 
 export default SuccessHandler;

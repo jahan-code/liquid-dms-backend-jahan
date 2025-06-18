@@ -9,56 +9,89 @@ const requestValidator = (req, res, next) => {
 
     // Extract route path without query parameters
     const fullURL = originalUrl.split('?')[0];
+    console.log(`🔍 Validating request: ${method} ${fullURL}`);
 
-    // Find a matching route using path-to-regexp v8.x syntax
+    // Match the route using path-to-regexp
     const matchedRoute = Object.keys(validationSchemas).find((route) => {
       try {
         const { regexp } = pathToRegexp(route);
-        return regexp.test(fullURL);
+        const isMatch = regexp.test(fullURL);
+        if (isMatch) {
+          console.log(`✅ Matched route: ${route}`);
+        }
+        return isMatch;
       } catch (err) {
-        errorConstants.GENERAL.VALIDATION_ERROR || err.message;
+        console.error(
+          `❌ Failed to compile route pattern "${route}": ${err.message}`
+        );
+        return false;
       }
     });
 
-    // If no matching route found, skip validation
+    // No matching route in validationSchemas
     if (!matchedRoute) {
-      console.log('No matching route found');
-      return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
+      console.warn(`⚠️ No validation schema route matched for: ${fullURL}`);
+      return next(
+        new ApiError(
+          errorConstants.GENERAL.VALIDATION_ERROR || 'Route not validated',
+          400
+        )
+      );
     }
 
     const routeSchemas = validationSchemas[matchedRoute];
     if (!routeSchemas) {
-      console.log('No matching schema found');
-      return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
+      console.warn(
+        `⚠️ Route "${matchedRoute}" found but no method-based schema exists`
+      );
+      return next(
+        new ApiError(
+          errorConstants.GENERAL.VALIDATION_ERROR ||
+            'No schema defined for this route',
+          400
+        )
+      );
     }
+
     const schema = routeSchemas[method];
-
-    // For joi validation null means no schema needed
     if (schema === null) {
+      console.log(
+        `ℹ️ Validation skipped (null schema) for ${method} ${matchedRoute}`
+      );
       return next();
     }
 
-    // If no schema for this method, skip validation
     if (!schema) {
+      console.log(
+        `ℹ️ No schema defined for HTTP method ${method} in route "${matchedRoute}"`
+      );
       return next();
     }
 
-    // Skip validation for file uploads (multipart/form-data)
     if (req.is('multipart/form-data')) {
+      console.log(`📁 Skipping validation for multipart/form-data`);
       return next();
     }
 
     const { error } = schema.validate(body, { abortEarly: false });
 
     if (error) {
+      console.error(
+        `❌ Joi validation error in route ${method} ${matchedRoute}:`
+      );
       error.details.forEach((detail) => {
-        console.log(`  - ${detail.path.join('.')}: ${detail.message}`);
+        console.error(`  - ${detail.path.join('.')}: ${detail.message}`);
       });
+
       return next(new ApiError(error.details[0].message, 400));
     }
 
+    console.log(
+      `✅ Request body passed validation for ${method} ${matchedRoute}`
+    );
     next();
   } catch (err) {
+    console.error(`🔥 Uncaught validation middleware error: ${err.message}`);
     return next(
       new ApiError(errorConstants.GENERAL.VALIDATION_ERROR || err.message, 403)
     );

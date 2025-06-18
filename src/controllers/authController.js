@@ -32,8 +32,12 @@ const register = async (req, res, next) => {
       .findOne({ email: value.email.toLowerCase() })
       .lean();
     if (existingUser) {
+      logger.warn({
+        message: errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS,
+        timestamp: new Date().toISOString(),
+      });
       return next(
-        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS, 409)
+        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
       );
     }
 
@@ -41,7 +45,7 @@ const register = async (req, res, next) => {
     const newUser = await user.create(value);
 
     const otp = otpService.generateOTP();
-    otpService.setOTP(newUser.email, otp, 'register');
+    await otpService.setOTP(newUser.email, otp, 'register');
 
     // store context in session:
     req.session.email = newUser.email.toLowerCase();
@@ -358,7 +362,11 @@ const verifyOtp = async (req, res, next) => {
       );
     }
 
-    const otpResult = otpService.verifyOTP(email.toLowerCase(), otp, context);
+    const otpResult = await otpService.verifyOTP(
+      email.toLowerCase(),
+      otp,
+      context
+    );
     if (!otpResult.valid) {
       return next(new ApiError(otpResult.reason, 400));
     }

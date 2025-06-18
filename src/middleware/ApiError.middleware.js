@@ -1,12 +1,12 @@
-import logger from "../functions/logger.js";
-
-const ApiError = (err, req, res, next) => {
+import logger from '../functions/logger.js';
+// eslint-disable-next-line no-unused-vars
+const ApiError = (err, req, res, _next) => {
   const statusCode = err.status || 500;
-  const rawMessage = err.message || "Internal Server Error";
+  const rawMessage = err.message || 'Internal Server Error';
 
   // Ensure error message is a string
   const errorMessage =
-    typeof rawMessage === "object" && rawMessage !== null
+    typeof rawMessage === 'object' && rawMessage !== null
       ? JSON.stringify(rawMessage)
       : rawMessage;
 
@@ -21,7 +21,7 @@ const ApiError = (err, req, res, next) => {
   // Send error response
   res.status(statusCode).json({
     success: false,
-    error: errorMessage,
+    message: errorMessage,
   });
 };
 
