@@ -11,8 +11,15 @@ import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
 import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
 import cookieParser from 'cookie-parser';
-
+import helmet from 'helmet';
 const app = express();
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // disables strict CSP in dev
+    crossOriginEmbedderPolicy: false, // useful if using <iframe> or Canvas
+  })
+);
 
 const startServer = async () => {
   try {

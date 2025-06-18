@@ -14,7 +14,7 @@ export const getSessionMiddleware = () => {
       secure: false,
       httpOnly: true,
       sameSite: 'lax',
-      maxAge: 24 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
     },
   });
 };
