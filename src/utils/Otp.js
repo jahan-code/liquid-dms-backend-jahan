@@ -30,8 +30,8 @@ const trackRequest = (email) => {
   const now = Date.now();
 
   const maxAttempts = 2;
-  const waitBetweenMs = 2 * 60 * 1000; // 2 minutes between requests
-  const lockoutMs = 15 * 60 * 1000; // 15 minutes lockout after max attempts
+  const waitBetweenMs = 30 * 60 * 1000; // 2 minutes between requests
+  const lockoutMs = 60 * 60 * 1000; // 15 minutes lockout after max attempts
 
   let requests = requestStore.get(email) || {
     attempts: [],

@@ -11,9 +11,12 @@ import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
 import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+
 const app = express();
 
 const startServer = async () => {
+  app.use(helmet());
   try {
     await connectRedis(); // ✅ Redis connected
 
