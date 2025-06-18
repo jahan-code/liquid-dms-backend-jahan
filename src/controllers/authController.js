@@ -373,6 +373,8 @@ const verifyOtp = async (req, res, next) => {
 
     // Mark OTP verified for this context:
     req.session.otpVerified = true;
+    delete req.session.expiresAt;
+
     if (context === 'register') {
       await user.updateOne(
         { email: email.toLowerCase() },
@@ -422,7 +424,7 @@ const resetPassword = async (req, res, next) => {
       );
     }
 
-    if (req.session.expiresAt < Date.now()) {
+    if (!req.session.otpVerified && req.session.expiresAt < Date.now()) {
       req.session.destroy();
       return next(
         new ApiError(errorConstants.AUTHENTICATION.SESSION_EXPIRED, 400)
