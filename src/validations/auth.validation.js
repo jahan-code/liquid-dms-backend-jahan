@@ -69,7 +69,6 @@ const forgotPasswordSchema = Joi.object({
 });
 
 const verifyOtpSchema = Joi.object({
-  email: emailSchema,
   otp: otpSchema,
 });
 
