@@ -62,7 +62,7 @@ const addVendor = async (req, res, next) => {
 
       personalInfo: {
         name: newVendor.name,
-        phone: newVendor.phone,
+        primaryContactNumber: newVendor.primaryContactNumber,
         email: newVendor.email,
         city: newVendor.city,
       },
@@ -102,6 +102,7 @@ const showAllVendors = async (req, res, next) => {
 
     const vendors = await vendor
       .find()
+      .select('-taxIdOrSSN')
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 }); // Optional: sort by newest first
@@ -133,5 +134,49 @@ const showAllVendors = async (req, res, next) => {
     );
   }
 };
+// controller
+const getVendorById = async (req, res, next) => {
+  try {
+    const { id } = req.query;
 
-export default { addVendor, showAllVendors };
+    if (!id) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
+    }
+
+    const foundVendor = await vendor.findById(id).select('-taxIdOrSSN');
+
+    if (!foundVendor) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
+    }
+
+    const vendorResponse = {
+      vendorId: foundVendor.vendorId,
+      name: foundVendor.name,
+      phone: foundVendor.primaryContactNumber,
+      email: foundVendor.email,
+      street: foundVendor.street,
+      city: foundVendor.city,
+      state: foundVendor.state,
+      zip: foundVendor.zip,
+      contact: foundVendor.contact,
+      category: foundVendor.category,
+      accountNumber: foundVendor.accountNumber,
+      note: foundVendor.note,
+    };
+
+    return SuccessHandler(
+      vendorResponse,
+      200,
+      'Vendor fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error({
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+    next(new ApiError('Internal Server Error', 500));
+  }
+};
+
+export default { addVendor, showAllVendors, getVendorById };

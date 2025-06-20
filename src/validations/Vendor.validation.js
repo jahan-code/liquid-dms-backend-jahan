@@ -83,8 +83,8 @@ const addVendorSchema = Joi.object({
   zip: zipSchema,
   city: citySchema,
   state: stateSchema,
-  phone: phoneSchema,
-  otherPhone: otherPhoneSchema,
+  primaryContactNumber: phoneSchema,
+  alternativeContactNumber: otherPhoneSchema,
   contactPerson: contactPersonSchema,
   email: emailSchema,
   accountNumber: accountNumberSchema,
@@ -93,5 +93,7 @@ const addVendorSchema = Joi.object({
 
   note: noteSchema,
 });
-
-export { addVendorSchema };
+const getVendorByIdSchema = Joi.object({
+  id: Joi.string().length(24).hex().required(),
+});
+export { addVendorSchema, getVendorByIdSchema };

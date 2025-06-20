@@ -12,6 +12,7 @@ import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
 import cookieParser from 'cookie-parser';
 
+import formData from 'express-form-data';
 const app = express();
 
 const startServer = async () => {
@@ -25,6 +26,7 @@ const startServer = async () => {
         credentials: true,
       })
     );
+    app.use(formData.parse());
     app.use(cookieParser());
     app.use(getSessionMiddleware());
     app.use(express.json());

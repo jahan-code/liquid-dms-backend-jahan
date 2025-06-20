@@ -28,9 +28,9 @@ const vendorSchema = new Schema(
       type: String,
       enum: ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California'],
     },
-    phone: String,
+    primaryContactNumber: String,
     contactPerson: String,
-    otherPhone: String,
+    alternativeContactNumber: String,
     email: {
       type: String,
       unique: true,

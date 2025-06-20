@@ -95,6 +95,8 @@ const errorConstants = {
 
   VENDOR: {
     // Category
+    VENDOR_ID_REQUIRED: 'Vendor ID is required',
+    VENDOR_NOT_FOUND: 'Vendor not found.',
     EMAIL_ALREADY_EXISTS: 'Email already exists.',
     ZIP_INVALID_FORMAT: 'ZIP code must be 5 digits (e.g., 90210)',
     ADDRESS_REQUIRED: 'Address is required.',

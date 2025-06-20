@@ -1,10 +1,11 @@
 import express from 'express';
 import vendor from '../controllers/vendorController.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
-import vendorController from '../controllers/vendorController.js';
 
 const router = express.Router();
 
 router.post('/add-vendor', verifyToken, vendor.addVendor);
-router.get('/vendors', verifyToken, vendorController.showAllVendors);
+router.get('/vendors', verifyToken, vendor.showAllVendors);
+router.get('/', verifyToken, vendor.getVendorById);
+
 export default router;

@@ -6,7 +6,8 @@ import {
   resetPasswordSchema,
   resendOtpSchema,
 } from './auth.validation.js';
-import { addVendorSchema } from './Vendor.validation.js';
+import { addVehicleSchema } from './Vehicle.validation.js';
+import { addVendorSchema, getVendorByIdSchema } from './Vendor.validation.js';
 
 const validationSchemas = {
   // Authentication
@@ -22,6 +23,10 @@ const validationSchemas = {
   //Vendor
   '/vendor/add-vendor': { POST: addVendorSchema },
   '/vendor/vendors': { GET: null },
+  '/vendor': { GET: getVendorByIdSchema },
+
+  //Vehicle
+  '/vehicle/add-vehicle': { POST: addVehicleSchema },
 };
 
 export { validationSchemas };
