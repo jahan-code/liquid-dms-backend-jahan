@@ -6,7 +6,9 @@ import { pathToRegexp } from 'path-to-regexp';
 const requestValidator = (req, res, next) => {
   try {
     const { method, originalUrl, body } = req;
-
+    if (originalUrl.startsWith('/uploads') || originalUrl === '/favicon.ico') {
+      return next();
+    }
     // Extract route path without query parameters
     const fullURL = originalUrl.split('?')[0];
     console.log(`🔍 Validating request: ${method} ${fullURL}`);

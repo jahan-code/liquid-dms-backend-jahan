@@ -67,7 +67,123 @@ const errorConstants = {
     ORGANIZATION_ID_REQUIRED: 'The organization ID is required.',
   },
 
-  // 🔹 Campaign Login Template Errors
+  //// 🔹 Vehicle Validation Errors
+  //
+  VEHICLE: {
+    VEHICLE_TITLE_MUST_BE_STRING: 'Vehicle title must be a string.',
+    VEHICLE_TITLE_REQUIRED: 'Vehicle title is required.',
+    VIN_MUST_BE_STRING: 'VIN must be a string.',
+    VIN_REQUIRED: 'VIN is required.',
+    MAKE_MUST_BE_STRING: 'Make must be a string.',
+    MAKE_REQUIRED: 'Make is required.',
+    MODEL_MUST_BE_STRING: 'Model must be a string.',
+    MODEL_REQUIRED: 'Model is required.',
+    STYLE_INVALID: 'Invalid vehicle style selected.',
+    BODY_TYPE_INVALID: 'Invalid body type selected.',
+    YEAR_MUST_BE_NUMBER: 'Year must be a number.',
+    YEAR_TOO_OLD: 'Year is too old.',
+    YEAR_TOO_NEW: 'Year is too far in the future.',
+    YEAR_INTEGER: 'Year must be an integer.',
+    TYPE_MUST_BE_STRING: 'Vehicle type must be a string.',
+    TYPE_REQUIRED: 'Vehicle type is required.',
+    CONDITION_INVALID: 'Condition must be New, Used, or Rebuild.',
+    CERTIFIED_INVALID: 'Certified must be Yes or No.',
+
+    // Specifications
+    TRANSMISSION_INVALID: 'Invalid transmission type.',
+    TRAN_SPEED_MUST_BE_NUMBER: 'Transmission speed must be a number.',
+    TRAN_SPEED_TOO_LOW: 'Transmission speed is too low.',
+    TRAN_SPEED_TOO_HIGH: 'Transmission speed is too high.',
+    TRAN_SPEED_INTEGER: 'Transmission speed must be an integer.',
+    DRIVETRAIN_INVALID: 'Invalid drivetrain type.',
+    CYLINDERS_MUST_BE_NUMBER: 'Engine cylinders must be a number.',
+    CYLINDERS_TOO_LOW: 'Too few engine cylinders.',
+    CYLINDERS_TOO_HIGH: 'Too many engine cylinders.',
+    CYLINDERS_INTEGER: 'Engine cylinders must be an integer.',
+    ENGINE_SIZE_INVALID: 'Engine size must match format like "2.0L".',
+    FUEL_TYPE_INVALID: 'Invalid fuel type.',
+    MPG_MUST_BE_NUMBER: 'MPG must be a number.',
+    MPG_NEGATIVE: 'MPG cannot be negative.',
+    TOW_CAPACITY_INVALID: 'Tow capacity must be like "3,000 lbs" or "1500 kg".',
+    PASSENGERS_MUST_BE_NUMBER: 'Passenger count must be a number.',
+    PASSENGERS_TOO_LOW: 'Too few passengers.',
+    PASSENGERS_TOO_HIGH: 'Too many passengers.',
+    PASSENGERS_INTEGER: 'Passenger count must be an integer.',
+    MILEAGE_MUST_BE_NUMBER: 'Mileage must be a number.',
+    MILEAGE_NEGATIVE: 'Mileage cannot be negative.',
+    MILEAGE_STATUS_INVALID: 'Invalid mileage status.',
+
+    // Exterior & Interior
+    COLOR_INVALID: 'Invalid exterior color.',
+    INTERIOR_COLOR_INVALID: 'Invalid interior color.',
+    COLOR_DESCRIPTION_MUST_BE_STRING: 'Color description must be a string.',
+    TAG_MUST_BE_STRING: 'Tag must be a string.',
+    DECAL_MUST_BE_STRING: 'Decal must be a string.',
+    GPS_SERIAL_MUST_BE_STRING: 'GPS Serial must be a string.',
+
+    // Title & Registration
+    TITLE_APPLICATION_MUST_BE_STRING: 'Title application must be a string.',
+    TITLE_APPLICATION_REQUIRED: 'Title application is required.',
+    TITLE_IN_MUST_BE_BOOLEAN: 'Title In must be a boolean.',
+    TITLE_IN_REQUIRED: 'Title In is required.',
+    STATE_TITLE_IN_MUST_BE_STRING: 'State Title In must be a string.',
+    TITLE_MUST_BE_STRING: 'Title must be a string.',
+    TITLE_DATE_INVALID: 'Invalid title date.',
+    COUNTRY_INVALID: 'Invalid country selected.',
+
+    // Inspection
+    INSPECTED_MUST_BE_BOOLEAN: 'Inspected must be a boolean.',
+    INSPECTED_REQUIRED: 'Inspected is required.',
+    INSPECTION_NUMBER_MUST_BE_STRING: 'Inspection number must be a string.',
+    INSPECTION_DATE_INVALID: 'Invalid inspection date.',
+    INSPECTED_BY_MUST_BE_STRING: 'Inspected by must be a string.',
+    WARRANTY_INVALID: 'Invalid warranty selection.',
+    STARTER_INTERRUPT_MUST_BE_BOOLEAN: 'Starter interrupt must be a boolean.',
+
+    // Key & Security
+    IGNITION_KEY_CODE_MUST_BE_STRING: 'Ignition key code must be a string.',
+    DOOR_KEY_CODE_MUST_BE_STRING: 'Door key code must be a string.',
+    VALET_KEY_CODE_MUST_BE_STRING: 'Valet key code must be a string.',
+
+    // Features
+    FEATURES_MUST_BE_ARRAY: 'Features must be an array.',
+
+    // Vendor Info
+    CATEGORY_MUST_BE_STRING: 'Category must be a string.',
+    CATEGORY_REQUIRED: 'Category is required.',
+    NAME_MUST_BE_STRING: 'Vendor name must be a string.',
+    NAME_REQUIRED: 'Vendor name is required.',
+    STREET_MUST_BE_STRING: 'Street must be a string.',
+    STREET_REQUIRED: 'Street is required.',
+    ZIP_MUST_BE_STRING: 'ZIP code must be a string.',
+    ZIP_REQUIRED: 'ZIP code is required.',
+    CITY_MUST_BE_STRING: 'City must be a string.',
+    CITY_REQUIRED: 'City is required.',
+    STATE_INVALID: 'Invalid state selected.',
+    PRIMARY_CONTACT_NUMBER_MUST_BE_STRING:
+      'Primary contact number must be a string.',
+    PRIMARY_CONTACT_NUMBER_REQUIRED: 'Primary contact number is required.',
+    CONTACT_PERSON_MUST_BE_STRING: 'Contact person must be a string.',
+    CONTACT_PERSON_REQUIRED: 'Contact person is required.',
+    ALTERNATIVE_CONTACT_NUMBER_MUST_BE_STRING:
+      'Alternative contact number must be a string.',
+    ALTERNATIVE_CONTACT_NUMBER_REQUIRED:
+      'Alternative contact number is required.',
+    EMAIL_MUST_BE_STRING: 'Email must be a valid string.',
+    EMAIL_REQUIRED: 'Email is required.',
+    TAX_ID_OR_SSN_MUST_BE_STRING: 'Tax ID or SSN must be a string.',
+    TAX_ID_OR_SSN_REQUIRED: 'Tax ID or SSN is required.',
+    ACCOUNT_NUMBER_MUST_BE_STRING: 'Account number must be a string.',
+    NOTES_MUST_BE_STRING: 'Notes must be a string.',
+
+    // Images
+    FEATURED_IMAGE_URL_MUST_BE_STRING: 'Featured image URL must be a string.',
+    FEATURED_IMAGE_URL_REQUIRED: 'Featured image URL is required.',
+    IMAGE_URL_INVALID: 'Image URL must be a valid URI.',
+    IMAGE_URLS_MUST_BE_ARRAY: 'Other image URLs must be an array.',
+  },
+
+  //🔹 Campaign Login Template Errors
   CAMPAIGN_LOGIN_TEMPLATE: {
     NAME_REQUIRED: 'The campaign login template name is required.',
     NAME_MUST_BE_STRING:

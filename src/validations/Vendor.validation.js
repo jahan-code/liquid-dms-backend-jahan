@@ -21,7 +21,7 @@ const streetSchema = Joi.string().required().messages({
 });
 
 const zipSchema = Joi.string()
-  .allow('', null)
+  .required()
   .pattern(/^\d{5}$/)
   .messages({
     'string.base': errorConstants.VENDOR.ZIP_MUST_BE_STRING,
@@ -43,15 +43,15 @@ const stateSchema = Joi.string()
     'any.required': errorConstants.VENDOR.STATE_REQUIRED,
   });
 
-const phoneSchema = Joi.string().allow('', null).messages({
+const phoneSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.PHONE_MUST_BE_STRING,
 });
 
-const otherPhoneSchema = Joi.string().allow('', null).messages({
+const otherPhoneSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.OTHER_PHONE_MUST_BE_STRING,
 });
 
-const contactPersonSchema = Joi.string().allow('', null).messages({
+const contactPersonSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.CONTACT_PERSON_MUST_BE_STRING,
 });
 

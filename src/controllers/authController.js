@@ -129,10 +129,11 @@ const login = async (req, res, next) => {
       return next(ApiError.wrongCredentials());
     }
 
-    await generateAndSetJwtCookie(existingUser, res);
-
     const userResponse = existingUser.toObject();
     delete userResponse.password;
+
+    const token = generateAndSetJwtCookie(userResponse, res); // ✅ pass userResponse here
+    userResponse.token = token;
 
     logger.info({
       message: '\n///PASSWORD MATCHED///\n///User logged in successfully///\n',
@@ -142,6 +143,7 @@ const login = async (req, res, next) => {
 
     return SuccessHandler(
       userResponse,
+
       200,
       'User logged in successfully',
       res

@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // ✅ Resolve the path to src/uploads
-const uploadDir = path.resolve(__dirname, 'uploads');
+const uploadDir = path.resolve(__dirname, '../uploads');
 
 // ✅ Create the uploads folder if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
@@ -33,15 +33,12 @@ const storage = multer.diskStorage({
 
 // ✅ Optional file type filter
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-  console.log(`🔍 File type: ${file.mimetype}`);
-  if (allowedTypes.includes(file.mimetype)) {
+  if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed!'), false);
+    cb(new Error('Only image files are allowed'), false);
   }
 };
-
 // 🚀 Final multer upload instance
 const upload = multer({
   storage,
