@@ -38,7 +38,10 @@ const vendorSchema = new Schema(
     },
     accountNumber: String,
     taxIdOrSSN: String,
-
+    billofsales: {
+      type: String,
+      default: '',
+    },
     note: String,
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

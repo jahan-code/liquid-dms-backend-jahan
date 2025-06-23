@@ -265,6 +265,7 @@ const errorConstants = {
 
     // Note
     NOTE_MUST_BE_STRING: 'Note must be a string.',
+    BILL_OF_SALES_MUST_BE_STRING: 'Bill of sales must be a string.',
   },
 
   // 🔹 Message Template Errors

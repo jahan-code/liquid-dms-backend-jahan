@@ -47,7 +47,7 @@ const phoneSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.PHONE_MUST_BE_STRING,
 });
 
-const otherPhoneSchema = Joi.string().required().messages({
+const otherPhoneSchema = Joi.string().optional().allow('', null).messages({
   'string.base': errorConstants.VENDOR.OTHER_PHONE_MUST_BE_STRING,
 });
 
@@ -61,7 +61,7 @@ const emailSchema = Joi.string().email().required().messages({
   'any.required': errorConstants.VENDOR.EMAIL_REQUIRED,
 });
 
-const accountNumberSchema = Joi.string().allow('', null).messages({
+const accountNumberSchema = Joi.string().optional().allow('', null).messages({
   'string.base': errorConstants.VENDOR.ACCOUNT_NUMBER_MUST_BE_STRING,
 });
 
@@ -71,8 +71,11 @@ const taxIdSchema = Joi.string().required().messages({
   'any.required': errorConstants.VENDOR.TAX_ID_REQUIRED,
 });
 
-const noteSchema = Joi.string().allow('', null).messages({
+const noteSchema = Joi.string().optional().allow('', null).messages({
   'string.base': errorConstants.VENDOR.NOTE_MUST_BE_STRING,
+});
+const billOfSalesSchema = Joi.string().optional().allow('', null).messages({
+  'string.base': errorConstants.VENDOR.BILL_OF_SALES_MUST_BE_STRING,
 });
 
 // Main vendor schema
@@ -90,8 +93,8 @@ const addVendorSchema = Joi.object({
   accountNumber: accountNumberSchema,
 
   taxIdOrSSN: taxIdSchema,
-
   note: noteSchema,
+  billofsales: billOfSalesSchema,
 });
 const getVendorByIdSchema = Joi.object({
   id: Joi.string().length(24).hex().required(),

@@ -102,15 +102,9 @@ export const addVehicle = async (req, res, next) => {
       },
     });
     // e.g., "Auction" → "AU"
-
     await newVehicle.save();
 
-    return SuccessHandler(
-      newVehicle.basicDetails,
-      200,
-      'Vehicle registered successfully',
-      res
-    );
+    return SuccessHandler(200, 'Vehicle registered successfully', res);
   } catch (error) {
     logger.error('❌ Add vehicle error:', error);
     res.status(500).json({ message: 'Internal server error' });
