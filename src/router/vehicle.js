@@ -11,6 +11,7 @@ router.post(
   upload.fields([
     { name: 'featuredImage', maxCount: 1 },
     { name: 'otherImages', maxCount: 5 },
+    { name: 'billofsales', maxCount: 1 },
   ]),
   addVehicle
 );

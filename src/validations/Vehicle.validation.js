@@ -227,6 +227,7 @@ const warrantyValidator = enumValidator('WARRANTY', [
 
 export const addVehicleSchema = Joi.object({
   // Section 1: Basic Details
+  stockId: optionalString('STOCK_ID'),
   basicDetails: Joi.object({
     vehicleTitle: requiredString('VEHICLE_TITLE'),
     vin: requiredString('VIN'),
@@ -314,6 +315,7 @@ export const addVehicleSchema = Joi.object({
     accountNumber: optionalString('ACCOUNT_NUMBER'),
     taxIdOrSSN: requiredString('TAX_ID_OR_SSN'),
     notes: optionalString('NOTES'),
+    billofsales: optionalString('BILL_OF_SALES'),
   }),
 
   // Section 9: Images (optional, handled by multer usually)

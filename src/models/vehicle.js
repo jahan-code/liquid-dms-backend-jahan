@@ -7,6 +7,9 @@ const yearOptions = Array.from(
 );
 const vehicleSchema = new mongoose.Schema(
   {
+    stockId: {
+      type: String,
+    },
     basicDetails: {
       vehicleTitle: String,
       vin: String,

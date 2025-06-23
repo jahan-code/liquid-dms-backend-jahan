@@ -31,19 +31,43 @@ const storage = multer.diskStorage({
   },
 });
 
-// ✅ Optional file type filter
+// ✅ Custom file filter per field
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
+  const field = file.fieldname;
+
+  const imageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const pdfTypes = ['application/pdf'];
+
+  if (field === 'featuredImage' || field === 'otherImages') {
+    if (imageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          'Only image files (jpeg, png, webp) are allowed for vehicle images'
+        ),
+        false
+      );
+    }
+  } else if (field === 'billofsales') {
+    if ([...imageTypes, ...pdfTypes].includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error('Only image or PDF files are allowed for bill of sales'),
+        false
+      );
+    }
   } else {
-    cb(new Error('Only image files are allowed'), false);
+    cb(new Error(`Unexpected upload field: ${field}`), false);
   }
 };
+
 // 🚀 Final multer upload instance
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
 });
 
 export default upload;

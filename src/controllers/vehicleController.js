@@ -61,6 +61,11 @@ export const addVehicle = async (req, res, next) => {
         new ApiError(errorConstants.VENDOR.EMAIL_ALREADY_EXISTS, 409)
       ); //
     }
+    const billofsalesFile = req.files?.billofsales?.[0];
+    const billofsalesUrl = billofsalesFile
+      ? toPublicUrl(billofsalesFile.path)
+      : '';
+    vendorInfo.billofsales = billofsalesUrl;
     const categoryCode = extractCategoryCode(vendorInfo.category);
     const count = await Vendor.countDocuments({
       vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
@@ -70,6 +75,7 @@ export const addVehicle = async (req, res, next) => {
       ...vendorInfo,
       vendorId,
       email: vendorEmail,
+      billofsales: billofsalesUrl,
       createdBy: req.user?.userId, // If using auth
     });
 
@@ -80,7 +86,7 @@ export const addVehicle = async (req, res, next) => {
     const otherImageUrls =
       req.files?.otherImages?.map((file) => toPublicUrl(file.path)) || [];
 
-    const vehicleTypeCode = basicDetails?.type?.toUpperCase(); // e.g., "SUV"
+    const vehicleTypeCode = basicDetails?.vehicleType?.toUpperCase(); // e.g., "SUV"
     const vehicleCountStock = await vehicle.countDocuments({
       stockId: new RegExp(`^${categoryCode}-${vehicleTypeCode}-\\d{4}$`, 'i'),
     });
@@ -103,8 +109,20 @@ export const addVehicle = async (req, res, next) => {
     });
     // e.g., "Auction" → "AU"
     await newVehicle.save();
+    await newVehicle.populate({
+      path: 'vendor',
+      select: '-taxIdOrSSN',
+    });
 
-    return SuccessHandler(200, 'Vehicle registered successfully', res);
+    return SuccessHandler(
+      {
+        vehicle: newVehicle,
+        billofsales: newVehicle.vendor?.billofsales || '',
+      },
+      200,
+      'Vehicle registered successfully',
+      res
+    );
   } catch (error) {
     logger.error('❌ Add vehicle error:', error);
     res.status(500).json({ message: 'Internal server error' });

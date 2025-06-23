@@ -175,8 +175,9 @@ const errorConstants = {
     TAX_ID_OR_SSN_REQUIRED: 'Tax ID or SSN is required.',
     ACCOUNT_NUMBER_MUST_BE_STRING: 'Account number must be a string.',
     NOTES_MUST_BE_STRING: 'Notes must be a string.',
-
+    BILL_OF_SALES_MUST_BE_STRING: 'Bill of sales must be a string.',
     // Images
+    STOCK_ID_MUST_BE_STRING: 'Stock ID must be a string.',
     FEATURED_IMAGE_URL_MUST_BE_STRING: 'Featured image URL must be a string.',
     FEATURED_IMAGE_URL_REQUIRED: 'Featured image URL is required.',
     IMAGE_URL_INVALID: 'Image URL must be a valid URI.',
