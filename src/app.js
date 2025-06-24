@@ -32,8 +32,8 @@ const startServer = async () => {
       '/uploads',
       express.static(path.join(process.cwd(), 'src', 'uploads'))
     );
-    app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
 
     app.use(requestValidator);
 

@@ -108,8 +108,17 @@ const vehicleSchema = new mongoose.Schema(
       passengers: Number,
       weight: String,
       mileage: {
-        type: Number,
-        enum: [2021, 2022, 2023],
+        type: String,
+        enum: [
+          '1,000',
+          '10,000',
+          '25,000',
+          '50,000',
+          '75,000',
+          '100,000',
+          '125,000',
+          '150,000+',
+        ],
       },
       mileageIs: {
         type: String,

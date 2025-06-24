@@ -1,5 +1,5 @@
 import express from 'express';
-import { addVehicle } from '../controllers/vehicleController.js';
+import { addVehicle, editVehicle } from '../controllers/vehicleController.js';
 import upload from '../middleware/upload.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -15,5 +15,5 @@ router.post(
   ]),
   addVehicle
 );
-
+router.put('/edit', verifyToken, editVehicle);
 export default router;

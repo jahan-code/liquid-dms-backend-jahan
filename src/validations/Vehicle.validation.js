@@ -1,27 +1,33 @@
 import Joi from 'joi';
 import errorConstants from '../utils/errors.js';
+
+// 🔹 Reusable Validators
 const requiredString = (field) =>
   Joi.string()
+    .trim()
     .required()
     .messages({
       'string.base': errorConstants.VEHICLE[`${field}_MUST_BE_STRING`],
       'string.empty': errorConstants.VEHICLE[`${field}_REQUIRED`],
       'any.required': errorConstants.VEHICLE[`${field}_REQUIRED`],
     });
+
 const optionalString = (field) =>
   Joi.string()
+    .trim()
     .allow('', null)
     .messages({
       'string.base': errorConstants.VEHICLE[`${field}_MUST_BE_STRING`],
     });
+
 const enumValidator = (field, values) =>
   Joi.string()
     .valid(...values)
     .messages({
       'any.only': errorConstants.VEHICLE[`${field}_INVALID`],
     });
-// Reusable string field
 
+// 🔹 Field Validators
 const makeValidator = requiredString('MAKE').valid(
   'Toyota',
   'Honda',
@@ -76,8 +82,6 @@ const conditionValidator = enumValidator('CONDITION', [
   'Rebuild',
 ]);
 const certifiedValidator = enumValidator('CERTIFIED', ['Yes', 'No']);
-
-// Specifications
 const transmissionValidator = enumValidator('TRANSMISSION', [
   'Automatic',
   'Manual',
@@ -134,11 +138,17 @@ const passengersValidator = Joi.number().integer().min(1).max(100).messages({
   'number.max': errorConstants.VEHICLE.PASSENGERS_TOO_HIGH,
   'number.integer': errorConstants.VEHICLE.PASSENGERS_INTEGER,
 });
-const weightValidator = towCapacityValidator;
-const mileageValidator = Joi.number().min(0).messages({
-  'number.base': errorConstants.VEHICLE.MILEAGE_MUST_BE_NUMBER,
-  'number.min': errorConstants.VEHICLE.MILEAGE_NEGATIVE,
-});
+const mileageValidator = enumValidator('MILEAGE', [
+  '1,000',
+  '10,000',
+  '25,000',
+  '50,000',
+  '75,000',
+  '100,000',
+  '125,000',
+  '150,000+',
+]);
+
 const mileageIsValidator = enumValidator('MILEAGE_STATUS', [
   'Actual',
   'Not Actual',
@@ -146,8 +156,6 @@ const mileageIsValidator = enumValidator('MILEAGE_STATUS', [
   'Unknown',
   'TMU',
 ]);
-
-// Exterior & Interior
 const colorValidator = enumValidator('COLOR', [
   'Black',
   'White',
@@ -176,8 +184,6 @@ const interiorColorValidator = enumValidator('INTERIOR_COLOR', [
   'Red',
   'Blue',
 ]);
-
-// Title & Registration
 const stateValidator = enumValidator('STATE', [
   'Alabama',
   'Alaska',
@@ -194,7 +200,6 @@ const stateValidator = enumValidator('STATE', [
   'Illinois',
   'Indiana',
   'Iowa',
-  // ... remaining states
 ]);
 const countryValidator = enumValidator('COUNTRY', [
   'USA(United States of America)',
@@ -214,8 +219,6 @@ const countryValidator = enumValidator('COUNTRY', [
   'South Korea',
   'Netherlands',
 ]);
-
-// Inspection
 const warrantyValidator = enumValidator('WARRANTY', [
   '3 months/3,000 miles',
   '6 months/6,000 miles',
@@ -225,9 +228,75 @@ const warrantyValidator = enumValidator('WARRANTY', [
   'Certified Pre-Owned',
 ]);
 
+// 🔹 Smart Vendor Schema with `.when()`
+const vendorInfoSchema = Joi.object({
+  isExistingVendor: Joi.boolean().required(),
+  vendorId: Joi.when('isExistingVendor', {
+    is: true,
+    then: Joi.string().required().messages({
+      'string.base': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+      'string.empty': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+      'any.required': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    }),
+    otherwise: Joi.forbidden(),
+  }),
+  category: requiredString('CATEGORY'),
+  name: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('NAME'),
+    otherwise: Joi.forbidden(),
+  }),
+  street: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('STREET'),
+    otherwise: Joi.forbidden(),
+  }),
+  zip: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('ZIP'),
+    otherwise: Joi.forbidden(),
+  }),
+  city: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('CITY'),
+    otherwise: Joi.forbidden(),
+  }),
+  state: Joi.when('isExistingVendor', {
+    is: false,
+    then: stateValidator,
+    otherwise: Joi.forbidden(),
+  }),
+  primaryContactNumber: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('PRIMARY_CONTACT_NUMBER'),
+    otherwise: Joi.forbidden(),
+  }),
+  contactPerson: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('CONTACT_PERSON'),
+    otherwise: Joi.forbidden(),
+  }),
+  alternativeContactNumber: optionalString('ALTERNATIVE_CONTACT_NUMBER'),
+  email: Joi.when('isExistingVendor', {
+    is: false,
+    then: Joi.string().email().required().messages({
+      'string.email': errorConstants.VENDOR.EMAIL_INVALID,
+      'any.required': errorConstants.VENDOR.EMAIL_REQUIRED,
+    }),
+    otherwise: Joi.forbidden(),
+  }),
+  accountNumber: optionalString('ACCOUNT_NUMBER'),
+  taxIdOrSSN: Joi.when('isExistingVendor', {
+    is: false,
+    then: requiredString('TAX_ID_OR_SSN'),
+    otherwise: Joi.forbidden(),
+  }),
+  notes: optionalString('NOTES'),
+  billofsales: optionalString('BILL_OF_SALES'),
+});
+
+// 🔹 Final Schema
 export const addVehicleSchema = Joi.object({
-  // Section 1: Basic Details
-  stockId: optionalString('STOCK_ID'),
   basicDetails: Joi.object({
     vehicleTitle: requiredString('VEHICLE_TITLE'),
     vin: requiredString('VIN'),
@@ -241,7 +310,6 @@ export const addVehicleSchema = Joi.object({
     certified: certifiedValidator,
   }),
 
-  // Section 2: Specifications
   specifications: Joi.object({
     transmission: transmissionValidator,
     tranSpeed: tranSpeedValidator,
@@ -254,12 +322,11 @@ export const addVehicleSchema = Joi.object({
     mpgHighway: mpgValidator,
     towCapacity: towCapacityValidator,
     passengers: passengersValidator,
-    weight: weightValidator,
+    weight: towCapacityValidator,
     mileage: mileageValidator,
     mileageIs: mileageIsValidator,
   }),
 
-  // Section 3: Exterior & Interior
   exteriorInterior: Joi.object({
     exteriorColor: colorValidator,
     exteriorColor2: colorValidator,
@@ -270,7 +337,6 @@ export const addVehicleSchema = Joi.object({
     gpsSerial: optionalString('GPS_SERIAL'),
   }),
 
-  // Section 4: Title & Registration
   titleRegistration: Joi.object({
     titleApplication: requiredString('TITLE_APPLICATION'),
     titleIn: Joi.boolean().required(),
@@ -280,7 +346,6 @@ export const addVehicleSchema = Joi.object({
     country: countryValidator,
   }),
 
-  // Section 5: Inspection
   inspection: Joi.object({
     inspected: Joi.boolean().required(),
     inspectionNumber: optionalString('INSPECTION_NUMBER'),
@@ -290,37 +355,29 @@ export const addVehicleSchema = Joi.object({
     deviceHasStarterInterrupt: Joi.boolean().optional(),
   }),
 
-  // Section 6: Key & Security
   keySecurity: Joi.object({
     ignitionKeyCode: optionalString('IGNITION_KEY_CODE'),
     doorKeyCode: optionalString('DOOR_KEY_CODE'),
     valetKeyCode: optionalString('VALET_KEY_CODE'),
   }),
 
-  // Section 7: Features
   features: Joi.array().items(Joi.string()).optional(),
 
-  // Section 8: Vendor Info
-  vendorInfo: Joi.object({
-    category: requiredString('CATEGORY'),
-    name: requiredString('NAME'),
-    street: requiredString('STREET'),
-    zip: requiredString('ZIP'),
-    city: requiredString('CITY'),
-    state: stateValidator,
-    primaryContactNumber: requiredString('PRIMARY_CONTACT_NUMBER'),
-    contactPerson: requiredString('CONTACT_PERSON'),
-    alternativeContactNumber: requiredString('ALTERNATIVE_CONTACT_NUMBER'),
-    email: Joi.string().email().required(),
-    accountNumber: optionalString('ACCOUNT_NUMBER'),
-    taxIdOrSSN: requiredString('TAX_ID_OR_SSN'),
-    notes: optionalString('NOTES'),
-    billofsales: optionalString('BILL_OF_SALES'),
-  }),
+  vendorInfo: vendorInfoSchema,
 
-  // Section 9: Images (optional, handled by multer usually)
   images: Joi.object({
     featuredImageUrl: requiredString('FEATURED_IMAGE_URL'),
     otherImageUrls: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
 });
+export const vehicleIdQuerySchema = Joi.object({
+  id: Joi.string().trim().required().messages({
+    'string.base': errorConstants.VEHICLE.ID_MUST_BE_STRING,
+    'string.empty': errorConstants.VEHICLE.ID_REQUIRED,
+    'any.required': errorConstants.VEHICLE.ID_REQUIRED,
+  }),
+});
+export const editVehicleSchema = addVehicleSchema.fork(
+  Object.keys(addVehicleSchema.describe().keys),
+  (schema) => schema.optional()
+);

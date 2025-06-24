@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import errorConstants from '../utils/errors.js';
 
-// Individual field schemas
+// 🔹 Individual field schemas for new Vendor
 const categorySchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.CATEGORY_MUST_BE_STRING,
   'string.empty': errorConstants.VENDOR.CATEGORY_REQUIRED,
@@ -21,21 +21,74 @@ const streetSchema = Joi.string().required().messages({
 });
 
 const zipSchema = Joi.string()
-  .required()
   .pattern(/^\d{5}$/)
+  .required()
   .messages({
     'string.base': errorConstants.VENDOR.ZIP_MUST_BE_STRING,
+
+    'any.required': errorConstants.VENDOR.ZIP_REQUIRED,
     'string.pattern.base': errorConstants.VENDOR.ZIP_INVALID_FORMAT,
   });
 
 const citySchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.CITY_MUST_BE_STRING,
-  'string.empty': errorConstants.VENDOR.ADDRESS_REQUIRED,
-  'any.required': errorConstants.VENDOR.ADDRESS_REQUIRED,
+  'string.empty': errorConstants.VENDOR.CITY_REQUIRED,
+  'any.required': errorConstants.VENDOR.CITY_REQUIRED,
 });
 
 const stateSchema = Joi.string()
-  .valid('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California')
+  .valid(
+    'Alabama',
+    'Alaska',
+    'Arizona',
+    'Arkansas',
+    'California',
+    'Colorado',
+    'Connecticut',
+    'Delaware',
+    'Florida',
+    'Georgia',
+    'Hawaii',
+    'Idaho',
+    'Illinois',
+    'Indiana',
+    'Iowa',
+    'Kansas',
+    'Kentucky',
+    'Louisiana',
+    'Maine',
+    'Maryland',
+    'Massachusetts',
+    'Michigan',
+    'Minnesota',
+    'Mississippi',
+    'Missouri',
+    'Montana',
+    'Nebraska',
+    'Nevada',
+    'New Hampshire',
+    'New Jersey',
+    'New Mexico',
+    'New York',
+    'North Carolina',
+    'North Dakota',
+    'Ohio',
+    'Oklahoma',
+    'Oregon',
+    'Pennsylvania',
+    'Rhode Island',
+    'South Carolina',
+    'South Dakota',
+    'Tennessee',
+    'Texas',
+    'Utah',
+    'Vermont',
+    'Virginia',
+    'Washington',
+    'West Virginia',
+    'Wisconsin',
+    'Wyoming'
+  )
   .required()
   .messages({
     'string.base': errorConstants.VENDOR.STATE_MUST_BE_STRING,
@@ -45,14 +98,18 @@ const stateSchema = Joi.string()
 
 const phoneSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.PHONE_MUST_BE_STRING,
+  'string.empty': errorConstants.VENDOR.PRIMARY_CONTACT_NUMBER_REQUIRED,
+  'any.required': errorConstants.VENDOR.PRIMARY_CONTACT_NUMBER_REQUIRED,
 });
 
-const otherPhoneSchema = Joi.string().optional().allow('', null).messages({
+const otherPhoneSchema = Joi.string().allow('', null).messages({
   'string.base': errorConstants.VENDOR.OTHER_PHONE_MUST_BE_STRING,
 });
 
 const contactPersonSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.CONTACT_PERSON_MUST_BE_STRING,
+  'string.empty': errorConstants.VENDOR.CONTACT_PERSON_REQUIRED,
+  'any.required': errorConstants.VENDOR.CONTACT_PERSON_REQUIRED,
 });
 
 const emailSchema = Joi.string().email().required().messages({
@@ -61,7 +118,7 @@ const emailSchema = Joi.string().email().required().messages({
   'any.required': errorConstants.VENDOR.EMAIL_REQUIRED,
 });
 
-const accountNumberSchema = Joi.string().optional().allow('', null).messages({
+const accountNumberSchema = Joi.string().allow('', null).messages({
   'string.base': errorConstants.VENDOR.ACCOUNT_NUMBER_MUST_BE_STRING,
 });
 
@@ -71,15 +128,17 @@ const taxIdSchema = Joi.string().required().messages({
   'any.required': errorConstants.VENDOR.TAX_ID_REQUIRED,
 });
 
-const noteSchema = Joi.string().optional().allow('', null).messages({
+const noteSchema = Joi.string().allow('', null).messages({
   'string.base': errorConstants.VENDOR.NOTE_MUST_BE_STRING,
 });
-const billOfSalesSchema = Joi.string().optional().allow('', null).messages({
+
+const billOfSalesSchema = Joi.string().allow('', null).messages({
   'string.base': errorConstants.VENDOR.BILL_OF_SALES_MUST_BE_STRING,
 });
 
-// Main vendor schema
-const addVendorSchema = Joi.object({
+// 🔹 “New Vendor” schema
+export const newVendorSchema = Joi.object({
+  isExistingVendor: Joi.valid(false).optional(),
   category: categorySchema,
   name: nameSchema,
   street: streetSchema,
@@ -91,12 +150,30 @@ const addVendorSchema = Joi.object({
   contactPerson: contactPersonSchema,
   email: emailSchema,
   accountNumber: accountNumberSchema,
-
   taxIdOrSSN: taxIdSchema,
   note: noteSchema,
   billofsales: billOfSalesSchema,
 });
-const getVendorByIdSchema = Joi.object({
-  id: Joi.string().length(24).hex().required(),
+
+// 🔹 “Existing Vendor” schema: only requires the flag and vendorId
+export const existingVendorSchema = Joi.object({
+  isExistingVendor: Joi.valid(true).required(),
+  vendorId: Joi.string().required().messages({
+    'string.base': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    'string.empty': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    'any.required': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+  }),
 });
-export { addVendorSchema, getVendorByIdSchema };
+
+// 🔹 Add Vendor standalone (if you ever need a pure “create vendor” endpoint)
+export const addVendorSchema = newVendorSchema;
+
+// 🔹 Get Vendor by ID (e.g. `GET /vendors/:id`)
+export const getVendorByIdSchema = Joi.object({
+  id: Joi.string().length(24).hex().required().messages({
+    'string.base': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    'string.length': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    'string.hex': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+    'any.required': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
+  }),
+});

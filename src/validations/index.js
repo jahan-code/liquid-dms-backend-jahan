@@ -6,7 +6,11 @@ import {
   resetPasswordSchema,
   resendOtpSchema,
 } from './auth.validation.js';
-import { addVehicleSchema } from './Vehicle.validation.js';
+import {
+  addVehicleSchema,
+  vehicleIdQuerySchema,
+  editVehicleSchema,
+} from './Vehicle.validation.js';
 import { addVendorSchema, getVendorByIdSchema } from './Vendor.validation.js';
 
 const validationSchemas = {
@@ -27,6 +31,12 @@ const validationSchemas = {
 
   //Vehicle
   '/vehicle/add-vehicle': { POST: addVehicleSchema },
+  '/vehicle/edit': {
+    PUT: {
+      query: vehicleIdQuerySchema,
+      body: editVehicleSchema,
+    },
+  },
 };
 
 export { validationSchemas };
