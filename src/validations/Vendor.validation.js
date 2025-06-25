@@ -157,7 +157,7 @@ export const newVendorSchema = Joi.object({
 
 // 🔹 “Existing Vendor” schema: only requires the flag and vendorId
 export const existingVendorSchema = Joi.object({
-  isExistingVendor: Joi.valid(true).required(),
+  isExistingVendor: Joi.valid(true).optional(),
   vendorId: Joi.string().required().messages({
     'string.base': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
     'string.empty': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
@@ -177,3 +177,13 @@ export const getVendorByIdSchema = Joi.object({
     'any.required': errorConstants.VENDOR.VENDOR_ID_REQUIRED,
   }),
 });
+export const editVendorSchema = newVendorSchema
+  .fork(Object.keys(newVendorSchema.describe().keys), (schema) =>
+    schema.optional().empty('').messages({
+      'any.empty': errorConstants.VENDOR.FIELD_REQUIRED,
+    })
+  )
+  .min(1)
+  .messages({
+    'object.min': errorConstants.VENDOR.AT_LEAST_ONE_FIELD_REQUIRED,
+  });

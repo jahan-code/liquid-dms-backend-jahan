@@ -1,4 +1,7 @@
-import { addVendorSchema } from '../validations/Vendor.validation.js';
+import {
+  addVendorSchema,
+  editVendorSchema,
+} from '../validations/Vendor.validation.js';
 import vendor from '../models/vendor.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import errorConstants from '../utils/errors.js';
@@ -137,13 +140,13 @@ const showAllVendors = async (req, res, next) => {
 // controller
 const getVendorById = async (req, res, next) => {
   try {
-    const { id } = req.query;
+    const { id } = req.query.id;
 
     if (!id) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
     }
 
-    const foundVendor = await vendor.findById(id).select('-taxIdOrSSN');
+    const foundVendor = await vendor.findById(id);
 
     if (!foundVendor) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
@@ -158,9 +161,11 @@ const getVendorById = async (req, res, next) => {
       city: foundVendor.city,
       state: foundVendor.state,
       zip: foundVendor.zip,
-      contact: foundVendor.contact,
+      primaryContactNumber: foundVendor.primaryContactNumber,
+      alternativeContactNumber: foundVendor.alternativeContactNumber,
       category: foundVendor.category,
       accountNumber: foundVendor.accountNumber,
+      taxIdOrSSN: foundVendor.taxIdOrSSN,
       note: foundVendor.note,
     };
 
@@ -178,5 +183,159 @@ const getVendorById = async (req, res, next) => {
     next(new ApiError('Internal Server Error', 500));
   }
 };
+const editVendor = async (req, res, next) => {
+  try {
+    const { id } = req.query;
 
-export default { addVendor, showAllVendors, getVendorById };
+    if (!id) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
+    }
+
+    // Validate incoming data
+    const { error, value } = editVendorSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      logger.warn({
+        message: error.details[0].message,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
+    }
+
+    const existingVendor = await vendor.findById(id);
+    if (!existingVendor) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
+    }
+
+    // If email is being updated, ensure it's unique
+    if (value.email && value.email !== existingVendor.email) {
+      const emailExists = await vendor.findOne({ email: value.email });
+      if (emailExists) {
+        logger.warn({
+          message: `❌ Email already exists: ${value.email}`,
+          timestamp: new Date().toISOString(),
+        });
+        return next(
+          new ApiError(errorConstants.VENDOR.EMAIL_ALREADY_EXISTS, 409)
+        );
+      }
+    }
+
+    // If category is changed, regenerate vendorId
+    if (value.category && value.category !== existingVendor.category) {
+      const categoryCode = extractCategoryCode(value.category);
+      const count = await vendor.countDocuments({
+        vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
+      });
+
+      value.vendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+    }
+
+    // Update vendor
+    const updatedVendor = await vendor.findByIdAndUpdate(id, value, {
+      new: true,
+      runValidators: true,
+    });
+
+    logger.info({
+      message: `✅ Vendor updated: ${updatedVendor.name}`,
+      timestamp: new Date().toISOString(),
+    });
+
+    const updatedVendorResponse = {
+      vendorId: updatedVendor.vendorId,
+      name: updatedVendor.name,
+      primaryContactNumber: updatedVendor.primaryContactNumber,
+      alternativeContactNumber: updatedVendor.alternativeContactNumber,
+      email: updatedVendor.email,
+      street: updatedVendor.street,
+      city: updatedVendor.city,
+      state: updatedVendor.state,
+      zip: updatedVendor.zip,
+      contact: updatedVendor.contact,
+      category: updatedVendor.category,
+      accountNumber: updatedVendor.accountNumber,
+      taxIdOrSSN: updatedVendor.taxIdOrSSN,
+      note: updatedVendor.note,
+    };
+
+    return SuccessHandler(
+      updatedVendorResponse,
+      200,
+      'Vendor updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error({
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+const deleteVendor = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
+    }
+
+    const existingVendor = await vendor.findById(id);
+
+    if (!existingVendor) {
+      return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
+    }
+
+    // Remove vendor reference from the user document
+    await user.findByIdAndUpdate(
+      existingVendor.createdBy,
+      { $pull: { vendors: id } },
+      { new: true }
+    );
+
+    // Delete the vendor
+    await vendor.findByIdAndDelete(id);
+
+    logger.info({
+      message: `🗑️ Vendor deleted: ${existingVendor.vendorId}`,
+      timestamp: new Date().toISOString(),
+    });
+
+    return SuccessHandler(
+      { vendorId: existingVendor.vendorId },
+      200,
+      'Vendor deleted successfully',
+      res
+    );
+  } catch (error) {
+    logger.error({
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+export default {
+  addVendor,
+  showAllVendors,
+  getVendorById,
+  editVendor,
+  deleteVendor,
+};

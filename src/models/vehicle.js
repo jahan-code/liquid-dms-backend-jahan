@@ -269,9 +269,8 @@ const vehicleSchema = new mongoose.Schema(
       valetKeyCode: String,
     },
 
-    // Features
     features: {
-      type: [String], // array of strings
+      type: [String],
       default: [],
     },
 

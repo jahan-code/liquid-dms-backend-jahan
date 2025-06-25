@@ -11,7 +11,11 @@ import {
   vehicleIdQuerySchema,
   editVehicleSchema,
 } from './Vehicle.validation.js';
-import { addVendorSchema, getVendorByIdSchema } from './Vendor.validation.js';
+import {
+  addVendorSchema,
+  editVendorSchema,
+  getVendorByIdSchema,
+} from './Vendor.validation.js';
 
 const validationSchemas = {
   // Authentication
@@ -28,7 +32,8 @@ const validationSchemas = {
   '/vendor/add-vendor': { POST: addVendorSchema },
   '/vendor/vendors': { GET: null },
   '/vendor': { GET: getVendorByIdSchema },
-
+  '/vendor/edit-vendor': { PUT: editVendorSchema },
+  '/vendor/delete-vendor': { DELETE: getVendorByIdSchema },
   //Vehicle
   '/vehicle/add-vehicle': { POST: addVehicleSchema },
   '/vehicle/edit': {

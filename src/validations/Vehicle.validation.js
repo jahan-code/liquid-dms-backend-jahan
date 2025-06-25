@@ -371,8 +371,10 @@ export const addVehicleSchema = Joi.object({
   }).optional(),
 });
 export const vehicleIdQuerySchema = Joi.object({
-  id: Joi.string().trim().required().messages({
+  id: Joi.string().length(24).hex().required().messages({
     'string.base': errorConstants.VEHICLE.ID_MUST_BE_STRING,
+    'string.length': errorConstants.VEHICLE.ID_INVALID_LENGTH,
+    'string.hex': errorConstants.VEHICLE.ID_INVALID_FORMAT,
     'string.empty': errorConstants.VEHICLE.ID_REQUIRED,
     'any.required': errorConstants.VEHICLE.ID_REQUIRED,
   }),

@@ -233,6 +233,8 @@ const errorConstants = {
     VALET_KEY_CODE_MUST_BE_STRING: 'Valet key code must be a string.',
     MILEAGE_INVALID: 'Mileage must be one of the allowed values.',
     // 🔹 Media
+    ID_INVALID_LENGTH: 'ID must be 24 characters long.',
+    ID_INVALID_FORMAT: 'ID must be a valid hex string.',
     ID_MUST_BE_STRING: 'ID must be a string.',
     ID_REQUIRED: 'ID is required.',
     FEATURED_IMAGE_URL_MUST_BE_STRING: 'Featured image URL must be a string.',
@@ -271,6 +273,8 @@ const errorConstants = {
 
   VENDOR: {
     // Category
+    AT_LEAST_ONE_FIELD_REQUIRED: 'At least one field is required to update',
+    FIELD_REQUIRED: 'This field cannot be empty if provided',
     STREET_MUST_BE_STRING: 'Street must be a string.',
     VENDOR_ID_REQUIRED: 'Vendor ID is required',
     VENDOR_NOT_FOUND: 'Vendor not found.',

@@ -15,5 +15,14 @@ router.post(
   ]),
   addVehicle
 );
-router.put('/edit', verifyToken, editVehicle);
+router.put(
+  '/edit',
+  verifyToken,
+  upload.fields([
+    { name: 'featuredImage', maxCount: 1 },
+    { name: 'otherImages', maxCount: 5 },
+    { name: 'billofsales', maxCount: 1 },
+  ]),
+  editVehicle
+);
 export default router;
