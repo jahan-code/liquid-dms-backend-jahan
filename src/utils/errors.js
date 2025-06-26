@@ -336,6 +336,8 @@ const errorConstants = {
   },
   FLOOR_PLAN: {
     // 🔹 Company Details
+    FEE_NEGATIVE: ' Fee cannot be negative.',
+    FEE_MUST_BE_NUMBER: ' Fee must be a number.',
     COMPANY_NAME_MUST_BE_STRING: 'Company name must be a string.',
     COMPANY_NAME_REQUIRED: 'Company name is required.',
     STREET_MUST_BE_STRING: 'Street must be a string.',

@@ -8,5 +8,5 @@ const router = Router();
 router.use('/auth', auth);
 router.use('/vendor', vendor);
 router.use('/vehicle', vehicle);
-router.use('/floor-plan', floorPlan);
+router.use('/floorPlan', floorPlan);
 export default router;

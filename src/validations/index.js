@@ -16,7 +16,7 @@ import {
   editVendorSchema,
   getVendorByIdSchema,
 } from './Vendor.validation.js';
-
+import { addFloorPlanSchema } from './FloorPlan.validation.js';
 const validationSchemas = {
   // Authentication
 
@@ -42,6 +42,8 @@ const validationSchemas = {
       body: editVehicleSchema,
     },
   },
+
+  '/floorPlan/add-floor': { POST: addFloorPlanSchema },
 };
 
 export { validationSchemas };
