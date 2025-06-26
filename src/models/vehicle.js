@@ -285,6 +285,38 @@ const vehicleSchema = new mongoose.Schema(
       featuredImageUrl: String,
       otherImageUrls: [String],
     },
+    costDetails: {
+      purchaseDate: Date,
+      originalCost: { type: Number, default: 0 },
+      buyersFee: { type: Number, default: 0 },
+      transportationFee: { type: Number, default: 0 },
+      lotFee: { type: Number, default: 0 },
+      addedCosts: [
+        {
+          title: String,
+          cost: { type: Number, default: 0 },
+          date: Date,
+          description: String,
+        },
+      ],
+    },
+
+    floorPlanDetails: {
+      isFloorPlanned: { type: Boolean, default: false },
+      company: String,
+      dateOpened: Date,
+      setUpFee: { type: Number, default: 0 },
+      adminFee: { type: Number, default: 0 },
+      additionalFee: { type: Number, default: 0 },
+      aprRate: { type: Number, default: 0 },
+      notes: String,
+    },
+    Curtailments: {
+      lengthFloorPlan: { type: Number, default: 0 },
+      daysUntil1stCurtailment: { type: Number, default: 0 },
+      lengthFloorPlan2: { type: Number, default: 0 },
+      daysUntil2ndCurtailment: { type: Number, default: 0 },
+    },
   },
   { timestamps: true }
 );

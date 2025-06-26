@@ -155,7 +155,7 @@ const getVendorById = async (req, res, next) => {
     const vendorResponse = {
       vendorId: foundVendor.vendorId,
       name: foundVendor.name,
-      phone: foundVendor.primaryContactNumber,
+
       email: foundVendor.email,
       street: foundVendor.street,
       city: foundVendor.city,

@@ -334,9 +334,88 @@ const errorConstants = {
     NOTE_MUST_BE_STRING: 'Note must be a string.',
     BILL_OF_SALES_MUST_BE_STRING: 'Bill of sales must be a string.',
   },
+  FLOOR_PLAN: {
+    // 🔹 Company Details
+    COMPANY_NAME_MUST_BE_STRING: 'Company name must be a string.',
+    COMPANY_NAME_REQUIRED: 'Company name is required.',
+    STREET_MUST_BE_STRING: 'Street must be a string.',
+    STREET_REQUIRED: 'Street is required.',
+    CITY_MUST_BE_STRING: 'City must be a string.',
+    CITY_REQUIRED: 'City is required.',
+    STATE_MUST_BE_STRING: 'State must be a string.',
+    STATE_REQUIRED: 'State is required.',
+    ZIP_MUST_BE_STRING: 'ZIP code must be a string.',
+    ZIP_REQUIRED: 'ZIP code is required.',
 
+    // 🔹 Rate
+    APR_MUST_BE_NUMBER: 'APR must be a number.',
+    APR_TOO_LOW: 'APR cannot be negative.',
+    APR_TOO_HIGH: 'APR cannot exceed 100%.',
+    INTEREST_DAYS_MUST_BE_NUMBER: 'Interest calculation days must be a number.',
+    INTEREST_DAYS_TOO_LOW: 'Interest calculation days must be at least 1.',
+    INTEREST_DAYS_TOO_HIGH: 'Interest calculation days cannot exceed 365.',
+    INTEREST_DAYS_INTEGER: 'Interest calculation days must be an integer.',
+
+    // 🔹 Fees
+    FEES_TYPE_MUST_BE_STRING: 'Fees type must be a string.',
+    FEES_TYPE_INVALID:
+      'Fees type must be either "One Time" or "Plus for each Curtailment".',
+    FEES_TYPE_REQUIRED: 'Fees type is required.',
+    ADMIN_FEE_MUST_BE_NUMBER: 'Admin fee must be a number.',
+    ADMIN_FEE_NEGATIVE: 'Admin fee cannot be negative.',
+    SET_UP_FEE_MUST_BE_NUMBER: 'Setup fee must be a number.',
+    SET_UP_FEE_NEGATIVE: 'Setup fee cannot be negative.',
+    ADDITIONAL_FEE_MUST_BE_NUMBER: 'Additional fee must be a number.',
+    ADDITIONAL_FEE_NEGATIVE: 'Additional fee cannot be negative.',
+
+    // 🔹 Term
+    TERM_LENGTH_MUST_BE_NUMBER: 'Term length must be a number.',
+    TERM_LENGTH_TOO_LOW: 'Term length cannot be negative.',
+    TERM_LENGTH_INTEGER: 'Term length must be an integer.',
+    DAYS_UNTIL_FIRST_CURT_MUST_BE_NUMBER:
+      'Days until first curtailment must be a number.',
+    DAYS_UNTIL_FIRST_CURT_TOO_LOW:
+      'Days until first curtailment cannot be negative.',
+    DAYS_UNTIL_FIRST_CURT_INTEGER:
+      'Days until first curtailment must be an integer.',
+    PERCENT_REDUCTION_MUST_BE_NUMBER:
+      'Percent principal reduction must be a number.',
+    PERCENT_REDUCTION_TOO_LOW:
+      'Percent principal reduction cannot be negative.',
+    PERCENT_REDUCTION_TOO_HIGH:
+      'Percent principal reduction cannot exceed 100%.',
+    DAYS_UNTIL_SECOND_CURT_MUST_BE_NUMBER:
+      'Days until second curtailment must be a number.',
+    DAYS_UNTIL_SECOND_CURT_TOO_LOW:
+      'Days until second curtailment cannot be negative.',
+    DAYS_UNTIL_SECOND_CURT_INTEGER:
+      'Days until second curtailment must be an integer.',
+    PERCENT_REDUCTION2_MUST_BE_NUMBER:
+      'Second percent principal reduction must be a number.',
+    PERCENT_REDUCTION2_TOO_LOW:
+      'Second percent principal reduction cannot be negative.',
+    PERCENT_REDUCTION2_TOO_HIGH:
+      'Second percent principal reduction cannot exceed 100%.',
+    INTEREST_AND_FEES_MUST_BE_BOOLEAN:
+      'Interest and fees with each curtailment must be a boolean.',
+
+    // 🔹 Additional Notes
+    ADDITIONAL_NOTES_MUST_BE_STRING: 'Additional notes must be a string.',
+
+    // 🔹 General
+    FLOOR_PLAN_NOT_FOUND: 'Floor plan not found.',
+    FLOOR_PLAN_CREATED: 'Floor plan created successfully.',
+    FLOOR_PLAN_UPDATED: 'Floor plan updated successfully.',
+    FLOOR_PLAN_DELETED: 'Floor plan deleted successfully.',
+    COMPANY_DETAILS_REQUIRED: 'Company details are required.',
+    RATE_REQUIRED: 'Rate details are required.',
+    FEES_REQUIRED: 'Fees details are required.',
+    TERM_REQUIRED: 'Term details are required.',
+  },
   // 🔹 Message Template Errors
   MESSAGE_TEMPLATE: {
+    FEE_MUST_BE_NUMBER: 'Fee must be a number.',
+    FEE_NEGATIVE: 'Fee cannot be negative.',
     NAME_REQUIRED: 'The message template name is required.',
     NAME_MUST_BE_STRING: 'The message template name must be a valid string.',
     NAME_MIN_LENGTH:

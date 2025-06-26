@@ -157,36 +157,10 @@ export const addVehicle = async (req, res, next) => {
 };
 export const editVehicle = async (req, res, next) => {
   try {
-    // ✅ First, parse stringified fields (from multipart/form-data)
-    const jsonFields = [
-      'basicDetails',
-      'specifications',
-      'exteriorInterior',
-      'titleRegistration',
-      'inspection',
-      'keySecurity',
-      'features',
-      'vendorInfo',
-    ];
-
-    jsonFields.forEach((field) => {
-      const raw = req.body[field];
-      if (typeof raw === 'string' && raw.trim() !== '') {
-        try {
-          req.body[field] = JSON.parse(raw);
-        } catch (err) {
-          return next(
-            new ApiError(`Invalid JSON in ${field}: ${err.message}`, 400)
-          );
-        }
-      }
-    });
-
-    // ✅ Validate parsed body using Joi
+    // ✅ Validate request
     const { error, value } = editVehicleSchema.validate(req.body, {
       abortEarly: false,
     });
-
     if (error) {
       logger.warn({
         message: error.details.map((d) => d.message).join(', '),
@@ -195,7 +169,6 @@ export const editVehicle = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    // ✅ Destructure validated values
     const {
       basicDetails,
       specifications,
@@ -209,10 +182,7 @@ export const editVehicle = async (req, res, next) => {
 
     const vehicleId = req.query.id;
     if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
-      return next(new ApiError('Invalid vendor ID format', 400));
-    }
-    if (!vehicleId) {
-      return next(new ApiError('Vehicle ID is required in query', 400));
+      return next(new ApiError('Invalid vehicle ID format', 400));
     }
 
     const existingVehicle =
@@ -220,15 +190,16 @@ export const editVehicle = async (req, res, next) => {
     if (!existingVehicle) {
       return next(new ApiError('Vehicle not found', 404));
     }
+
     let vendor = existingVehicle.vendor;
 
-    // ✅ Handle bill of sales upload
+    // ✅ Handle bill of sales file
     const billofsalesFile = req.files?.billofsales?.[0];
     const billofsalesUrl = billofsalesFile
       ? toPublicUrl(billofsalesFile.path)
       : '';
 
-    // ✅ Vendor logic
+    // ✅ Vendor Handling
     if (vendorInfo.isExistingVendor) {
       const foundVendor = await Vendor.findOne({
         vendorId: vendorInfo.vendorId,
@@ -236,7 +207,6 @@ export const editVehicle = async (req, res, next) => {
       if (!foundVendor) {
         return next(new ApiError('Vendor not found', 404));
       }
-
       vendor = foundVendor;
 
       if (billofsalesUrl) {
@@ -261,6 +231,9 @@ export const editVehicle = async (req, res, next) => {
         ...vendorInfo,
         email: vendorEmail,
       });
+
+      // 🔄 Re-fetch vendor
+      vendor = await Vendor.findById(vendor._id);
     }
 
     // ✅ Image Handling
@@ -273,31 +246,31 @@ export const editVehicle = async (req, res, next) => {
         ? req.files.otherImages.map((f) => toPublicUrl(f.path))
         : existingVehicle.images.otherImageUrls;
 
-    // ✅ Update Vehicle
+    // ✅ Compare category/vehicleType for stockId change
+    const oldCategory = (existingVehicle.vendor?.category || '')
+      .trim()
+      .toLowerCase();
+    const newCategory = (vendor?.category || '').trim().toLowerCase();
+
+    const oldVehicleType = (existingVehicle.basicDetails?.vehicleType || '')
+      .trim()
+      .toLowerCase();
+    const newVehicleType = (basicDetails?.vehicleType || '')
+      .trim()
+      .toLowerCase();
+
     let updatedStockId = existingVehicle.stockId;
 
-    const oldCategory = existingVehicle.vendor?.category;
-    const newCategory = vendor?.category;
-
-    const oldVehicleType = existingVehicle.basicDetails?.vehicleType;
-    const newVehicleType = basicDetails?.vehicleType;
-
-    const categoryChanged = oldCategory !== newCategory;
-    const vehicleTypeChanged = oldVehicleType !== newVehicleType;
-
-    if (categoryChanged || vehicleTypeChanged) {
-      const categoryCode = extractCategoryCode(newCategory);
-      const vehicleTypeCode = newVehicleType.toUpperCase();
-
+    if (oldCategory !== newCategory || oldVehicleType !== newVehicleType) {
+      const categoryCode = extractCategoryCode(vendor.category);
+      const vehicleTypeCode = basicDetails.vehicleType.toUpperCase();
       const vehicleCount = await Vehicle.countDocuments({
-        stockId: {
-          $regex: `^${categoryCode}-${vehicleTypeCode}-\\d{4}$`,
-          $options: 'i',
-        },
+        stockId: new RegExp(`^${categoryCode}-${vehicleTypeCode}-\\d{4}$`, 'i'),
       });
-
       updatedStockId = `${categoryCode}-${vehicleTypeCode}-${String(vehicleCount + 1).padStart(4, '0')}`;
     }
+
+    // ✅ Update Vehicle
     existingVehicle.set({
       stockId: updatedStockId,
       basicDetails,
@@ -317,7 +290,6 @@ export const editVehicle = async (req, res, next) => {
     await existingVehicle.save();
     await existingVehicle.populate({ path: 'vendor', select: '-taxIdOrSSN' });
 
-    // ✅ Respond
     return SuccessHandler(
       {
         vehicle: existingVehicle,
