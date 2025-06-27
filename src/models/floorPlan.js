@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const floorPlanSchema = new mongoose.Schema({
   CompanyDetails: {
-    companyName: { type: String, required: true },
+    companyName: { type: String, required: true, unique: true },
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },

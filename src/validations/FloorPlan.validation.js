@@ -93,31 +93,31 @@ const interestAndFeesValidator = Joi.boolean().default(false);
 
 // 🔹 Nested Schemas
 const companyDetailsSchema = Joi.object({
-  companyName: companyNameValidator,
-  street: streetValidator,
-  city: cityValidator,
-  state: stateValidator,
-  zip: zipValidator,
+  companyName: companyNameValidator.required(),
+  street: streetValidator.required(),
+  city: cityValidator.required(),
+  state: stateValidator.required(),
+  zip: zipValidator.required(),
 }).required();
 
 const rateSchema = Joi.object({
-  apr: aprValidator,
-  interestCalculationDays: interestCalculationDaysValidator,
+  apr: aprValidator.required(),
+  interestCalculationDays: interestCalculationDaysValidator.required(),
 }).required();
 
 const feesSchema = Joi.object({
   type: feesTypeValidator,
-  adminFee: feeValidator,
-  setUpFee: feeValidator,
+  adminFee: feeValidator.required(),
+  setUpFee: feeValidator.required(),
   additionalFee: feeValidator,
 }).required();
 
 const termSchema = Joi.object({
-  lengthInDays: termLengthValidator,
-  daysUntilFirstCurtailment: termLengthValidator,
-  percentPrincipalReduction: percentReductionValidator,
-  daysUntillSecondCurtailment: termLengthValidator,
-  percentPrincipalReduction2: percentReductionValidator,
+  lengthInDays: termLengthValidator.required(),
+  daysUntilFirstCurtailment: termLengthValidator.required(),
+  percentPrincipalReduction: percentReductionValidator.required(),
+  daysUntillSecondCurtailment: termLengthValidator.optional(),
+  percentPrincipalReduction2: percentReductionValidator.optional(),
   interestAndFeesWithEachCurtailment: interestAndFeesValidator,
 }).required();
 

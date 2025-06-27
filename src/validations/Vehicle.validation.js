@@ -370,6 +370,47 @@ export const addVehicleSchema = Joi.object({
     otherImageUrls: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
 });
+export const AddVehicleCostSchema = Joi.object({
+  costDetails: Joi.object({
+    purchaseDate: Joi.date().optional(),
+    originalCost: Joi.number().min(0).optional(),
+    buyersFee: Joi.number().min(0).optional(),
+    transportationFee: Joi.number().min(0).optional(),
+    lotFee: Joi.number().min(0).optional(),
+    addedCosts: Joi.array()
+      .items(
+        Joi.object({
+          title: Joi.string().optional(),
+          cost: Joi.number().min(0).optional(),
+          date: Joi.date().optional(),
+          description: Joi.string().allow('', null).optional(),
+        })
+      )
+      .optional(),
+  }).optional(),
+  floorPlanDetails: Joi.object({
+    isFloorPlanned: Joi.boolean().optional(),
+    company: Joi.string().allow('', null).optional(),
+    dateOpened: Joi.date().optional(),
+    setUpFee: Joi.number().min(0).optional(),
+    adminFee: Joi.number().min(0).optional(),
+    additionalFee: Joi.number().min(0).optional(),
+    aprRate: Joi.number().min(0).optional(),
+    notes: Joi.string().allow('', null).optional(),
+  }).optional(),
+  Curtailments: Joi.object({
+    lengthFloorPlan: Joi.number().min(0).optional(),
+    daysUntil1stCurtailment: Joi.number().min(0).integer().optional(),
+    lengthFloorPlan2: Joi.number().min(0).optional(),
+    daysUntil2ndCurtailment: Joi.number().min(0).integer().optional(),
+  }).optional(),
+})
+  .or('costDetails', 'floorPlanDetails', 'Curtailments')
+  .messages({
+    'object.missing':
+      'At least one of costDetails, floorPlanDetails, or Curtailments is required.',
+  });
+
 export const vehicleIdQuerySchema = Joi.object({
   id: Joi.string().length(24).hex().required().messages({
     'string.base': errorConstants.VEHICLE.ID_MUST_BE_STRING,
@@ -379,6 +420,47 @@ export const vehicleIdQuerySchema = Joi.object({
     'any.required': errorConstants.VEHICLE.ID_REQUIRED,
   }),
 });
+export const updateVehiclePricingSchema = Joi.object({
+  Price: Joi.object({
+    Retail: Joi.number().min(0).optional(),
+    Interest: Joi.number().min(0).optional(),
+    Wholesale: Joi.number().min(0).optional(),
+    Other: Joi.number().min(0).optional(),
+  }).optional(),
+  Values: Joi.object({
+    MarketValue: Joi.number().min(0).optional(),
+    MSRP: Joi.number().min(0).optional(),
+  }).optional(),
+  Payment: Joi.object({
+    Down: Joi.number().min(0).optional(),
+    Weekly: Joi.number().min(0).optional(),
+    Monthly: Joi.number().min(0).optional(),
+  }).optional(),
+  Dates: Joi.object({
+    Arrival: Joi.date().optional(),
+    ReadytoSell: Joi.date().optional(),
+  }).optional(),
+  WindowSheetOptions: Joi.object({
+    price: Joi.boolean().optional(),
+    DownPayment: Joi.boolean().optional(),
+    Features: Joi.boolean().optional(),
+    SalesComments: Joi.boolean().optional(),
+  }).optional(),
+  SalesComments: Joi.string().allow('', null).optional(),
+})
+  .or(
+    'Price',
+    'Values',
+    'Payment',
+    'Dates',
+    'WindowSheetOptions',
+    'SalesComments'
+  )
+  .messages({
+    'object.missing':
+      'At least one of the pricing, values, payment, dates, or options fields is required.',
+  });
+
 export const editVehicleSchema = addVehicleSchema.fork(
   Object.keys(addVehicleSchema.describe().keys),
   (schema) => schema.optional()

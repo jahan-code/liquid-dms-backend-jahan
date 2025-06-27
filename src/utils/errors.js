@@ -336,6 +336,8 @@ const errorConstants = {
   },
   FLOOR_PLAN: {
     // 🔹 Company Details
+    COMPANY_ALREADY_EXISTS:
+      'A floor plan with this company name already exists.',
     FEE_NEGATIVE: ' Fee cannot be negative.',
     FEE_MUST_BE_NUMBER: ' Fee must be a number.',
     COMPANY_NAME_MUST_BE_STRING: 'Company name must be a string.',

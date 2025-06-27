@@ -6,6 +6,9 @@ import logger from '../functions/logger.js';
 import {
   addVehicleSchema,
   editVehicleSchema,
+  AddVehicleCostSchema,
+  vehicleIdQuerySchema,
+  updateVehiclePricingSchema,
 } from '../validations/Vehicle.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
@@ -135,13 +138,20 @@ export const addVehicle = async (req, res, next) => {
     await newVehicle.save();
     await newVehicle.populate({ path: 'vendor', select: '-taxIdOrSSN' });
 
+    // Reorder vehicle object for response
+    const vehicleObject = newVehicle.toObject();
+    const responseVehicle = {
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
     // ✅ Respond
     return SuccessHandler(
       {
-        vehicle: newVehicle,
+        vehicle: responseVehicle,
         billofsales: newVehicle.vendor?.billofsales || '',
       },
-      200,
+      201,
       'Vehicle registered successfully',
       res
     );
@@ -151,6 +161,180 @@ export const addVehicle = async (req, res, next) => {
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
         500
+      )
+    );
+  }
+};
+export const addVehicleCost = async (req, res, next) => {
+  try {
+    logger.info('💰 Add vehicle Cost request received');
+
+    // 1. Validate vehicle ID from query
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    // 2. Validate request body
+    const { error: bodyError, value } = AddVehicleCostSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      }
+    );
+    if (bodyError) {
+      logger.warn({
+        message: bodyError.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(bodyError.details[0].message, 400));
+    }
+
+    // 3. Prepare update object for mongoose using dot notation for nested objects
+    const updateData = {};
+    if (value.costDetails) {
+      Object.keys(value.costDetails).forEach((key) => {
+        updateData[`costDetails.${key}`] = value.costDetails[key];
+      });
+    }
+    if (value.floorPlanDetails) {
+      Object.keys(value.floorPlanDetails).forEach((key) => {
+        updateData[`floorPlanDetails.${key}`] = value.floorPlanDetails[key];
+      });
+    }
+    if (value.Curtailments) {
+      Object.keys(value.Curtailments).forEach((key) => {
+        updateData[`Curtailments.${key}`] = value.Curtailments[key];
+      });
+    }
+
+    // 4. Update the vehicle
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+
+    if (!updatedVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 5. Reorder vehicle object for response
+    const vehicleObject = updatedVehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    // 6. Respond
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle Cost Added successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Adding vehicle error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+export const updateVehiclePricing = async (req, res, next) => {
+  try {
+    logger.info('💲 Update vehicle pricing request received');
+
+    // 1. Validate vehicle ID from query
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    // 2. Validate request body
+    const { error: bodyError, value } = updateVehiclePricingSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      }
+    );
+    if (bodyError) {
+      logger.warn({
+        message: bodyError.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(bodyError.details[0].message, 400));
+    }
+
+    // 3. Find the vehicle to update
+    const vehicle = await Vehicle.findById(vehicleId);
+    if (!vehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 4. Apply updates to the document.
+    const updateData = {};
+    if (value.Price) {
+      Object.keys(value.Price).forEach((key) => {
+        updateData[`Price.${key}`] = value.Price[key];
+      });
+    }
+    if (value.Values) {
+      Object.keys(value.Values).forEach((key) => {
+        updateData[`Values.${key}`] = value.Values[key];
+      });
+    }
+    if (value.Payment) {
+      Object.keys(value.Payment).forEach((key) => {
+        updateData[`Payement.${key}`] = value.Payment[key];
+      });
+    }
+    if (value.Dates) {
+      Object.keys(value.Dates).forEach((key) => {
+        updateData[`Dates.${key}`] = value.Dates[key];
+      });
+    }
+    if (value.WindowSheetOptions) {
+      Object.keys(value.WindowSheetOptions).forEach((key) => {
+        updateData[`WindowSheetOptions.${key}`] = value.WindowSheetOptions[key];
+      });
+    }
+    if (value.Notes) {
+      updateData.Notes = value.Notes;
+    }
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    // 5. Save the updated vehicle
+
+    // 6. Reorder vehicle object for response
+    const vehicleObject = updatedVehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    // 7. Respond
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle pricing details updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Update vehicle pricing error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR
       )
     );
   }
@@ -290,9 +474,16 @@ export const editVehicle = async (req, res, next) => {
     await existingVehicle.save();
     await existingVehicle.populate({ path: 'vendor', select: '-taxIdOrSSN' });
 
+    // Reorder vehicle object for response
+    const vehicleObject = existingVehicle.toObject();
+    const responseVehicle = {
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
     return SuccessHandler(
       {
-        vehicle: existingVehicle,
+        vehicle: responseVehicle,
         billofsales: vendor?.billofsales || '',
       },
       200,

@@ -22,7 +22,18 @@ export const addFloorPlan = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
     const { CompanyDetails, Rate, Fees, term, additionalNotes } = value;
-
+    const existingFloorPlan = await FloorPlan.findOne({
+      'CompanyDetails.companyName': value.CompanyDetails.companyName,
+    });
+    if (existingFloorPlan) {
+      logger.warn({
+        message: `❌ Floor plan already exists for company: ${value.CompanyDetails.companyName}`,
+        timestamp: new Date().toISOString(),
+      });
+      return next(
+        new ApiError(errorConstants.FLOOR_PLAN.COMPANY_ALREADY_EXISTS, 409)
+      ); // 409 Conflict
+    }
     const floorPlan = new FloorPlan({
       CompanyDetails,
       Rate,

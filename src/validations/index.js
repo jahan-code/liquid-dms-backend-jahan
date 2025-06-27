@@ -10,6 +10,8 @@ import {
   addVehicleSchema,
   vehicleIdQuerySchema,
   editVehicleSchema,
+  AddVehicleCostSchema,
+  updateVehiclePricingSchema,
 } from './Vehicle.validation.js';
 import {
   addVendorSchema,
@@ -42,7 +44,8 @@ const validationSchemas = {
       body: editVehicleSchema,
     },
   },
-
+  '/vehicle/Cost': { PUT: AddVehicleCostSchema },
+  '/vehicle/pricing': { PUT: updateVehiclePricingSchema },
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
 };
 

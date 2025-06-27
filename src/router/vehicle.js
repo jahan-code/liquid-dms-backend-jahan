@@ -1,5 +1,10 @@
 import express from 'express';
-import { addVehicle, editVehicle } from '../controllers/vehicleController.js';
+import {
+  addVehicle,
+  editVehicle,
+  addVehicleCost,
+  updateVehiclePricing,
+} from '../controllers/vehicleController.js';
 import upload from '../middleware/upload.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -25,4 +30,6 @@ router.put(
   ]),
   editVehicle
 );
+router.put('/Cost', verifyToken, addVehicleCost);
+router.put('/pricing', verifyToken, updateVehiclePricing);
 export default router;
