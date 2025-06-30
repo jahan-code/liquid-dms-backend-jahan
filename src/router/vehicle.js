@@ -3,7 +3,8 @@ import {
   addVehicle,
   editVehicle,
   addVehicleCost,
-  updateVehiclePricing,
+  addVehicleSales,
+  addVehiclePreviousOwner,
 } from '../controllers/vehicleController.js';
 import upload from '../middleware/upload.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
@@ -31,5 +32,11 @@ router.put(
   editVehicle
 );
 router.put('/Cost', verifyToken, addVehicleCost);
-router.put('/pricing', verifyToken, updateVehiclePricing);
+router.put('/Sales', verifyToken, addVehicleSales);
+router.put(
+  '/previous-owner',
+  verifyToken,
+  upload.fields([{ name: 'transferDocument', maxCount: 1 }]),
+  addVehiclePreviousOwner
+);
 export default router;

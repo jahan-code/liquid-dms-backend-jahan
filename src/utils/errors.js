@@ -145,6 +145,16 @@ const errorConstants = {
     NOTES_REQUIRED: 'Notes are required.',
     BILL_OF_SALES_REQUIRED: 'Bill of sales is required.',
 
+    // 🔹 Previous Owner
+    OWNER_NAME_MUST_BE_STRING: 'Owner name must be a string.',
+    OWNERSHIP_TYPE_INVALID: 'Ownership type is invalid.',
+    CONTACT_NUMBER_MUST_BE_STRING: 'Contact number must be a string.',
+    ADDRESS_MUST_BE_STRING: 'Address must be a string.',
+    STATE_OF_REGISTRATION_MUST_BE_STRING:
+      'State of registration must be a string.',
+    STATE_OF_REGISTRATION_INVALID: 'State of registration is invalid.',
+    PRINCIPLE_USE_OF_VEHICLE_MUST_BE_STRING:
+      'Principle use of vehicle must be a string.',
     // 🔹 Contact
     PRIMARY_CONTACT_NUMBER_MUST_BE_STRING:
       'Primary contact number must be a string.',

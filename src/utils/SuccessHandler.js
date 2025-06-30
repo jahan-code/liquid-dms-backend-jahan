@@ -1,4 +1,4 @@
-const SuccessHandler = (data, statusCode, message, res) => {
+const SuccessHandler = (data, statusCode, message, res, options = {}) => {
   const response = {
     statusCode,
     message,
@@ -7,6 +7,11 @@ const SuccessHandler = (data, statusCode, message, res) => {
 
   if (data !== null) {
     response.data = data;
+  }
+
+  // ✅ Optional session ID
+  if (options.sessionID) {
+    response.sessionID = options.sessionID;
   }
 
   return res.status(statusCode).json(response);

@@ -8,7 +8,8 @@ import {
   editVehicleSchema,
   AddVehicleCostSchema,
   vehicleIdQuerySchema,
-  updateVehiclePricingSchema,
+  AddVehicleSalesSchema,
+  addVehiclePreviousOwnerSchema,
 } from '../validations/Vehicle.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
@@ -246,9 +247,9 @@ export const addVehicleCost = async (req, res, next) => {
   }
 };
 
-export const updateVehiclePricing = async (req, res, next) => {
+export const addVehicleSales = async (req, res, next) => {
   try {
-    logger.info('💲 Update vehicle pricing request received');
+    logger.info('💲 Sales request received');
 
     // 1. Validate vehicle ID from query
     const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
@@ -258,7 +259,7 @@ export const updateVehiclePricing = async (req, res, next) => {
     const { id: vehicleId } = req.query;
 
     // 2. Validate request body
-    const { error: bodyError, value } = updateVehiclePricingSchema.validate(
+    const { error: bodyError, value } = AddVehicleSalesSchema.validate(
       req.body,
       {
         abortEarly: false,
@@ -327,7 +328,7 @@ export const updateVehiclePricing = async (req, res, next) => {
     return SuccessHandler(
       { vehicle: responseVehicle },
       200,
-      'Vehicle pricing details updated successfully',
+      'Vehicle Sales updated successfully',
       res
     );
   } catch (error) {
@@ -339,6 +340,83 @@ export const updateVehiclePricing = async (req, res, next) => {
     );
   }
 };
+export const addVehiclePreviousOwner = async (req, res, next) => {
+  try {
+    logger.info('🔄 Previous owner update request received');
+
+    // 1. Validate vehicle ID from query
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    // 2. Validate request body
+    const { error: bodyError, value } = addVehiclePreviousOwnerSchema.validate(
+      req.body,
+      { abortEarly: false }
+    );
+    if (bodyError) {
+      logger.warn({
+        message: bodyError.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(bodyError.details[0].message, 400));
+    }
+
+    // 3. Construct update object
+    const updateData = {};
+    if (value.PreviousOwnerDetail) {
+      Object.keys(value.PreviousOwnerDetail).forEach((key) => {
+        updateData[`PreviousOwnerDetail.${key}`] =
+          value.PreviousOwnerDetail[key];
+      });
+    }
+    if (value.values) {
+      Object.keys(value.values).forEach((key) => {
+        updateData[`values.${key}`] = value.values[key];
+      });
+    }
+
+    // 4. Handle file upload
+    if (req.files && req.files.transferDocument) {
+      updateData.transferDocument = toPublicUrl(
+        req.files.transferDocument[0].path
+      );
+    }
+
+    // 5. Update the vehicle
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+
+    if (!updatedVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 6. Reorder vehicle object for response
+    const vehicleObject = updatedVehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    // 7. Respond
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle previous owner updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Update previous owner error:', error);
+    next(new ApiError(error.message, 500));
+  }
+};
+
 export const editVehicle = async (req, res, next) => {
   try {
     // ✅ Validate request

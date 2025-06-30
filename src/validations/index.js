@@ -11,7 +11,8 @@ import {
   vehicleIdQuerySchema,
   editVehicleSchema,
   AddVehicleCostSchema,
-  updateVehiclePricingSchema,
+  AddVehicleSalesSchema,
+  addVehiclePreviousOwnerSchema,
 } from './Vehicle.validation.js';
 import {
   addVendorSchema,
@@ -45,7 +46,8 @@ const validationSchemas = {
     },
   },
   '/vehicle/Cost': { PUT: AddVehicleCostSchema },
-  '/vehicle/pricing': { PUT: updateVehiclePricingSchema },
+  '/vehicle/Sales': { PUT: AddVehicleSalesSchema },
+  '/vehicle/previous-owner': { PUT: addVehiclePreviousOwnerSchema },
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
 };
 

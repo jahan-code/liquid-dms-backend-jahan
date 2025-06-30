@@ -420,7 +420,7 @@ export const vehicleIdQuerySchema = Joi.object({
     'any.required': errorConstants.VEHICLE.ID_REQUIRED,
   }),
 });
-export const updateVehiclePricingSchema = Joi.object({
+export const AddVehicleSalesSchema = Joi.object({
   Price: Joi.object({
     Retail: Joi.number().min(0).optional(),
     Interest: Joi.number().min(0).optional(),
@@ -460,7 +460,79 @@ export const updateVehiclePricingSchema = Joi.object({
     'object.missing':
       'At least one of the pricing, values, payment, dates, or options fields is required.',
   });
-
+export const addVehiclePreviousOwnerSchema = Joi.object({
+  PreviousOwnerDetail: Joi.object({
+    OwnerName: optionalString('OWNER_NAME'),
+    OwnershipType: enumValidator('OWNERSHIP_TYPE', [
+      'Individual',
+      'Company-Owned',
+      'Leased',
+      'Financed',
+      'Fleet',
+      'Rental',
+      'Government-Owned',
+    ]),
+    ContactNumber: optionalString('CONTACT_NUMBER'),
+    Email: Joi.string().email().allow('', null).messages({
+      'string.email': errorConstants.VEHICLE.EMAIL_INVALID,
+    }),
+    Address: optionalString('ADDRESS'),
+    StateofRegistration: optionalString('STATE_OF_REGISTRATION').valid(
+      'Alabama',
+      'Alaska',
+      'Arizona',
+      'Arkansas',
+      'California',
+      'Colorado',
+      'Connecticut',
+      'Delaware',
+      'Florida',
+      'Georgia',
+      'Hawaii',
+      'Idaho',
+      'Illinois',
+      'Indiana',
+      'Iowa',
+      'Kansas',
+      'Kentucky',
+      'Louisiana',
+      'Maine',
+      'Maryland',
+      'Massachusetts',
+      'Michigan',
+      'Minnesota',
+      'Mississippi',
+      'Missouri',
+      'Montana',
+      'Nebraska',
+      'Nevada',
+      'New Hampshire',
+      'New Jersey',
+      'New Mexico',
+      'New York',
+      'North Carolina',
+      'North Dakota',
+      'Ohio',
+      'Oklahoma',
+      'Oregon',
+      'Pennsylvania',
+      'Rhode Island',
+      'South Carolina',
+      'South Dakota',
+      'Tennessee',
+      'Texas',
+      'Utah'
+    ),
+    OwnershipStartDate: Joi.date().allow(null),
+    OwnershipEndDate: Joi.date().allow(null),
+    PrincipleUseofVehicle: optionalString('PRINCIPLE_USE_OF_VEHICLE'),
+    Notes: optionalString('NOTES'),
+  }).optional(),
+  values: Joi.object({
+    MarketValue: Joi.number().min(0).optional(),
+    MSRP: Joi.number().min(0).optional(),
+  }).optional(),
+});
 export const editVehicleSchema = addVehicleSchema.fork(
   Object.keys(addVehicleSchema.describe().keys),
   (schema) => schema.optional()
