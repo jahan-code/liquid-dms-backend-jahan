@@ -372,13 +372,19 @@ const verifyOtp = async (req, res, next) => {
       );
     }
 
-    const otpResult = await otpService.verifyOTP(
-      email.toLowerCase(),
-      otp,
-      context
-    );
-    if (!otpResult.valid) {
-      return next(new ApiError(otpResult.reason, 400));
+    try {
+      const otpResult = await otpService.verifyOTP(
+        email.toLowerCase(),
+        otp,
+        context
+      );
+      if (!otpResult.valid) {
+        console.log('❌ OTP not valid:', otpResult.reason);
+        return next(new ApiError(otpResult.reason, 400));
+      }
+    } catch (err) {
+      console.error('❌ OTP verification error:', err);
+      return next(new ApiError('Internal OTP verification failure.', 500));
     }
 
     // Mark OTP verified for this context:
