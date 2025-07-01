@@ -20,6 +20,7 @@ const startServer = async () => {
     await connectRedis(); // ✅ Redis connected
 
     // ✅ Middleware setup
+    app.use(getSessionMiddleware());
     app.use(
       cors({
         origin: 'https://liquid-dms-admin-panel.vercel.app',
@@ -29,7 +30,6 @@ const startServer = async () => {
     app.use(cookieParser());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
-    app.use(getSessionMiddleware());
     app.use(
       '/uploads',
       express.static(path.join(process.cwd(), 'src', 'uploads'))
