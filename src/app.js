@@ -20,12 +20,24 @@ const startServer = async () => {
     await connectRedis(); // ✅ Redis connected
 
     // ✅ Middleware setup
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://liquid-dms-admin-panel.vercel.app',
+    ];
+
     app.use(
       cors({
-        origin: 'https://liquid-dms-admin-panel.vercel.app',
+        origin: function (origin, callback) {
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        },
         credentials: true,
       })
     );
+
     app.use(cookieParser());
     app.use(getSessionMiddleware());
     app.use(
