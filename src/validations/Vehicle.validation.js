@@ -533,6 +533,25 @@ export const addVehiclePreviousOwnerSchema = Joi.object({
     MSRP: Joi.number().min(0).optional(),
   }).optional(),
 });
+export const addVehicleNotesSchema = Joi.object({
+  OtherNotes: Joi.object({
+    NoteCategory: Joi.string()
+      .valid(
+        'Buyer Inquiry',
+        'Follow-up',
+        'New Lead',
+        'Call Scheduled',
+        'Showroom Visit'
+      )
+      .optional()
+      .messages({
+        'any.only': errorConstants.VEHICLE.NOTE_CATEGORY_INVALID,
+      }),
+    NoteTitle: optionalString('NOTE_TITLE'),
+    NoteDetails: optionalString('NOTE_DETAILS'),
+  }).optional(),
+});
+
 export const editVehicleSchema = addVehicleSchema.fork(
   Object.keys(addVehicleSchema.describe().keys),
   (schema) => schema.optional()

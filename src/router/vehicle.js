@@ -5,6 +5,11 @@ import {
   addVehicleCost,
   addVehicleSales,
   addVehiclePreviousOwner,
+  addVehicleNotes,
+  markVehicleAsCompleted,
+  getAllVehicles,
+  getVehicleById,
+  deleteVehicleById,
 } from '../controllers/vehicleController.js';
 import upload from '../middleware/upload.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
@@ -39,4 +44,15 @@ router.put(
   upload.fields([{ name: 'transferDocument', maxCount: 1 }]),
   addVehiclePreviousOwner
 );
+router.put(
+  '/notes',
+  verifyToken,
+  upload.fields([{ name: 'uploadedNotes', maxCount: 1 }]),
+  addVehicleNotes
+);
+router.patch('/complete', verifyToken, markVehicleAsCompleted);
+router.get('/vehicles', verifyToken, getAllVehicles);
+router.get('/vehiclebyId', verifyToken, getVehicleById);
+router.delete('/deletebyId', verifyToken, deleteVehicleById);
+
 export default router;

@@ -8,11 +8,11 @@ import {
 } from './auth.validation.js';
 import {
   addVehicleSchema,
-  vehicleIdQuerySchema,
   editVehicleSchema,
   AddVehicleCostSchema,
   AddVehicleSalesSchema,
   addVehiclePreviousOwnerSchema,
+  addVehicleNotesSchema,
 } from './Vehicle.validation.js';
 import {
   addVendorSchema,
@@ -34,21 +34,22 @@ const validationSchemas = {
   //Vendor
   '/vendor/add-vendor': { POST: addVendorSchema },
   '/vendor/vendors': { GET: null },
-  '/vendor': { GET: getVendorByIdSchema },
+  '/vendor/vendorbyId': { GET: getVendorByIdSchema },
   '/vendor/edit-vendor': { PUT: editVendorSchema },
   '/vendor/delete-vendor': { DELETE: getVendorByIdSchema },
   //Vehicle
   '/vehicle/add-vehicle': { POST: addVehicleSchema },
-  '/vehicle/edit': {
-    PUT: {
-      query: vehicleIdQuerySchema,
-      body: editVehicleSchema,
-    },
-  },
+  '/vehicle/edit': { PUT: editVehicleSchema },
   '/vehicle/Cost': { PUT: AddVehicleCostSchema },
   '/vehicle/Sales': { PUT: AddVehicleSalesSchema },
   '/vehicle/previous-owner': { PUT: addVehiclePreviousOwnerSchema },
+  '/vehicle/notes': { POST: addVehicleNotesSchema },
+
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
+  '/vehicle/complete': { PATCH: null },
+  '/vehicle/vehicles': { GET: null },
+  '/vehicle/vehiclebyId': { GET: null },
+  '/vehicle/deletebyId': { DELETE: null },
 };
 
 export { validationSchemas };

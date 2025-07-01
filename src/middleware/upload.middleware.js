@@ -67,6 +67,15 @@ const fileFilter = (req, file, cb) => {
         false
       );
     }
+  } else if (field === 'uploadedNotes') {
+    if ([...imageTypes, ...pdfTypes].includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error('Only image or PDF files are allowed for transfer document'),
+        false
+      );
+    }
   } else {
     cb(new Error(`Unexpected upload field: ${field}`), false);
   }

@@ -428,13 +428,23 @@ const vehicleSchema = new mongoose.Schema(
     },
     // Add transferDocument here if needed, e.g.:
     OtherNotes: {
-      NoteCategory: String,
+      NoteCategory: {
+        type: String,
+        enum: [
+          'Buyer Inquiry',
+          'Follow-up',
+          'New Lead',
+          'Call Scheduled',
+          'Showroom Visit',
+        ],
+      },
 
       NoteTitle: String,
 
       NoteDetails: String,
     },
     uploadedNotes: String,
+    markAsCompleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

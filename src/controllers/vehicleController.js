@@ -10,10 +10,12 @@ import {
   vehicleIdQuerySchema,
   AddVehicleSalesSchema,
   addVehiclePreviousOwnerSchema,
+  addVehicleNotesSchema,
 } from '../validations/Vehicle.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import mongoose from 'mongoose';
+import paginate from '../utils/paginate.js';
 
 // 🔧 Convert file path to public URL
 const toPublicUrl = (filePath) => {
@@ -152,7 +154,7 @@ export const addVehicle = async (req, res, next) => {
         vehicle: responseVehicle,
         billofsales: newVehicle.vendor?.billofsales || '',
       },
-      201,
+      200,
       'Vehicle registered successfully',
       res
     );
@@ -416,6 +418,223 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
     next(new ApiError(error.message, 500));
   }
 };
+export const addVehicleNotes = async (req, res, next) => {
+  try {
+    logger.info('📝 Vehicle notes update request received');
+
+    // 1. Validate vehicle ID from query
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    const { error: bodyError, value } = addVehicleNotesSchema.validate(
+      req.body,
+      { abortEarly: false }
+    );
+
+    if (bodyError) {
+      logger.warn({
+        message: bodyError.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(bodyError.details[0].message, 400));
+    }
+
+    // 3. Construct update object for nested OtherNotes
+    const updateData = {};
+    if (value.OtherNotes) {
+      Object.keys(value.OtherNotes).forEach((key) => {
+        updateData[`OtherNotes.${key}`] = value.OtherNotes[key];
+      });
+    }
+
+    // 4. Handle file upload for uploadedNotes (single file expected)
+    if (req.files && req.files.uploadedNotes) {
+      updateData.uploadedNotes = toPublicUrl(req.files.uploadedNotes[0].path);
+    }
+
+    // 5. Update the vehicle
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+
+    if (!updatedVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 6. Reorder vehicle object for response
+    const vehicleObject = updatedVehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    // 7. Respond
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle notes updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Update vehicle notes error:', error);
+    next(new ApiError(error.message, 500));
+  }
+};
+export const markVehicleAsCompleted = async (req, res, next) => {
+  try {
+    logger.info('✅ Mark vehicle as completed request received');
+
+    // 1. Validate vehicle ID from query
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    // 2. Update markAsCompleted field
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      { $set: { markAsCompleted: true } },
+      { new: true, runValidators: true }
+    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+
+    if (!updatedVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 4. Format response
+    const vehicleObject = updatedVehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle marked as completed successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Mark vehicle as completed error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+export const getAllVehicles = async (req, res, next) => {
+  try {
+    logger.info('📄 Fetching all completed vehicles');
+
+    const { page = 1, limit = 10 } = req.query;
+    const { skip, limit: parsedLimit } = paginate(page, limit);
+
+    // 🚙 Fetch only vehicles that are marked as completed
+    const vehicles = await Vehicle.find({ markAsCompleted: true })
+      .populate({ path: 'vendor', select: '-taxIdOrSSN' })
+      .skip(skip)
+      .limit(parsedLimit)
+      .sort({ createdAt: -1 });
+
+    const total = await Vehicle.countDocuments({ markAsCompleted: true });
+
+    const response = {
+      totalVehicles: total,
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / parsedLimit),
+      vehicles,
+    };
+
+    return SuccessHandler(
+      response,
+      200,
+      'Completed vehicles fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Error fetching completed vehicles:', error);
+    return next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+export const getVehicleById = async (req, res, next) => {
+  try {
+    logger.info('🔍 Get vehicle by ID request received');
+
+    // 1. Validate vehicle ID
+    const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
+    if (queryError) {
+      return next(new ApiError(queryError.details[0].message, 400));
+    }
+    const { id: vehicleId } = req.query;
+
+    // 2. Fetch vehicle
+    const vehicle = await Vehicle.findById(vehicleId).populate({
+      path: 'vendor',
+    });
+
+    if (!vehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 3. Prepare response
+    const vehicleObject = vehicle.toObject();
+    const responseVehicle = {
+      _id: vehicleObject._id,
+      stockId: vehicleObject.stockId,
+      ...vehicleObject,
+    };
+
+    return SuccessHandler(
+      { vehicle: responseVehicle },
+      200,
+      'Vehicle fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get vehicle by ID error:', error);
+    next(new ApiError(error.message, 500));
+  }
+};
+export const deleteVehicleById = async (req, res, next) => {
+  try {
+    logger.info('🗑️ Delete vehicle by ID request received');
+
+    // 1. Validate query
+    const { error } = vehicleIdQuerySchema.validate(req.query);
+    if (error) {
+      return next(new ApiError(error.details[0].message, 400));
+    }
+
+    const { id: vehicleId } = req.query;
+
+    // 2. Delete the vehicle
+    const deletedVehicle = await Vehicle.findByIdAndDelete(vehicleId);
+
+    if (!deletedVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    return SuccessHandler(null, 200, 'Vehicle deleted successfully', res);
+  } catch (error) {
+    logger.error('❌ Delete vehicle error:', error);
+    next(new ApiError(error.message, 500));
+  }
+};
 
 export const editVehicle = async (req, res, next) => {
   try {
@@ -550,7 +769,7 @@ export const editVehicle = async (req, res, next) => {
     });
 
     await existingVehicle.save();
-    await existingVehicle.populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    await existingVehicle.populate({ path: 'vendor' });
 
     // Reorder vehicle object for response
     const vehicleObject = existingVehicle.toObject();

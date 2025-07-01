@@ -71,6 +71,7 @@ const errorConstants = {
   //
   VEHICLE: {
     // 🔹 Basic Details
+    NOTE_CATEGORY_INVALID: 'Note category is invalid.',
     MAKE_MUST_BE_STRING: 'Make must be a string.',
     MAKE_REQUIRED: 'Make is required.',
     MODEL_MUST_BE_STRING: 'Model must be a string.',
@@ -251,6 +252,9 @@ const errorConstants = {
     FEATURED_IMAGE_URL_REQUIRED: 'Featured image URL is required.',
     IMAGE_URL_INVALID: 'Image URL is invalid.',
     IMAGE_URLS_MUST_BE_ARRAY: 'Image URLs must be an array.',
+    NOTE_CATEGORY_MUST_BE_STRING: 'Note category must be a string.',
+    NOTE_TITLE_MUST_BE_STRING: 'Note title must be a string.',
+    NOTE_DETAILS_MUST_BE_STRING: 'Note details must be a string.',
 
     // 🔹 Misc
     FEATURES_MUST_BE_ARRAY: 'Features must be an array.',
