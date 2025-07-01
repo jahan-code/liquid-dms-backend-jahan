@@ -22,10 +22,11 @@ const startServer = async () => {
     // ✅ Middleware setup
     app.use(
       cors({
-        origin: '*',
+        origin: 'https://liquid-dms-admin-panel.vercel.app',
         credentials: true,
       })
     );
+
     app.use(cookieParser());
     app.use(getSessionMiddleware());
     app.use(
