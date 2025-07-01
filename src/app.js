@@ -18,9 +18,11 @@ const app = express();
 const startServer = async () => {
   try {
     await connectRedis(); // ✅ Redis connected
-
+    app.set('trust proxy', 1);
     // ✅ Middleware setup
-    app.use(getSessionMiddleware());
+    const sessionMiddleware = await getSessionMiddleware(); // ✅ wait for the middleware
+    app.use(sessionMiddleware); // ✅ apply it to Express
+
     app.use(
       cors({
         origin: 'https://liquid-dms-admin-panel.vercel.app',
