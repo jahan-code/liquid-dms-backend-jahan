@@ -27,6 +27,10 @@ const startServer = async () => {
       })
     );
     app.use(cookieParser());
+    app.use((req, res, next) => {
+      console.log('🍪 Incoming cookies:', req.headers.cookie);
+      next();
+    });
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(
@@ -43,10 +47,6 @@ const startServer = async () => {
       res.json({
         message: 'OK',
       });
-    });
-    app.use((req, res, next) => {
-      console.log('🍪 Incoming cookies:', req.headers.cookie);
-      next();
     });
 
     app.use('/', router);
