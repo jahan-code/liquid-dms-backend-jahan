@@ -20,7 +20,8 @@ const startServer = async () => {
     await connectRedis(); // ✅ Redis connected
 
     // ✅ Middleware setup
-    app.use(
+    app.options(
+      '*',
       cors({
         origin: 'https://liquid-dms-admin-panel.vercel.app',
         credentials: true,
