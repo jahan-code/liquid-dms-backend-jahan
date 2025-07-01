@@ -33,7 +33,7 @@ const startServer = async () => {
       express.static(path.join(process.cwd(), 'src', 'uploads'))
     );
     // ✅ Middleware setup
-    const sessionMiddleware = getSessionMiddleware(); // ✅ wait for the middleware
+    const sessionMiddleware = await getSessionMiddleware(); // ✅ wait for the middleware
     app.use(sessionMiddleware); // ✅ apply it to Express
 
     app.use(requestValidator);

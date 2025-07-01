@@ -57,6 +57,11 @@ const register = async (req, res, next) => {
     await new Promise((resolve, reject) =>
       req.session.save((err) => (err ? reject(err) : resolve()))
     );
+    console.log('✅ Session set:', {
+      id: req.sessionID,
+      email: req.session.email,
+      context: req.session.otpContext,
+    });
 
     try {
       await sendEmail({
@@ -346,6 +351,12 @@ const forgotPassword = async (req, res, next) => {
 };
 const verifyOtp = async (req, res, next) => {
   try {
+    console.log('📥 Session received:', {
+      id: req.sessionID,
+      email: req.session.email,
+      context: req.session.otpContext,
+    });
+
     const { error, value } = verifyOtpSchema.validate(req.body, {
       abortEarly: false,
     });
