@@ -27,12 +27,17 @@ const deleteOTP = async (email) => {
 };
 
 const verifyOTP = async (email, inputOtp) => {
-  const stored = await getOTP(email);
-  if (!stored) return { valid: false, reason: 'OTP expired or not found' };
-  if (stored !== inputOtp.toString())
-    return { valid: false, reason: 'Invalid OTP' };
-  await deleteOTP(email);
-  return { valid: true };
+  try {
+    const stored = await getOTP(email);
+    if (!stored) return { valid: false, reason: 'OTP expired or not found' };
+    if (stored !== inputOtp.toString())
+      return { valid: false, reason: 'Invalid OTP' };
+    await deleteOTP(email);
+    return { valid: true };
+  } catch (err) {
+    console.error('❌ Redis OTP verification failed:', err);
+    throw new Error('OTP verification failed');
+  }
 };
 
 const trackRequest = async (email) => {
