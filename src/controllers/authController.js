@@ -54,9 +54,17 @@ const register = async (req, res, next) => {
     req.session.otpContext = 'register';
     req.session.otpVerified = false;
     req.session.expiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
-    await new Promise((resolve, reject) =>
-      req.session.save((err) => (err ? reject(err) : resolve()))
-    );
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          reject(err);
+        } else {
+          console.log('Session saved successfully');
+          resolve();
+        }
+      });
+    });
 
     try {
       await sendEmail({
