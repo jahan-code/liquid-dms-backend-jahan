@@ -10,6 +10,7 @@ const generateOTP = () => {
 const setOTP = async (email, otp) => {
   const redis = getRedisClient(); // ✅ move inside
   const key = OTP_PREFIX + email.toLowerCase();
+  console.log(`🔐 Saving OTP ${otp} to Redis with key: ${key}`);
   await redis.setEx(key, 120, otp); // expire in 120 seconds
 };
 
