@@ -348,6 +348,9 @@ const verifyOtp = async (req, res, next) => {
     if (error) {
       return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
     }
+    console.log('Received body:', req.body);
+    console.log('Session data:', req.session);
+
     const { otp } = value;
     const email = req.session?.email;
     const context = req.session?.otpContext;
