@@ -44,6 +44,11 @@ const startServer = async () => {
         message: 'OK',
       });
     });
+    app.use((req, res, next) => {
+      console.log('🍪 Incoming cookies:', req.headers.cookie);
+      next();
+    });
+
     app.use('/', router);
     app.use(ApiErrorMiddleware);
   } catch (err) {
