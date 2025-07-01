@@ -354,6 +354,9 @@ const verifyOtp = async (req, res, next) => {
     }
     console.log('Received body:', req.body);
     console.log('Session data:', req.session);
+    console.log('Session check — email:', req.session.email);
+    console.log('Session check — otpContext:', req.session.otpContext);
+    console.log('Session check — expiresAt:', req.session.expiresAt);
 
     const { otp } = value;
     const email = req.session?.email;
