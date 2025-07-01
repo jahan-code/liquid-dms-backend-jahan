@@ -422,7 +422,7 @@ const verifyOtp = async (req, res, next) => {
       res
     );
   } catch (error) {
-    console.error('❌ OTP verification error:', error);
+    console.log('❌ OTP verification error:', error);
     logger.error({
       message: error.message,
       timestamp: new Date().toISOString(),
