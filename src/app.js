@@ -26,6 +26,13 @@ const startServer = async () => {
         credentials: true,
       })
     );
+    app.options(
+      '*',
+      cors({
+        origin: 'https://liquid-dms-admin-panel.vercel.app',
+        credentials: true,
+      })
+    );
 
     app.use(cookieParser());
     app.use(getSessionMiddleware());
