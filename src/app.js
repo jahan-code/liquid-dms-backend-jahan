@@ -20,19 +20,14 @@ const startServer = async () => {
     await connectRedis(); // ✅ Redis connected
 
     // ✅ Middleware setup
-    app.use(
-      cors({
-        origin: 'https://liquid-dms-admin-panel.vercel.app',
-        credentials: true,
-      })
-    );
-    app.options(
-      '*',
-      cors({
-        origin: 'https://liquid-dms-admin-panel.vercel.app',
-        credentials: true,
-      })
-    );
+    const corsOptions = {
+      origin: 'https://liquid-dms-admin-panel.vercel.app',
+      credentials: true,
+    };
+
+    // 🚨 MUST COME FIRST
+    app.use(cors(corsOptions));
+    app.options('*', cors(corsOptions));
 
     app.use(cookieParser());
     app.use(getSessionMiddleware());
