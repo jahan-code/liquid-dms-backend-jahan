@@ -27,13 +27,13 @@ const startServer = async () => {
       })
     );
     app.use(cookieParser());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
     app.use(getSessionMiddleware());
     app.use(
       '/uploads',
       express.static(path.join(process.cwd(), 'src', 'uploads'))
     );
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
 
     app.use(requestValidator);
 
