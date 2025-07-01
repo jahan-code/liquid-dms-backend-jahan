@@ -12,7 +12,7 @@ import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
 import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
 import cookieParser from 'cookie-parser';
-import sessionFromHeader from './middleware/sessionFromHeader.js';
+
 const app = express();
 
 const startServer = async () => {
@@ -22,13 +22,12 @@ const startServer = async () => {
     // ✅ Middleware setup
     app.use(
       cors({
-        origin: 'http://localhost:3000',
+        origin: 'https://liquid-dms-admin-panel.vercel.app',
         credentials: true,
       })
     );
     app.use(cookieParser());
     app.use(getSessionMiddleware());
-    app.use(sessionFromHeader(connectRedis()));
     app.use(
       '/uploads',
       express.static(path.join(process.cwd(), 'src', 'uploads'))

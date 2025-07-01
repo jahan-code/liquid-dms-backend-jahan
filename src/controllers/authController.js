@@ -87,8 +87,7 @@ const register = async (req, res, next) => {
       userResponse,
       200,
       'User registered successfully',
-      res,
-      { sessionID: req.sessionID } // ✅ sessionID passed in options object
+      res
     );
   } catch (error) {
     logger.error({
@@ -325,8 +324,7 @@ const forgotPassword = async (req, res, next) => {
       { email: value.email.toLowerCase() },
       200,
       'Password reset OTP sent successfully',
-      res,
-      { sessionID: req.sessionID }
+      res
     );
   } catch (error) {
     req.session.destroy(); // Clean up session on error
