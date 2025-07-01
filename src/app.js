@@ -19,14 +19,10 @@ const startServer = async () => {
   try {
     await connectRedis(); // ✅ Redis connected
     app.set('trust proxy', 1);
-    // ✅ Middleware setup
-    const sessionMiddleware = await getSessionMiddleware(); // ✅ wait for the middleware
-    app.use(sessionMiddleware); // ✅ apply it to Express
 
     app.use(
       cors({
         origin: 'https://liquid-dms-admin-panel.vercel.app',
-        credentials: true,
       })
     );
     app.use(cookieParser());
@@ -36,6 +32,9 @@ const startServer = async () => {
       '/uploads',
       express.static(path.join(process.cwd(), 'src', 'uploads'))
     );
+    // ✅ Middleware setup
+    const sessionMiddleware = getSessionMiddleware(); // ✅ wait for the middleware
+    app.use(sessionMiddleware); // ✅ apply it to Express
 
     app.use(requestValidator);
 
