@@ -9,35 +9,41 @@ const REQ_WAIT_MS = 30 * 1000; // 30 seconds between requests
 const MAX_ATTEMPTS = 3; // Max OTP requests per window
 const LOCKOUT_MS = 60 * 1000; // 1-minute lockout after max attempts
 
-// Helper functions
-const getOTPKey = (email) => `${OTP_PREFIX}${email.toLowerCase()}`;
+// Type-aware Redis key for OTP (register, forgot, etc.)
+const getOTPKey = (email, type) =>
+  `${OTP_PREFIX}${type}:${email.toLowerCase()}`;
+
 const getReqKey = (email) => `${REQ_PREFIX}${email.toLowerCase()}`;
 
+// Stronger OTP Generator (4-digit for now)
 const generateOTP = () => {
-  // Use a stronger 6-digit alphanumeric OTP
   return Math.floor(1000 + Math.random() * 9000).toString();
 };
 
-const setOTP = async (email, otp) => {
+// Set OTP for a specific purpose
+const setOTP = async (email, otp, type) => {
   const redis = getRedisClient();
-  const key = getOTPKey(email);
+  const key = getOTPKey(email, type);
   await redis.setEx(key, OTP_EXPIRY_SECONDS, otp);
 };
 
-const getOTP = async (email) => {
+// Get OTP for verification
+const getOTP = async (email, type) => {
   const redis = getRedisClient();
-  const key = getOTPKey(email);
+  const key = getOTPKey(email, type);
   return await redis.get(key);
 };
 
-const deleteOTP = async (email) => {
+// Delete OTP after use
+const deleteOTP = async (email, type) => {
   const redis = getRedisClient();
-  const key = getOTPKey(email);
+  const key = getOTPKey(email, type);
   await redis.del(key);
 };
 
-const verifyOTP = async (email, inputOtp) => {
-  const storedOtp = await getOTP(email);
+// Verify OTP with strict type enforcement
+const verifyOTP = async (email, inputOtp, type) => {
+  const storedOtp = await getOTP(email, type);
   if (!storedOtp) {
     return {
       valid: false,
@@ -45,10 +51,17 @@ const verifyOTP = async (email, inputOtp) => {
       message: 'OTP expired or not found',
     };
   }
+
   if (storedOtp !== inputOtp.toString()) {
-    return { valid: false, code: 'OTP_INVALID', message: 'Invalid OTP' };
+    return {
+      valid: false,
+      code: 'OTP_INVALID',
+      message: 'Invalid OTP',
+    };
   }
-  await deleteOTP(email);
+
+  await deleteOTP(email, type);
+
   return {
     valid: true,
     code: 'OTP_VALID',
@@ -56,12 +69,12 @@ const verifyOTP = async (email, inputOtp) => {
   };
 };
 
+// OTP rate-limiting per user (email)
 const trackRequest = async (email) => {
   const redis = getRedisClient();
   const key = getReqKey(email);
   const now = Date.now();
 
-  // Fetch or initialize request record
   const data = await redis.get(key);
   let record = data ? JSON.parse(data) : { attempts: [], lockoutUntil: null };
 
@@ -70,7 +83,7 @@ const trackRequest = async (email) => {
     record = { attempts: [], lockoutUntil: null };
   }
 
-  // Check if locked out
+  // Lockout still in effect
   if (record.lockoutUntil && now < record.lockoutUntil) {
     const remainingMs = record.lockoutUntil - now;
     return {
@@ -80,12 +93,12 @@ const trackRequest = async (email) => {
     };
   }
 
-  // Filter attempts within the last 15 minutes
+  // Filter only recent attempts
   record.attempts = record.attempts.filter(
     (time) => now - time < REQ_WINDOW_SECONDS * 1000
   );
 
-  // Check wait time between requests
+  // Check cooldown between attempts
   const lastAttempt = record.attempts.at(-1);
   if (lastAttempt && now - lastAttempt < REQ_WAIT_MS) {
     const remainingMs = REQ_WAIT_MS - (now - lastAttempt);
@@ -96,7 +109,7 @@ const trackRequest = async (email) => {
     };
   }
 
-  // Enforce max attempts
+  // Lockout after max attempts
   if (record.attempts.length >= MAX_ATTEMPTS) {
     record.lockoutUntil = now + LOCKOUT_MS;
     await redis.setEx(key, REQ_WINDOW_SECONDS, JSON.stringify(record));
@@ -110,7 +123,11 @@ const trackRequest = async (email) => {
   // Allow request
   record.attempts.push(now);
   await redis.setEx(key, REQ_WINDOW_SECONDS, JSON.stringify(record));
-  return { allowed: true, code: 'ALLOWED', message: 'OTP request allowed' };
+  return {
+    allowed: true,
+    code: 'ALLOWED',
+    message: 'OTP request allowed',
+  };
 };
 
 export default {
