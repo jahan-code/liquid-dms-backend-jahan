@@ -28,8 +28,7 @@ const validationSchemas = {
   '/auth/forget-password': { POST: forgotPasswordSchema },
   '/auth/verify-otp': { POST: verifyOtpSchema },
   '/auth/reset-password': { POST: resetPasswordSchema },
-  '/auth/resend-otp': { POST: resendOtpSchema },
-  '/auth/verify-forget-otp': { POST: verifyOtpSchema }, // Or a separate schema if different
+  '/auth/resend-otp': { POST: resendOtpSchema }, // Or a separate schema if different
   '/health': { health: { GET: null } },
 
   //Vendor
