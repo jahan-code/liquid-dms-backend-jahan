@@ -1,12 +1,9 @@
-// 📁 controllers/auth.controller.js
-
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import otpUtils from '../utils/Otp.js';
 import sendEmail from '../utils/sendEmail.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 
-// -------------------- Register --------------------
 const register = async (req, res, next) => {
   try {
     const { fullname, email, password } = req.body;
@@ -46,7 +43,6 @@ const register = async (req, res, next) => {
   }
 };
 
-// -------------------- Forgot Password --------------------
 const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -84,7 +80,6 @@ const forgotPassword = async (req, res, next) => {
   }
 };
 
-// -------------------- Unified OTP Verification --------------------
 const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
@@ -127,8 +122,6 @@ const verifyOtp = async (req, res, next) => {
     next(err);
   }
 };
-
-// -------------------- Unified Resend OTP --------------------
 const resendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -232,13 +225,11 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
-
-// -------------------- Export --------------------
 export default {
   register,
   forgotPassword,
-  verifyOtp, // unified for both flows
-  resendOtp, // unified for both flows
+  verifyOtp,
+  resendOtp,
   resetPassword,
   login,
 };
