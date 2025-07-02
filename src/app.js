@@ -26,9 +26,9 @@ const startServer = async () => {
         credentials: true,
       })
     );
+    app.use(cookieParser());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
-    app.use(cookieParser());
     const sessionMiddleware = await getSessionMiddleware(); // ✅ wait for the middleware
     app.use(sessionMiddleware); // ✅ apply it to Express
     app.use((req, res, next) => {
