@@ -35,7 +35,7 @@ const register = async (req, res, next) => {
       userResponse,
 
       200,
-      'User logged in successfully',
+      'User registed successfully',
       res
     );
   } catch (err) {
