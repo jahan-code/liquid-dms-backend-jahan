@@ -225,7 +225,7 @@ const login = async (req, res, next) => {
     return SuccessHandler(
       userResponse,
       200,
-      'User logged in successfully',
+      'User logged in successfully.',
       res
     );
   } catch (err) {
