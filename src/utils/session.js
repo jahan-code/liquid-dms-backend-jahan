@@ -12,6 +12,7 @@ export const getSessionMiddleware = () => {
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
+
       httpOnly: true,
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       maxAge: 24 * 60 * 60 * 1000,

@@ -16,6 +16,7 @@ const errorConstants = {
   },
   // 🔹 Auth Errors
   AUTHENTICATION: {
+    INVALID_OTP: 'Invalid OTP.',
     TOKEN_INVALID: 'Invalid token. Please log in again.',
     TOKEN_MISSING: 'Token missing. Please log in again.',
     UNKNOWN_CONTEXT: 'Unknown OTP context.',
