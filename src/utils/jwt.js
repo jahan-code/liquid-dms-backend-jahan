@@ -5,13 +5,13 @@ const generateAndSetJwtCookie = (user, res) => {
   // Generate JWT
 
   console.log('JwT Scecret:', process.env.JWT_SECRET);
-  const jwtToken = jwt.sign(
+  const token = jwt.sign(
     { userId: user._id, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: '7d' } // Token expires in 1 hour
   );
   // Set cookie with JWT
-  const token = res.cookie('jwt', jwtToken, {
+  res.cookie('jwt', token, {
     httpOnly: true, // Prevents client-side JavaScript access
     secure: process.env.NODE_ENV === 'production', // Use secure in production
     sameSite: 'strict', // Protects against CSRF
