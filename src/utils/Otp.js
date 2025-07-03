@@ -5,9 +5,9 @@ const OTP_PREFIX = 'otp:';
 const REQ_PREFIX = 'otp-req:';
 const OTP_EXPIRY_SECONDS = 120; // 2 minutes
 const REQ_WINDOW_SECONDS = 15 * 60; // 15 minutes
-const REQ_WAIT_MS = 30 * 1000; // 30 seconds between requests
+const REQ_WAIT_MS = 2 * 60 * 1000; // 2 minutes between requests
 const MAX_ATTEMPTS = 3; // Max OTP requests per window
-const LOCKOUT_MS = 60 * 1000; // 1-minute lockout after max attempts
+const LOCKOUT_MS = 15 * 60 * 1000; // 1-minute lockout after max attempts
 
 // Type-aware Redis key for OTP (register, forgot, etc.)
 const getOTPKey = (email, type) =>
