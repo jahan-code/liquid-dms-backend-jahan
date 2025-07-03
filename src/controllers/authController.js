@@ -98,7 +98,7 @@ const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
     if (!user) {
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_VERIFIED, 403)
@@ -187,7 +187,7 @@ const resetPassword = async (req, res, next) => {
   try {
     const { email, newPassword } = req.body;
 
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
     if (!user)
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
