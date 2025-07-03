@@ -181,13 +181,15 @@ const resetPassword = async (req, res, next) => {
     const { email, newPassword } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user)
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
+      );
 
     if (!user.isResetOtpVerified)
-      return res
-        .status(403)
-        .json({ message: 'Please verify OTP before resetting password.' });
-
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.OTP_NOT_VERIFIED, 403)
+      );
     user.password = newPassword;
     user.isResetOtpVerified = false;
     await user.save();
@@ -213,13 +215,14 @@ const login = async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password)))
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.INVALID_CREDENTIALS, 404)
+      );
 
     if (!user.isVerified)
-      return res
-        .status(403)
-        .json({ message: 'Please verify your email first.' });
-
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_VERIFIED, 403)
+      );
     const userResponse = {
       email: user.email,
       fullname: user.fullname,

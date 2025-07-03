@@ -16,6 +16,8 @@ const errorConstants = {
   },
   // 🔹 Auth Errors
   AUTHENTICATION: {
+    INVALID_CREDENTIALS: 'Invalid email or password.',
+    OTP_NOT_VERIFIED: 'Please verify your OTP before proceeding.',
     INVALID_OTP: 'Invalid OTP.',
     TOKEN_INVALID: 'Invalid token. Please log in again.',
     TOKEN_MISSING: 'Token missing. Please log in again.',
@@ -28,7 +30,7 @@ const errorConstants = {
     OTP_INVALID_LENGTH: 'OTP must be 4 digits',
     OTP_INVALID_FORMAT: 'OTP must contain only digits',
     OTP_REQUIRED: 'OTP is required',
-    USER_NOT_VERIFIED: 'User not verified. Please verify your email first.',
+    USER_NOT_VERIFIED: 'Please verify your email first.',
     USER_NOT_FOUND: 'User not found.',
     EMAIL_ALREADY_IN_USE: 'The email is already in use.',
     EMAIL_MUST_BE_STRING: 'The email must be a string.',
