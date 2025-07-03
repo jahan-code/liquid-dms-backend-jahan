@@ -50,7 +50,7 @@ const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
@@ -63,8 +63,12 @@ const forgotPassword = async (req, res, next) => {
       );
     }
 
-    const track = await otpUtils.trackRequest(email);
-    if (!track.allowed) return res.status(429).json({ message: track.message });
+    const isFirstTime = !(await otpUtils.hasRequestedBefore(email));
+    if (!isFirstTime) {
+      const track = await otpUtils.trackRequest(email);
+      if (!track.allowed)
+        return res.status(429).json({ message: track.message });
+    }
 
     const otp = otpUtils.generateOTP();
     await otpUtils.setOTP(email, otp, 'forgot');
@@ -94,7 +98,7 @@ const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_VERIFIED, 403)
@@ -139,7 +143,7 @@ const resendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
@@ -183,7 +187,7 @@ const resetPassword = async (req, res, next) => {
   try {
     const { email, newPassword } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user)
       return next(
         new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
@@ -216,7 +220,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user || !(await user.comparePassword(password)))
       return next(
         new ApiError(errorConstants.AUTHENTICATION.INVALID_CREDENTIALS, 404)

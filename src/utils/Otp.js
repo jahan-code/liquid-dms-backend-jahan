@@ -137,6 +137,13 @@ const clearOtpCache = async (email) => {
   await redis.del(`otp:forgot:${emailKey}`);
   await redis.del(`otp-req:${emailKey}`);
 };
+const hasRequestedBefore = async (email) => {
+  const redis = getRedisClient();
+  const key = getReqKey(email);
+  const data = await redis.get(key);
+  return !!data; // true if exists
+};
+
 export default {
   generateOTP,
   setOTP,
@@ -145,4 +152,5 @@ export default {
   verifyOTP,
   trackRequest,
   clearOtpCache,
+  hasRequestedBefore,
 };
