@@ -4,7 +4,7 @@ import errorConstants from '../utils/errors.js';
 
 export const verifyToken = (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    const token = req.headers?.authorization?.replace('Bearer ', '');
 
     if (!token) {
       return next(
