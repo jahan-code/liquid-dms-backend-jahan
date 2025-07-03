@@ -16,8 +16,7 @@ const register = async (req, res, next) => {
         new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
       );
     }
-    const track = await otpUtils.trackRequest(email);
-    if (!track.allowed) return res.status(429).json({ message: track.message });
+    await otpUtils.clearOtpCache(email);
 
     const otp = otpUtils.generateOTP();
     await otpUtils.setOTP(email, otp, 'register');
@@ -141,7 +140,11 @@ const resendOtp = async (req, res, next) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
+      );
+    }
 
     const type = !user.isVerified ? 'register' : 'forgot';
     const subject =

@@ -48,7 +48,7 @@ const verifyOTP = async (email, inputOtp, type) => {
     return {
       valid: false,
       code: 'OTP_EXPIRED',
-      message: 'OTP expired or not found',
+      message: 'Your OTP has expired. Please request a new one.',
     };
   }
 
@@ -129,7 +129,14 @@ const trackRequest = async (email) => {
     message: 'OTP request allowed',
   };
 };
+const clearOtpCache = async (email) => {
+  const redis = getRedisClient();
+  const emailKey = email.toLowerCase();
 
+  await redis.del(`otp:register:${emailKey}`);
+  await redis.del(`otp:forgot:${emailKey}`);
+  await redis.del(`otp-req:${emailKey}`);
+};
 export default {
   generateOTP,
   setOTP,
@@ -137,4 +144,5 @@ export default {
   deleteOTP,
   verifyOTP,
   trackRequest,
+  clearOtpCache,
 };
