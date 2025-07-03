@@ -220,14 +220,13 @@ const login = async (req, res, next) => {
         .status(403)
         .json({ message: 'Please verify your email first.' });
 
-    const token = generateAndSetJwtCookie(userResponse, res); // ✅ pass userResponse here
-    userResponse.token = token;
     const userResponse = {
       email: user.email,
       fullname: user.fullname,
-      token,
       vendors: user.vendors, // Assuming vendorId is part of the User model
     };
+    const token = generateAndSetJwtCookie(userResponse, res); // ✅ pass userResponse here
+    userResponse.token = token;
     return SuccessHandler(
       userResponse,
       200,
