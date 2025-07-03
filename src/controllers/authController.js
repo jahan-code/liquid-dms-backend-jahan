@@ -220,7 +220,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password)))
       return next(
         new ApiError(errorConstants.AUTHENTICATION.INVALID_CREDENTIALS, 404)
