@@ -1,17 +1,21 @@
 import User from '../models/user.js';
-import jwt from 'jsonwebtoken';
+
 import otpUtils from '../utils/Otp.js';
 import sendEmail from '../utils/sendEmail.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
-
+import errorConstants from '../utils/errors.js';
+import ApiError from '../utils/ApiError.js';
+import generateAndSetJwtCookie from '../utils/jwt.js';
 const register = async (req, res, next) => {
   try {
     const { fullname, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists)
-      return res.status(400).json({ message: 'User already exists' });
-
+    const userExists = await User.findOne({ email }).lean();
+    if (userExists) {
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
+      );
+    }
     const track = await otpUtils.trackRequest(email);
     if (!track.allowed) return res.status(429).json({ message: track.message });
 
@@ -48,10 +52,17 @@ const forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user || !user.isVerified)
-      return res
-        .status(404)
-        .json({ message: 'Account not found or not verified' });
+    if (!user) {
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_FOUND, 404)
+      );
+    }
+
+    if (!user.isVerified) {
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_VERIFIED, 403)
+      );
+    }
 
     const track = await otpUtils.trackRequest(email);
     if (!track.allowed) return res.status(429).json({ message: track.message });
@@ -85,8 +96,11 @@ const verifyOtp = async (req, res, next) => {
     const { email, otp } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
+    if (!user) {
+      return next(
+        new ApiError(errorConstants.AUTHENTICATION.USER_NOT_VERIFIED, 403)
+      );
+    }
     const type = !user.isVerified ? 'register' : 'forgot';
     const result = await otpUtils.verifyOTP(email, otp, type);
 
@@ -206,9 +220,8 @@ const login = async (req, res, next) => {
         .status(403)
         .json({ message: 'Please verify your email first.' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
+    const token = generateAndSetJwtCookie(userResponse, res); // ✅ pass userResponse here
+    userResponse.token = token;
     const userResponse = {
       email: user.email,
       fullname: user.fullname,
