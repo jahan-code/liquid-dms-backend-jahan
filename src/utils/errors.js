@@ -353,6 +353,7 @@ const errorConstants = {
   },
   FLOOR_PLAN: {
     // 🔹 Company Details
+    FLOOR_PLAN_NOT_FOUND: 'Floor plan not found.',
     COMPANY_ALREADY_EXISTS:
       'A floor plan with this company name already exists.',
     FEE_NEGATIVE: ' Fee cannot be negative.',
@@ -424,7 +425,6 @@ const errorConstants = {
     ADDITIONAL_NOTES_MUST_BE_STRING: 'Additional notes must be a string.',
 
     // 🔹 General
-    FLOOR_PLAN_NOT_FOUND: 'Floor plan not found.',
     FLOOR_PLAN_CREATED: 'Floor plan created successfully.',
     FLOOR_PLAN_UPDATED: 'Floor plan updated successfully.',
     FLOOR_PLAN_DELETED: 'Floor plan deleted successfully.',

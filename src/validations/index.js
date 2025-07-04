@@ -53,6 +53,7 @@ const validationSchemas = {
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
   '/floorPlan': { GET: null },
   '/floorPlan/edit-floor': { PUT: null },
+  '/floorPlan/floors': { GET: null },
 };
 
 export { validationSchemas };

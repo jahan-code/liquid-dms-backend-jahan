@@ -97,7 +97,7 @@ export const editFloorPlan = async (req, res, next) => {
   try {
     logger.info('✏️ Edit floor plan request received');
 
-    const { id } = req.params;
+    const { id } = req.query;
 
     // Validate input
     const { error, value } = addFloorPlanSchema.validate(req.body, {
@@ -133,6 +133,44 @@ export const editFloorPlan = async (req, res, next) => {
     );
   } catch (error) {
     logger.error('❌ Edit floor plan error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+// ✅ Show All FloorPlans Controller
+export const showAllFloorPlans = async (req, res, next) => {
+  try {
+    logger.info('📄 Show all floor plans request received');
+
+    // 📦 Fetch all floor plans from the database
+    const allFloorPlans = await FloorPlan.find();
+
+    if (allFloorPlans.length === 0) {
+      logger.warn({
+        message: '❌ No floor plans found',
+        timestamp: new Date().toISOString(),
+      });
+      return next(
+        new ApiError(errorConstants.FLOOR_PLAN.FLOOR_PLAN_NOT_FOUND, 404)
+      );
+    }
+    const userResponse = allFloorPlans.map((plan) => ({
+      id: plan._id,
+      companyName: plan.CompanyDetails.companyName,
+    }));
+    // ✅ Send success response
+    return SuccessHandler(
+      userResponse,
+      200,
+      'All floor plans fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Show all floor plans error:', error);
     next(
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
