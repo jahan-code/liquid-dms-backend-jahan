@@ -9,4 +9,5 @@ router.use('/auth', auth);
 router.use('/vendor', vendor);
 router.use('/vehicle', vehicle);
 router.use('/floorPlan', floorPlan);
+
 export default router;

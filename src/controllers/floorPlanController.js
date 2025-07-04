@@ -61,3 +61,83 @@ export const addFloorPlan = async (req, res, next) => {
     );
   }
 };
+export const getFloorPlanById = async (req, res, next) => {
+  try {
+    logger.info('🔍 Get floor plan by ID request received');
+
+    const { id } = req.query;
+
+    const floorPlan = await FloorPlan.findById(id);
+
+    if (!floorPlan) {
+      logger.warn({
+        message: `❌ Floor plan not found for ID: ${id}`,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(errorConstants.FLOOR_PLAN.NOT_FOUND, 404));
+    }
+
+    return SuccessHandler(
+      floorPlan,
+      200,
+      'Floor plan fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get floor plan by ID error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+export const editFloorPlan = async (req, res, next) => {
+  try {
+    logger.info('✏️ Edit floor plan request received');
+
+    const { id } = req.params;
+
+    // Validate input
+    const { error, value } = addFloorPlanSchema.validate(req.body, {
+      abortEarly: false,
+    });
+    if (error) {
+      logger.warn({
+        message: error.details[0].message,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(error.details[0].message, 400));
+    }
+
+    const updatedFloorPlan = await FloorPlan.findByIdAndUpdate(
+      id,
+      { $set: value },
+      { new: true }
+    );
+
+    if (!updatedFloorPlan) {
+      logger.warn({
+        message: `❌ Floor plan not found for update with ID: ${id}`,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(errorConstants.FLOOR_PLAN.NOT_FOUND, 404));
+    }
+
+    return SuccessHandler(
+      updatedFloorPlan,
+      200,
+      'Floor plan updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Edit floor plan error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};

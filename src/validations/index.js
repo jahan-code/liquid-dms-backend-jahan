@@ -45,11 +45,14 @@ const validationSchemas = {
   '/vehicle/previous-owner': { PUT: addVehiclePreviousOwnerSchema },
   '/vehicle/notes': { POST: addVehicleNotesSchema },
 
-  '/floorPlan/add-floor': { POST: addFloorPlanSchema },
   '/vehicle/complete': { PATCH: null },
   '/vehicle/vehicles': { GET: null },
   '/vehicle': { GET: null },
   '/vehicle/deletebyId': { DELETE: null },
+  //FloorPlan
+  '/floorPlan/add-floor': { POST: addFloorPlanSchema },
+  '/floorPlan': { GET: null },
+  '/floorPlan/edit-floor': { PUT: null },
 };
 
 export { validationSchemas };
