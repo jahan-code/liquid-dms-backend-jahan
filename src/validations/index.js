@@ -20,6 +20,7 @@ import {
   getVendorByIdSchema,
 } from './Vendor.validation.js';
 import { addFloorPlanSchema } from './FloorPlan.validation.js';
+import { addCustomerSchema } from './Customer.validation.js';
 const validationSchemas = {
   // Authentication
 
@@ -54,6 +55,8 @@ const validationSchemas = {
   '/floorPlan': { GET: null },
   '/floorPlan/edit-floor': { PUT: null },
   '/floorPlan/floors': { GET: null },
+  //Customer
+  '/customer/add-customer': { POST: addCustomerSchema },
 };
 
 export { validationSchemas };

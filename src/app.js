@@ -22,7 +22,7 @@ const startServer = async () => {
 
     app.use(
       cors({
-        origin: 'https://liquid-dms-admin-panel.vercel.app',
+        origin: ['https://liquid-dms-admin-panel.vercel.app', 'localhost:3000'],
         credentials: true,
       })
     );
