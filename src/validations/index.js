@@ -34,7 +34,7 @@ const validationSchemas = {
   //Vendor
   '/vendor/add-vendor': { POST: addVendorSchema },
   '/vendor/vendors': { GET: null },
-  '/vendor/vendorbyId': { GET: getVendorByIdSchema },
+  '/vendor': { GET: getVendorByIdSchema },
   '/vendor/edit-vendor': { PUT: editVendorSchema },
   '/vendor/delete-vendor': { DELETE: getVendorByIdSchema },
   //Vehicle
@@ -48,7 +48,7 @@ const validationSchemas = {
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
   '/vehicle/complete': { PATCH: null },
   '/vehicle/vehicles': { GET: null },
-  '/vehicle/vehiclebyId': { GET: null },
+  '/vehicle': { GET: null },
   '/vehicle/deletebyId': { DELETE: null },
 };
 

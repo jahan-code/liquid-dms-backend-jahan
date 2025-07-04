@@ -52,7 +52,7 @@ router.put(
 );
 router.patch('/complete', verifyToken, markVehicleAsCompleted);
 router.get('/vehicles', verifyToken, getAllVehicles);
-router.get('/vehiclebyId', verifyToken, getVehicleById);
+router.get('/', verifyToken, getVehicleById);
 router.delete('/deletebyId', verifyToken, deleteVehicleById);
 
 export default router;
