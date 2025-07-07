@@ -3,12 +3,12 @@ import auth from './auth.js';
 import vendor from './vendor.js';
 import floorPlan from './floorPlan.js';
 import { Router } from 'express';
-import customer from '../models/customer.js';
+import customer from './customer.js';
 
 const router = Router();
 router.use('/auth', auth);
 router.use('/vendor', vendor);
 router.use('/vehicle', vehicle);
 router.use('/floorPlan', floorPlan);
-router.use('/Customer', customer);
+router.use('/customer', customer);
 export default router;

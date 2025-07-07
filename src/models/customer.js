@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 const CustomerSchema = new mongoose.Schema({
+  customerId: {
+    type: String,
+    unique: true,
+  },
   CustomerInformation: {
     firstName: {
       type: String,

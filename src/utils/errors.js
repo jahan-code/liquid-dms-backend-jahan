@@ -74,6 +74,8 @@ const errorConstants = {
   //
   VEHICLE: {
     // 🔹 Basic Details
+    TOW_CAPACITY_MUST_BE_NUMBER: 'Tow Capcity must be number',
+    TOW_CAPACITY_NEGATIVE: 'Tow Capacity cannot be negative.',
     NOTE_CATEGORY_INVALID: 'Note category is invalid.',
     MAKE_MUST_BE_STRING: 'Make must be a string.',
     MAKE_REQUIRED: 'Make is required.',
@@ -119,8 +121,6 @@ const errorConstants = {
     FUEL_TYPE_REQUIRED: 'Fuel type is required.',
     MPG_MUST_BE_STRING: 'MPG must be a string.',
     MPG_REQUIRED: 'MPG is required.',
-    TOW_CAPACITY_MUST_BE_STRING: 'Tow capacity must be a string.',
-    TOW_CAPACITY_REQUIRED: 'Tow capacity is required.',
     PASSENGERS_MUST_BE_STRING: 'Passenger count must be a string.',
     PASSENGERS_REQUIRED: 'Passenger count is required.',
     MILEAGE_MUST_BE_STRING: 'Mileage must be a string.',
@@ -212,7 +212,6 @@ const errorConstants = {
     FUEL_TYPE_INVALID: 'Fuel type is invalid.',
     MPG_MUST_BE_NUMBER: 'MPG must be a number.',
     MPG_NEGATIVE: 'MPG cannot be negative.',
-    TOW_CAPACITY_INVALID: 'Tow capacity format is invalid (e.g., "5,000 lbs").',
     PASSENGERS_MUST_BE_NUMBER: 'Passengers must be a number.',
     PASSENGERS_TOO_LOW: 'Too few passengers.',
     PASSENGERS_TOO_HIGH: 'Too many passengers.',

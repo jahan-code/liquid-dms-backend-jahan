@@ -53,7 +53,7 @@ export const addCustomerSchema = Joi.object({
     firstName: requiredString('FIRST_NAME'),
     middleName: optionalString('MIDDLE_NAME'),
     lastName: requiredString('LAST_NAME'),
-    Street: requiredString('STREET'),
+    Street: optionalString('STREET'),
     City: requiredString('CITY'),
     State: requiredString('STATE'),
     ZipCode: requiredString('ZIPCODE'),
@@ -76,3 +76,14 @@ export const addCustomerSchema = Joi.object({
     ]),
   }).required(),
 }).required();
+// inside Customer.validation.js
+const customerInfoSchema = addCustomerSchema.extract('CustomerInformation');
+const optionalCustomerInfoSchema = customerInfoSchema.fork(
+  Object.keys(customerInfoSchema.describe().keys),
+  (field) => field.optional()
+);
+
+// Step 3: Wrap back into the main schema
+export const editCustomerSchema = Joi.object({
+  CustomerInformation: optionalCustomerInfoSchema,
+});

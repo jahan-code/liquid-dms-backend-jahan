@@ -10,42 +10,51 @@ const register = async (req, res, next) => {
   try {
     const { fullname, email, password } = req.body;
 
-    const userExists = await User.findOne({ email }).lean();
+    const emailLower = email.toLowerCase().trim();
+    const userExists = await User.findOne({ email: emailLower });
+
     if (userExists) {
-      return next(
-        new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
-      );
+      if (userExists.isVerified) {
+        return next(
+          new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
+        );
+      } else {
+        await otpUtils.clearOtpCache(email);
+
+        const otp = otpUtils.generateOTP();
+        await otpUtils.setOTP(email, otp, 'register');
+
+        await sendEmail({
+          to: email,
+          subject: 'Verify Your Email',
+          templateName: 'otpTemplate',
+          replacements: { fullname: fullname || 'User', otp },
+        });
+
+        const newUser = new User({
+          fullname,
+          email,
+          password,
+          isVerified: false,
+        });
+        await newUser.save();
+        const userResponse = {
+          fullname: newUser.fullname,
+          email: newUser.email,
+        };
+        return SuccessHandler(
+          userResponse,
+
+          200,
+          'User registed successfully',
+          res
+        );
+      }
     }
-    await otpUtils.clearOtpCache(email);
-
-    const otp = otpUtils.generateOTP();
-    await otpUtils.setOTP(email, otp, 'register');
-
-    await sendEmail({
-      to: email,
-      subject: 'Verify Your Email',
-      templateName: 'otpTemplate',
-      replacements: { fullname: fullname || 'User', otp },
-    });
-
-    const newUser = new User({ fullname, email, password, isVerified: false });
-    await newUser.save();
-    const userResponse = {
-      fullname: newUser.fullname,
-      email: newUser.email,
-    };
-    return SuccessHandler(
-      userResponse,
-
-      200,
-      'User registed successfully',
-      res
-    );
   } catch (err) {
     next(err);
   }
 };
-
 const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;

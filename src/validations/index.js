@@ -20,7 +20,10 @@ import {
   getVendorByIdSchema,
 } from './Vendor.validation.js';
 import { addFloorPlanSchema } from './FloorPlan.validation.js';
-import { addCustomerSchema } from './Customer.validation.js';
+import {
+  addCustomerSchema,
+  editCustomerSchema,
+} from './Customer.validation.js';
 const validationSchemas = {
   // Authentication
 
@@ -57,6 +60,10 @@ const validationSchemas = {
   '/floorPlan/floors': { GET: null },
   //Customer
   '/customer/add-customer': { POST: addCustomerSchema },
+  '/customer/edit-customer': { PUT: editCustomerSchema },
+  '/customer': { GET: null },
+  '/customer/customers': { GET: null },
+  '/customer/delete-customer': { DELETE: null },
 };
 
 export { validationSchemas };

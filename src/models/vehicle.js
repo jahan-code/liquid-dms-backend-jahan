@@ -104,9 +104,9 @@ const vehicleSchema = new mongoose.Schema(
       mpgCombined: Number,
       mpgCity: Number,
       mpgHighway: Number,
-      towCapacity: String,
+      towCapacity: Number,
       passengers: Number,
-      weight: String,
+      weight: Number,
       mileage: {
         type: String,
         enum: [
