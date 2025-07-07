@@ -297,7 +297,7 @@ const vendorInfoSchema = Joi.object({
 // 🔹 Final Schema
 export const addVehicleSchema = Joi.object({
   basicDetails: Joi.object({
-    vehicleTitle: requiredString('VEHICLE_TITLE'),
+    vehicleTitle: optionalString('VEHICLE_TITLE'),
     vin: requiredString('VIN'),
     make: makeValidator,
     model: modelValidator,
