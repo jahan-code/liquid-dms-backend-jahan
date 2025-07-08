@@ -101,7 +101,7 @@ const drivetrainValidator = enumValidator('DRIVETRAIN', [
   'RWD (Rear-Wheel Drive)',
   'AWD (All-Wheel Drive)',
   '4WD (Four-Wheel Drive)',
-]).optional();
+]);
 const engineCylindersValidator = Joi.number()
   .integer()
   .min(1)
@@ -342,7 +342,7 @@ export const addVehicleSchema = Joi.object({
     stateTitleIn: optionalString('STATE_TITLE_IN'),
     title: optionalString('TITLE'),
     titleDate: Joi.date().optional(),
-    country: countryValidator,
+    Country: countryValidator,
   }),
 
   inspection: Joi.object({
