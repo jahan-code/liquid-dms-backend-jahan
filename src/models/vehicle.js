@@ -225,7 +225,7 @@ const vehicleSchema = new mongoose.Schema(
       },
       title: String,
       titleDate: Date,
-      country: {
+      Country: {
         type: String,
         enum: [
           'USA(United States of America)',
