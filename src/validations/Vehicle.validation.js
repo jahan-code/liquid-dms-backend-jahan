@@ -97,10 +97,10 @@ const tranSpeedValidator = Joi.number().integer().min(1).max(10).messages({
   'number.integer': errorConstants.VEHICLE.TRAN_SPEED_INTEGER,
 });
 const drivetrainValidator = enumValidator('DRIVETRAIN', [
-  'AWD',
-  'FWD',
-  'RWD',
-  '4WD',
+  'FWD (Front-Wheel Drive)',
+  'RWD (Rear-Wheel Drive)',
+  'AWD (All-Wheel Drive)',
+  '4WD (Four-Wheel Drive)',
 ]);
 const engineCylindersValidator = Joi.number()
   .integer()
