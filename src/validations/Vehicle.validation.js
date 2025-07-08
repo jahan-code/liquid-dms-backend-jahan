@@ -218,14 +218,14 @@ const stateValidator = enumValidator('STATE', [
 //   'South Korea',
 //   'Netherlands',
 // ]);
-const warrantyValidator = enumValidator('WARRANTY', [
-  '3 months/3,000 miles',
-  '6 months/6,000 miles',
-  '12 months/12,000 miles',
-  'Factory Warranty Remaining',
-  'Extended Warranty Available',
-  'Certified Pre-Owned',
-]);
+// const warrantyValidator = enumValidator('WARRANTY', [
+//   '3 months/3,000 miles',
+//   '6 months/6,000 miles',
+//   '12 months/12,000 miles',
+//   'Factory Warranty Remaining',
+//   'Extended Warranty Available',
+//   'Certified Pre-Owned',
+// ]);
 
 // 🔹 Smart Vendor Schema with `.when()`
 const vendorInfoSchema = Joi.object({
@@ -348,9 +348,9 @@ export const addVehicleSchema = Joi.object({
   inspection: Joi.object({
     inspected: Joi.boolean().required(),
     inspectionNumber: optionalString('INSPECTION_NUMBER'),
-    inspectionDate: Joi.date().optional(),
+    inspectionDate: optionalString('INSPECTION_DATE'),
     inspectedBy: optionalString('INSPECTED_BY'),
-    warranty: warrantyValidator,
+    warranty: optionalString('WARRANTY'),
     deviceHasStarterInterrupt: Joi.boolean().optional(),
   }),
 

@@ -74,6 +74,8 @@ const errorConstants = {
   //
   VEHICLE: {
     // 🔹 Basic Details
+    INSPECTION_DATE_MUST_BE_STRING: 'Inspection date must be a string',
+    WARRANTY_MUST_BE_STRING: 'Warranty must be a string',
     COUNTRY_MUST_BE_STRING: 'Country must be a string.',
     TITLE_DATE_MUST_BE_STRING: 'Title date must be a string',
     TOW_CAPACITY_MUST_BE_NUMBER: 'Tow Capcity must be number',
@@ -142,8 +144,7 @@ const errorConstants = {
     TITLE_REQUIRED: 'Title is required.',
     INSPECTION_NUMBER_REQUIRED: 'Inspection number is required.',
     INSPECTED_BY_REQUIRED: 'Inspected by is required.',
-    WARRANTY_MUST_BE_STRING: 'Warranty must be a string.',
-    WARRANTY_REQUIRED: 'Warranty is required.',
+
     IGNITION_KEY_CODE_REQUIRED: 'Ignition key code is required.',
     DOOR_KEY_CODE_REQUIRED: 'Door key code is required.',
     VALET_KEY_CODE_REQUIRED: 'Valet key code is required.',
