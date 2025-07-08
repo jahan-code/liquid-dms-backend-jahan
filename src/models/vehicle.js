@@ -93,7 +93,12 @@ const vehicleSchema = new mongoose.Schema(
       tranSpeed: Number,
       drivetrain: {
         type: String,
-        enum: ['AWD', 'FWD', 'RWD', '4WD'],
+        enum: [
+          'FWD (Front-Wheel Drive)',
+          'RWD (Rear-Wheel Drive)',
+          'AWD (All-Wheel Drive)',
+          '4WD (Four-Wheel Drive)',
+        ],
       },
       engineCylinders: Number,
       engineSize: String,
