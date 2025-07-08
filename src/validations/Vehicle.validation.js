@@ -200,24 +200,24 @@ const stateValidator = enumValidator('STATE', [
   'Indiana',
   'Iowa',
 ]);
-const countryValidator = enumValidator('COUNTRY', [
-  'USA(United States of America)',
-  'Canada',
-  'UK',
-  'Australia',
-  'Germany',
-  'France',
-  'Italy',
-  'Spain',
-  'Japan',
-  'China',
-  'India',
-  'Brazil',
-  'South Africa',
-  'Russia',
-  'South Korea',
-  'Netherlands',
-]);
+// const countryValidator = enumValidator('COUNTRY', [
+//   'USA(United States of America)',
+//   'Canada',
+//   'UK',
+//   'Australia',
+//   'Germany',
+//   'France',
+//   'Italy',
+//   'Spain',
+//   'Japan',
+//   'China',
+//   'India',
+//   'Brazil',
+//   'South Africa',
+//   'Russia',
+//   'South Korea',
+//   'Netherlands',
+// ]);
 const warrantyValidator = enumValidator('WARRANTY', [
   '3 months/3,000 miles',
   '6 months/6,000 miles',
@@ -341,8 +341,8 @@ export const addVehicleSchema = Joi.object({
     titleIn: Joi.boolean().required(),
     stateTitleIn: optionalString('STATE_TITLE_IN'),
     title: optionalString('TITLE'),
-    titleDate: Joi.date().optional(),
-    Country: countryValidator,
+    titleDate: optionalString('TITLE_DATE'),
+    country: optionalString('COUNTRY'),
   }),
 
   inspection: Joi.object({

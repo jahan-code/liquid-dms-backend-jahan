@@ -74,6 +74,8 @@ const errorConstants = {
   //
   VEHICLE: {
     // 🔹 Basic Details
+    COUNTRY_MUST_BE_STRING: 'Country must be a string.',
+    TITLE_DATE_MUST_BE_STRING: 'Title date must be a string',
     TOW_CAPACITY_MUST_BE_NUMBER: 'Tow Capcity must be number',
     TOW_CAPACITY_NEGATIVE: 'Tow Capacity cannot be negative.',
     NOTE_CATEGORY_INVALID: 'Note category is invalid.',
