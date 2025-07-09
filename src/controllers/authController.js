@@ -13,56 +13,51 @@ const register = async (req, res, next) => {
     const userExists = await User.findOne({ email: emailLower });
 
     if (userExists) {
-      console.log('register', 'register hitting');
       if (userExists.isVerified) {
-        return next(
-          new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS)
+        // User exists and is verified: return success with user info
+        const userResponse = {
+          fullname: userExists.fullname,
+          email: userExists.email,
+        };
+        return SuccessHandler(
+          userResponse,
+          200,
+          'User already registered and verified.',
+          res
         );
       } else {
+        // User exists but is NOT verified: resend OTP
         await otpUtils.clearOtpCache(email);
-
         const otp = otpUtils.generateOTP();
         await otpUtils.setOTP(email, otp, 'register');
-
         await sendEmail({
           to: email,
           subject: 'Verify Your Email',
           templateName: 'otpTemplate',
           replacements: { fullname: fullname || 'User', otp },
         });
-
-        const newUser = new User({
-          fullname,
-          email,
-          password,
-          isVerified: false,
-        });
-        await newUser.save();
         const userResponse = {
-          fullname: newUser.fullname,
-          email: newUser.email,
+          fullname: userExists.fullname,
+          email: userExists.email,
         };
         return SuccessHandler(
           userResponse,
           200,
-          'User registered successfully',
+          'OTP resent. Please verify your email to complete registration.',
           res
         );
       }
     } else {
-      // Handle new user registration
+      // User does not exist: create new user and send OTP
       await otpUtils.clearOtpCache(email);
-
       const otp = otpUtils.generateOTP();
       await otpUtils.setOTP(email, otp, 'register');
-
       await sendEmail({
         to: email,
         subject: 'Verify Your Email',
         templateName: 'otpTemplate',
         replacements: { fullname: fullname || 'User', otp },
       });
-
       const newUser = new User({
         fullname,
         email,
