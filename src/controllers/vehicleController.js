@@ -196,16 +196,33 @@ export const addVehicleCost = async (req, res, next) => {
 
     // 3. Prepare update object for mongoose using dot notation for nested objects
     const updateData = {};
+    let updatedAddedCosts = [];
     if (value.costDetails) {
-      // Calculate the sum of all addedCosts[].cost
-      let addedCostsTotal = 0;
+      // Fetch the current vehicle to get existing addedCosts if needed
+      let existingVehicle = null;
+      if (!value.costDetails.addedCosts) {
+        existingVehicle = await Vehicle.findById(vehicleId).select(
+          'costDetails.addedCosts'
+        );
+      }
+      // Use the new addedCosts if provided, otherwise use the existing ones
       if (Array.isArray(value.costDetails.addedCosts)) {
-        addedCostsTotal = value.costDetails.addedCosts.reduce((sum, item) => {
-          const cost = typeof item.cost === 'number' ? item.cost : 0;
-          return sum + cost;
-        }, 0);
-        // Add the total as a new field in costDetails
-        value.costDetails.addedCostsTotal = addedCostsTotal;
+        updatedAddedCosts = value.costDetails.addedCosts;
+      } else if (
+        existingVehicle &&
+        Array.isArray(existingVehicle.costDetails?.addedCosts)
+      ) {
+        updatedAddedCosts = existingVehicle.costDetails.addedCosts;
+      }
+      // Calculate the sum of all addedCosts[].cost
+      const addedCostsTotal = updatedAddedCosts.reduce((sum, item) => {
+        const cost = typeof item.cost === 'number' ? item.cost : 0;
+        return sum + cost;
+      }, 0);
+      value.costDetails.addedCostsTotal = addedCostsTotal;
+      // If we fetched existing addedCosts, make sure to update them in the DB if not present in the request
+      if (!value.costDetails.addedCosts && updatedAddedCosts.length > 0) {
+        value.costDetails.addedCosts = updatedAddedCosts;
       }
       Object.keys(value.costDetails).forEach((key) => {
         updateData[`costDetails.${key}`] = value.costDetails[key];
