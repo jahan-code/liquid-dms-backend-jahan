@@ -371,11 +371,11 @@ export const addVehicleSchema = Joi.object({
 });
 export const AddVehicleCostSchema = Joi.object({
   costDetails: Joi.object({
-    purchaseDate: Joi.date().optional(),
-    originalCost: Joi.number().min(0).optional(),
+    purchaseDate: Joi.date().required(),
+    originalCost: Joi.number().min(0).required(),
     buyersFee: Joi.number().min(0).optional(),
-    transportationFee: Joi.number().min(0).optional(),
-    lotFee: Joi.number().min(0).optional(),
+    transportationFee: Joi.number().min(0).required(),
+    lotFee: Joi.number().min(0).required(),
     addedCosts: Joi.array()
       .items(
         Joi.object({
@@ -421,7 +421,7 @@ export const vehicleIdQuerySchema = Joi.object({
 });
 export const AddVehicleSalesSchema = Joi.object({
   Price: Joi.object({
-    Retail: Joi.number().min(0).optional(),
+    Retail: Joi.number().min(0).required(),
     Interest: Joi.number().min(0).optional(),
     Wholesale: Joi.number().min(0).optional(),
     Other: Joi.number().min(0).optional(),
