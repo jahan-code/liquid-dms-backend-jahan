@@ -483,6 +483,7 @@ const vehicleSchema = new mongoose.Schema(
           description: String,
         },
       ],
+      addedCostsTotal: Number,
     },
 
     floorPlanDetails: {

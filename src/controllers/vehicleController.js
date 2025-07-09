@@ -197,6 +197,16 @@ export const addVehicleCost = async (req, res, next) => {
     // 3. Prepare update object for mongoose using dot notation for nested objects
     const updateData = {};
     if (value.costDetails) {
+      // Calculate the sum of all addedCosts[].cost
+      let addedCostsTotal = 0;
+      if (Array.isArray(value.costDetails.addedCosts)) {
+        addedCostsTotal = value.costDetails.addedCosts.reduce((sum, item) => {
+          const cost = typeof item.cost === 'number' ? item.cost : 0;
+          return sum + cost;
+        }, 0);
+        // Add the total as a new field in costDetails
+        value.costDetails.addedCostsTotal = addedCostsTotal;
+      }
       Object.keys(value.costDetails).forEach((key) => {
         updateData[`costDetails.${key}`] = value.costDetails[key];
       });
@@ -233,7 +243,10 @@ export const addVehicleCost = async (req, res, next) => {
 
     // 6. Respond
     return SuccessHandler(
-      { vehicle: responseVehicle },
+      {
+        vehicle: responseVehicle,
+        addedCostsTotal: responseVehicle.costDetails?.addedCostsTotal || 0,
+      },
       200,
       'Vehicle Cost Added successfully',
       res
