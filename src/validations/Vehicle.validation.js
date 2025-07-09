@@ -390,7 +390,7 @@ export const AddVehicleCostSchema = Joi.object({
   floorPlanDetails: Joi.object({
     isFloorPlanned: Joi.boolean().optional(),
     company: Joi.string().allow('', null).optional(),
-    dateOpened: Joi.date().allow('', null).optional(),
+    dateOpened: Joi.date().allow('').optional(),
     setUpFee: Joi.number().min(0).optional(),
     adminFee: Joi.number().min(0).optional(),
     additionalFee: Joi.number().min(0).optional(),

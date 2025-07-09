@@ -229,6 +229,10 @@ export const addVehicleCost = async (req, res, next) => {
       });
     }
     if (value.floorPlanDetails) {
+      // Remove dateOpened if it is an empty string
+      if (value.floorPlanDetails.dateOpened === '') {
+        delete value.floorPlanDetails.dateOpened;
+      }
       Object.keys(value.floorPlanDetails).forEach((key) => {
         updateData[`floorPlanDetails.${key}`] = value.floorPlanDetails[key];
       });
