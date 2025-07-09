@@ -15,15 +15,8 @@ const register = async (req, res, next) => {
     if (userExists) {
       if (userExists.isVerified) {
         // User exists and is verified: return success with user info
-        const userResponse = {
-          fullname: userExists.fullname,
-          email: userExists.email,
-        };
-        return SuccessHandler(
-          userResponse,
-          200,
-          'User already registered and verified.',
-          res
+        return next(
+          new ApiError(errorConstants.AUTHENTICATION.USER_ALREADY_EXISTS, 401)
         );
       } else {
         // User exists but is NOT verified: resend OTP
@@ -43,7 +36,7 @@ const register = async (req, res, next) => {
         return SuccessHandler(
           userResponse,
           200,
-          'OTP resent. Please verify your email to complete registration.',
+          'You are not Verfied. Please complete registration.',
           res
         );
       }
@@ -71,7 +64,7 @@ const register = async (req, res, next) => {
       };
       return SuccessHandler(
         userResponse,
-        200,
+        201,
         'User registered successfully',
         res
       );
