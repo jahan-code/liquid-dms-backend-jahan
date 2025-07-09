@@ -246,8 +246,8 @@ const resetPassword = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
+    const emailLower = email.toLowerCase().trim();
+    const user = await User.findOne({ email: emailLower });
     if (!user || !(await user.comparePassword(password)))
       return next(
         new ApiError(errorConstants.AUTHENTICATION.INVALID_CREDENTIALS, 404)
