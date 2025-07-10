@@ -38,7 +38,11 @@ const fileFilter = (req, file, cb) => {
   const imageTypes = ['image/jpeg', 'image/png', 'image/webp'];
   const pdfTypes = ['application/pdf'];
 
-  if (field === 'featuredImage' || field === 'otherImages') {
+  if (
+    field === 'featuredImage' ||
+    field === 'otherImages' ||
+    field === 'otherImages[]'
+  ) {
     if (imageTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
