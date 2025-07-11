@@ -110,8 +110,13 @@ export const addVehicle = async (req, res, next) => {
 
     // 🖼️ Vehicle Images
     const featuredImageUrl = toPublicUrl(req.files?.featuredImage?.[0]?.path);
-    const otherImageUrls =
-      req.files?.otherImages?.map((file) => toPublicUrl(file.path)) || [];
+    const otherImageFiles = [
+      ...(req.files?.otherImages || []),
+      ...(req.files?.['otherImages[]'] || []),
+    ];
+    const otherImageUrls = otherImageFiles.map((file) =>
+      toPublicUrl(file.path)
+    );
 
     // 🆔 Generate stockId (e.g. DL-SUV-0001)
     const vehicleTypeCode = basicDetails?.vehicleType?.toUpperCase(); // e.g., SUV
@@ -756,10 +761,13 @@ export const editVehicle = async (req, res, next) => {
       ? toPublicUrl(req.files.featuredImage[0].path)
       : existingVehicle.images.featuredImageUrl;
 
-    const otherImageUrls =
-      req.files?.otherImages?.length > 0
-        ? req.files.otherImages.map((f) => toPublicUrl(f.path))
-        : existingVehicle.images.otherImageUrls;
+    const otherImageFiles = [
+      ...(req.files?.otherImages || []),
+      ...(req.files?.['otherImages[]'] || []),
+    ];
+    const otherImageUrls = otherImageFiles.map((file) =>
+      toPublicUrl(file.path)
+    );
 
     // ✅ Compare category/vehicleType for stockId change
     const oldCategory = (existingVehicle.vendor?.category || '')

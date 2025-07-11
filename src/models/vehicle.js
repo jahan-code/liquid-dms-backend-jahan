@@ -630,6 +630,10 @@ const vehicleSchema = new mongoose.Schema(
     },
     uploadedNotes: String,
     markAsCompleted: { type: Boolean, default: false },
+    billofsales: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );
