@@ -112,11 +112,10 @@ const engineCylindersValidator = Joi.number()
     'number.max': errorConstants.VEHICLE.CYLINDERS_TOO_HIGH,
     'number.integer': errorConstants.VEHICLE.CYLINDERS_INTEGER,
   });
-const engineSizeValidator = Joi.string()
-  .pattern(/^\d+\.\d+L$/)
-  .messages({
-    'string.pattern.base': errorConstants.VEHICLE.ENGINE_SIZE_INVALID,
-  });
+const engineSizeValidator = Joi.number().positive().messages({
+  'number.base': errorConstants.VEHICLE.ENGINE_SIZE_INVALID,
+  'number.positive': errorConstants.VEHICLE.ENGINE_SIZE_INVALID,
+});
 const fuelTypeValidator = enumValidator('FUEL_TYPE', [
   'Gas',
   'Diesel',
