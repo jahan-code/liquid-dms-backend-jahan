@@ -211,7 +211,7 @@ const errorConstants = {
     CYLINDERS_TOO_LOW: 'Engine cylinders too low.',
     CYLINDERS_TOO_HIGH: 'Engine cylinders too high.',
     CYLINDERS_INTEGER: 'Engine cylinders must be an integer.',
-    ENGINE_SIZE_INVALID: 'Engine size must be in format like "2.5L".',
+    ENGINE_SIZE_INVALID: 'Engine size must be a number.',
     FUEL_TYPE_INVALID: 'Fuel type is invalid.',
     MPG_MUST_BE_NUMBER: 'MPG must be a number.',
     MPG_NEGATIVE: 'MPG cannot be negative.',
