@@ -274,7 +274,11 @@ const vendorInfoSchema = Joi.object({
     then: requiredString('CONTACT_PERSON'),
     otherwise: Joi.forbidden(),
   }),
-  alternativeContactNumber: optionalString('ALTERNATIVE_CONTACT_NUMBER'),
+  alternativeContactNumber: Joi.when('isExistingVendor', {
+    is: false,
+    then: optionalString('ALTERNATIVE_CONTACT_NUMBER'),
+    otherwise: Joi.forbidden(),
+  }),
   email: Joi.when('isExistingVendor', {
     is: false,
     then: Joi.string().email().required().messages({
@@ -283,14 +287,26 @@ const vendorInfoSchema = Joi.object({
     }),
     otherwise: Joi.forbidden(),
   }),
-  accountNumber: optionalString('ACCOUNT_NUMBER'),
+  accountNumber: Joi.when('isExistingVendor', {
+    is: false,
+    then: optionalString('ACCOUNT_NUMBER'),
+    otherwise: Joi.forbidden(),
+  }),
   taxIdOrSSN: Joi.when('isExistingVendor', {
     is: false,
     then: requiredString('TAX_ID_OR_SSN'),
     otherwise: Joi.forbidden(),
   }),
-  notes: optionalString('NOTES'),
-  billofsales: optionalString('BILL_OF_SALES'),
+  notes: Joi.when('isExistingVendor', {
+    is: false,
+    then: optionalString('NOTES'),
+    otherwise: Joi.forbidden(),
+  }),
+  billofsales: Joi.when('isExistingVendor', {
+    is: false,
+    then: optionalString('BILL_OF_SALES'),
+    otherwise: Joi.forbidden(),
+  }),
 });
 
 // 🔹 Final Schema
