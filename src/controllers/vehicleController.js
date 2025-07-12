@@ -729,17 +729,8 @@ export const editVehicle = async (req, res, next) => {
       }
       vendor = foundVendor;
 
-      // If email is provided for existing vendor, update it (but don't check for conflicts since it's the same vendor)
-      if (vendorInfo.email) {
-        vendor.email = vendorInfo.email.trim().toLowerCase();
-      }
-
       if (billofsalesUrl) {
         vendor.billofsales = billofsalesUrl;
-      }
-
-      // Save vendor if any changes were made
-      if (vendorInfo.email || billofsalesUrl) {
         await vendor.save();
       }
     } else {

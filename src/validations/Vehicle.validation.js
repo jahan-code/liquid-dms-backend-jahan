@@ -281,9 +281,7 @@ const vendorInfoSchema = Joi.object({
       'string.email': errorConstants.VENDOR.EMAIL_INVALID,
       'any.required': errorConstants.VENDOR.EMAIL_REQUIRED,
     }),
-    otherwise: Joi.string().email().optional().messages({
-      'string.email': errorConstants.VENDOR.EMAIL_INVALID,
-    }),
+    otherwise: Joi.forbidden(),
   }),
   accountNumber: optionalString('ACCOUNT_NUMBER'),
   taxIdOrSSN: Joi.when('isExistingVendor', {
