@@ -41,6 +41,7 @@ const validationSchemas = {
   '/vendor': { GET: getVendorByIdSchema },
   '/vendor/edit-vendor': { PUT: editVendorSchema },
   '/vendor/delete-vendor': { DELETE: getVendorByIdSchema },
+  '/vendor/vendors-by-category': { GET: null },
   //Vehicle
   '/vehicle/add-vehicle': { POST: addVehicleSchema },
   '/vehicle/edit': { PUT: editVehicleSchema },

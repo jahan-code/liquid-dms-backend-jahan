@@ -292,30 +292,92 @@ const deleteVendor = async (req, res, next) => {
     }
 
     const existingVendor = await vendor.findById(id);
-
     if (!existingVendor) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
     }
 
-    // Remove vendor reference from the user document
+    // Delete vendor
+    await vendor.findByIdAndDelete(id);
+
+    // Remove vendor from user's vendors list
     await user.findByIdAndUpdate(
-      existingVendor.createdBy,
+      req.user.userId,
       { $pull: { vendors: id } },
       { new: true }
     );
 
-    // Delete the vendor
-    await vendor.findByIdAndDelete(id);
+    logger.info({
+      message: `✅ Vendor deleted: ${existingVendor.name}`,
+      timestamp: new Date().toISOString(),
+    });
+
+    return SuccessHandler(null, 200, 'Vendor deleted successfully', res);
+  } catch (error) {
+    logger.error({
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+const getVendorsByCategory = async (req, res, next) => {
+  try {
+    const { category } = req.query;
+
+    if (!category) {
+      return next(new ApiError('Category is required', 400));
+    }
+
+    // Validate category against enum values
+    const validCategories = [
+      'Auction - AU',
+      'Company - COM',
+      'Wholesale - WS',
+      'Dealer - DL',
+      'Consignment - CT',
+      'Private Seller - PS',
+      'Manufacturer - MR',
+      'Rental Company - RC',
+      'Repossession - RE',
+      'Trade-In - TI',
+    ];
+
+    if (!validCategories.includes(category)) {
+      return next(new ApiError('Invalid category provided', 400));
+    }
+
+    // Find vendors by category and return only vendorId and name
+    const vendors = await vendor
+      .find({ category })
+      .select('vendorId name category')
+      .sort({ name: 1 }); // Sort alphabetically by name
+
+    const response = {
+      category,
+      totalVendors: vendors.length,
+      vendors: vendors.map((vendor) => ({
+        vendorId: vendor.vendorId,
+        name: vendor.name,
+        category: vendor.category,
+      })),
+    };
 
     logger.info({
-      message: `🗑️ Vendor deleted: ${existingVendor.vendorId}`,
+      message: `✅ Vendors fetched for category: ${category}`,
       timestamp: new Date().toISOString(),
     });
 
     return SuccessHandler(
-      { vendorId: existingVendor.vendorId },
+      response,
       200,
-      'Vendor deleted successfully',
+      'Vendors fetched successfully by category',
       res
     );
   } catch (error) {
@@ -333,10 +395,11 @@ const deleteVendor = async (req, res, next) => {
   }
 };
 
-export default {
+export {
   addVendor,
   showAllVendors,
   getVendorById,
   editVendor,
   deleteVendor,
+  getVendorsByCategory,
 };
