@@ -437,6 +437,18 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
       return next(new ApiError('Vehicle not found', 404));
     }
 
+    // Merge files from both field names
+    const transferDocs = [
+      ...(req.files?.transferDocument || []),
+      ...(req.files?.['transferDocument[]'] || []),
+    ];
+    const transferDocUrls = transferDocs.map((f) => toPublicUrl(f.path));
+
+    // Save to the vehicle (as an array)
+    updatedVehicle.transferDocuments = transferDocUrls;
+
+    await updatedVehicle.save();
+
     // 6. Reorder vehicle object for response
     const vehicleObject = updatedVehicle.toObject();
     const responseVehicle = {

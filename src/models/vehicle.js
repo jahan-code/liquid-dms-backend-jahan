@@ -374,7 +374,7 @@ const vehicleSchema = new mongoose.Schema(
       PrincipleUseofVehicle: String,
       Notes: String,
     },
-    transferDocument: String,
+    transferDocument: [String],
     values: {
       MarketValue: Number,
       MSRP: Number,
