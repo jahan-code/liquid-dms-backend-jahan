@@ -326,24 +326,16 @@ const vehicleSchema = new mongoose.Schema(
     OtherNotes: {
       NoteCategory: {
         type: String,
-        enum: [
-          'Buyer Inquiry',
-          'Follow-up',
-          'New Lead',
-          'Call Scheduled',
-          'Showroom Visit',
-        ],
       },
 
       NoteTitle: String,
 
       NoteDetails: String,
+      uploadedNotes: [String],
     },
-    uploadedNotes: String,
     markAsCompleted: { type: Boolean, default: false },
     billofsales: {
       type: String,
-      default: '',
     },
   },
   { timestamps: true }
