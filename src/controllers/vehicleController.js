@@ -444,10 +444,18 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
     ];
     const transferDocUrls = transferDocs.map((f) => toPublicUrl(f.path));
 
-    // Save to the vehicle (as an array)
-    updatedVehicle.transferDocuments = transferDocUrls;
+    // Set inside PreviousOwnerDetail
+    const existingVehicle = await Vehicle.findById(vehicleId);
+    if (!existingVehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
 
-    await updatedVehicle.save();
+    if (!existingVehicle.PreviousOwnerDetail) {
+      existingVehicle.PreviousOwnerDetail = {};
+    }
+    existingVehicle.PreviousOwnerDetail.transferDocuments = transferDocUrls;
+
+    await existingVehicle.save();
 
     // 6. Reorder vehicle object for response
     const vehicleObject = updatedVehicle.toObject();

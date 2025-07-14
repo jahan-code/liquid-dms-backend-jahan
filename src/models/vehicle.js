@@ -373,7 +373,7 @@ const vehicleSchema = new mongoose.Schema(
       OwnershipEndDate: Date,
       PrincipleUseofVehicle: String,
       Notes: String,
-      transferDocument: [String],
+      transferDocuments: [String],
     },
     values: {
       MarketValue: Number,

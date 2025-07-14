@@ -540,12 +540,12 @@ export const addVehiclePreviousOwnerSchema = Joi.object({
     OwnershipEndDate: Joi.date().allow(null),
     PrincipleUseofVehicle: optionalString('PRINCIPLE_USE_OF_VEHICLE'),
     Notes: optionalString('NOTES'),
+    transferDocuments: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
   values: Joi.object({
     MarketValue: Joi.number().min(0).optional(),
     MSRP: Joi.number().min(0).optional(),
   }).optional(),
-  transferDocuments: Joi.array().items(Joi.string().uri()).optional(),
 });
 export const addVehicleNotesSchema = Joi.object({
   OtherNotes: Joi.object({
