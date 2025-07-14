@@ -448,8 +448,8 @@ export const AddVehicleSalesSchema = Joi.object({
     Monthly: Joi.number().min(0).optional(),
   }).optional(),
   Dates: Joi.object({
-    Arrival: Joi.date().allow('', null).optional(),
-    ReadytoSell: Joi.date().optional(),
+    Arrival: Joi.date(),
+    ReadytoSell: Joi.date().allow('', null).optional(),
   }).optional(),
   WindowSheetOptions: Joi.object({
     price: Joi.boolean().optional(),
