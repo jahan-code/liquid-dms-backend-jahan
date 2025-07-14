@@ -48,9 +48,9 @@ const styleValidator = enumValidator('STYLE', [
   'SUV',
   'Van',
   'Convertible',
-  'Crossover',
+  'Pickup Truck',
+  'Wagon',
   'Minivan',
-  'Pickup',
   'Roadster',
 ]);
 const bodyTypeValidator = enumValidator('BODY_TYPE', ['2DR', '4DR']);
@@ -85,7 +85,7 @@ const certifiedValidator = enumValidator('CERTIFIED', ['Yes', 'No']);
 const transmissionValidator = enumValidator('TRANSMISSION', [
   'Automatic',
   'Manual',
-  'CVT',
+  'CVT (Continuously Variable Transmission)',
   'Dual-Clutch',
   'Tiptronic',
   'Semi-Automatic',
@@ -152,25 +152,22 @@ const mileageIsValidator = enumValidator('MILEAGE_STATUS', [
   'Not Actual',
   'Exempt',
   'Unknown',
-  'TMU',
+  'TMU (True Mileage Unknown)',
 ]);
 const colorValidator = enumValidator('COLOR', [
-  'Black',
   'White',
-  'Gray',
+  'Black',
   'Silver',
   'Red',
   'Blue',
   'Green',
   'Yellow',
-  'Orange',
+  'Gray',
   'Brown',
+  'Orange',
   'Gold',
   'Maroon',
   'Beige',
-  'Purple',
-  'Pink',
-  'Other',
 ]);
 const interiorColorValidator = enumValidator('INTERIOR_COLOR', [
   'Black',
