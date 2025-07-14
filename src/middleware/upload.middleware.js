@@ -63,7 +63,7 @@ const fileFilter = (req, file, cb) => {
         false
       );
     }
-  } else if (field === 'transferDocument') {
+  } else if (field === 'transferDocument' || field === 'transferDocument[]') {
     if ([...imageTypes, ...pdfTypes].includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -72,7 +72,7 @@ const fileFilter = (req, file, cb) => {
         false
       );
     }
-  } else if (field === 'uploadedNotes') {
+  } else if (field === 'uploadedNotes' || field === 'uploadedNotes[]') {
     if ([...imageTypes, ...pdfTypes].includes(file.mimetype)) {
       cb(null, true);
     } else {

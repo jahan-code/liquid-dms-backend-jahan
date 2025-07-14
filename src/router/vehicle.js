@@ -33,6 +33,7 @@ router.put(
   upload.fields([
     { name: 'featuredImage', maxCount: 1 },
     { name: 'otherImages', maxCount: 5 },
+    { name: 'otherImages[]', maxCount: 5 }, // <-- Add this line!
     { name: 'billofsales', maxCount: 1 },
   ]),
   editVehicle
@@ -42,13 +43,19 @@ router.put('/Sales', verifyToken, addVehicleSales);
 router.put(
   '/previous-owner',
   verifyToken,
-  upload.fields([{ name: 'transferDocument', maxCount: 1 }]),
+  upload.fields([
+    { name: 'transferDocument', maxCount: 5 },
+    { name: 'transferDocument[]', maxCount: 5 }, // Support multiple files and both field names
+  ]),
   addVehiclePreviousOwner
 );
 router.put(
   '/notes',
   verifyToken,
-  upload.fields([{ name: 'uploadedNotes', maxCount: 1 }]),
+  upload.fields([
+    { name: 'uploadedNotes', maxCount: 5 },
+    { name: 'uploadedNotes[]', maxCount: 5 }, // Support multiple files and both field names
+  ]),
   addVehicleNotes
 );
 router.patch('/complete', verifyToken, markVehicleAsCompleted);
