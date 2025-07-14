@@ -492,20 +492,10 @@ export const addVehiclePreviousOwnerSchema = Joi.object({
 });
 export const addVehicleNotesSchema = Joi.object({
   OtherNotes: Joi.object({
-    NoteCategory: Joi.string()
-      .valid(
-        'Buyer Inquiry',
-        'Follow-up',
-        'New Lead',
-        'Call Scheduled',
-        'Showroom Visit'
-      )
-      .optional()
-      .messages({
-        'any.only': errorConstants.VEHICLE.NOTE_CATEGORY_INVALID,
-      }),
-    NoteTitle: optionalString('NOTE_TITLE'),
-    NoteDetails: optionalString('NOTE_DETAILS'),
+    NoteCategory: Joi.string().allow('', null).optional(),
+    NoteTitle: Joi.string().allow('', null).optional(),
+    NoteDetails: Joi.string().allow('', null).optional(),
+    uploadedNotes: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
 });
 
