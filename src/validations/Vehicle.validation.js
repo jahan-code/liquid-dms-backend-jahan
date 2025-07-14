@@ -535,6 +535,8 @@ export const addVehiclePreviousOwnerSchema = Joi.object({
       'South Dakota',
       'Tennessee',
       'Texas',
+      'Washington',
+      'California',
       'Utah'
     ),
     OwnershipStartDate: Joi.date().allow(null),
