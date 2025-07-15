@@ -495,8 +495,8 @@ export const addVehicleNotesSchema = Joi.object({
     NoteCategory: Joi.string().allow('', null).optional(),
     NoteTitle: Joi.string().allow('', null).optional(),
     NoteDetails: Joi.string().allow('', null).optional(),
-    uploadedNotes: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
+  uploadedNotes: Joi.array().items(Joi.string().uri()).optional(),
 });
 
 export const editVehicleSchema = addVehicleSchema.fork(
