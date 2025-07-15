@@ -503,11 +503,16 @@ export const addVehicleNotes = async (req, res, next) => {
       });
     }
 
-    // 4. Handle file upload for uploadedNotes (single file expected)
-    if (req.files && req.files.uploadedNotes) {
-      updateData.uploadedNotes = getFullImageUrl(
-        req.files.uploadedNotes[0].filename
-      );
+    // 4. Handle file upload for uploadedNotes (single or multiple files expected)
+    const uploadedNotesFiles = [
+      ...(req.files?.uploadedNotes || []),
+      ...(req.files?.['uploadedNotes[]'] || []),
+    ];
+    const uploadedNotesUrls = uploadedNotesFiles.map((f) =>
+      getFullImageUrl(f.filename)
+    );
+    if (uploadedNotesUrls.length > 0) {
+      updateData.uploadedNotes = uploadedNotesUrls; // <-- Top-level field
     }
 
     // 5. Update the vehicle
@@ -520,22 +525,6 @@ export const addVehicleNotes = async (req, res, next) => {
     if (!updatedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
     }
-
-    // Merge files from both field names
-    const uploadedNotesFiles = [
-      ...(req.files?.uploadedNotes || []),
-      ...(req.files?.['uploadedNotes[]'] || []),
-    ];
-    const uploadedNotesUrls = uploadedNotesFiles.map((f) =>
-      getFullImageUrl(f.filename)
-    );
-
-    // Set inside OtherNotes
-    if (!updatedVehicle.OtherNotes) {
-      updatedVehicle.OtherNotes = {};
-    }
-    updatedVehicle.OtherNotes.uploadedNotes = uploadedNotesUrls;
-    await updatedVehicle.save();
 
     // 6. Reorder vehicle object for response
     const vehicleObject = updatedVehicle.toObject();

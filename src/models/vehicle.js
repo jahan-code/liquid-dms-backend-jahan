@@ -331,8 +331,8 @@ const vehicleSchema = new mongoose.Schema(
       NoteTitle: String,
 
       NoteDetails: String,
-      uploadedNotes: [String],
     },
+    uploadedNotes: [String],
     markAsCompleted: { type: Boolean, default: false },
     billofsales: {
       type: String,
