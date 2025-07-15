@@ -16,14 +16,9 @@ import extractCategoryCode from '../utils/extractCategory.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import mongoose from 'mongoose';
 import paginate from '../utils/paginate.js';
+import { getFullImageUrl } from '../utils/url.js';
 
 // 🔧 Convert file path to public URL
-const toPublicUrl = (filePath) => {
-  if (!filePath) return null;
-  const normalized = filePath.replace(/\\/g, '/'); // Windows fix
-  const uploadIndex = normalized.indexOf('uploads');
-  return uploadIndex !== -1 ? '/' + normalized.slice(uploadIndex) : normalized;
-};
 
 // ✅ Add Vehicle Controller
 export const addVehicle = async (req, res, next) => {
@@ -59,7 +54,7 @@ export const addVehicle = async (req, res, next) => {
     // 🔁 Reusable bill of sales file logic
     const billofsalesFile = req.files?.billofsales?.[0];
     const billofsalesUrl = billofsalesFile
-      ? toPublicUrl(billofsalesFile.path)
+      ? getFullImageUrl(billofsalesFile.filename)
       : '';
 
     // 📦 Handle Existing Vendor
@@ -109,13 +104,15 @@ export const addVehicle = async (req, res, next) => {
     }
 
     // 🖼️ Vehicle Images
-    const featuredImageUrl = toPublicUrl(req.files?.featuredImage?.[0]?.path);
+    const featuredImageUrl = req.files?.featuredImage?.[0]?.filename
+      ? getFullImageUrl(req.files.featuredImage[0].filename)
+      : '';
     const otherImageFiles = [
       ...(req.files?.otherImages || []),
       ...(req.files?.['otherImages[]'] || []),
     ];
     const otherImageUrls = otherImageFiles.map((file) =>
-      toPublicUrl(file.path)
+      getFullImageUrl(file.filename)
     );
 
     // 🆔 Generate stockId (e.g. DL-SUV-0001)
@@ -421,8 +418,8 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
 
     // 4. Handle file upload
     if (req.files && req.files.transferDocument) {
-      updateData.transferDocument = toPublicUrl(
-        req.files.transferDocument[0].path
+      updateData.transferDocument = getFullImageUrl(
+        req.files.transferDocument[0].filename
       );
     }
 
@@ -442,7 +439,9 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
       ...(req.files?.transferDocument || []),
       ...(req.files?.['transferDocument[]'] || []),
     ];
-    const transferDocUrls = transferDocs.map((f) => toPublicUrl(f.path));
+    const transferDocUrls = transferDocs.map((f) =>
+      getFullImageUrl(f.filename)
+    );
 
     // Set inside PreviousOwnerDetail
     if (!updatedVehicle.PreviousOwnerDetail) {
@@ -506,7 +505,9 @@ export const addVehicleNotes = async (req, res, next) => {
 
     // 4. Handle file upload for uploadedNotes (single file expected)
     if (req.files && req.files.uploadedNotes) {
-      updateData.uploadedNotes = toPublicUrl(req.files.uploadedNotes[0].path);
+      updateData.uploadedNotes = getFullImageUrl(
+        req.files.uploadedNotes[0].filename
+      );
     }
 
     // 5. Update the vehicle
@@ -526,7 +527,7 @@ export const addVehicleNotes = async (req, res, next) => {
       ...(req.files?.['uploadedNotes[]'] || []),
     ];
     const uploadedNotesUrls = uploadedNotesFiles.map((f) =>
-      toPublicUrl(f.path)
+      getFullImageUrl(f.filename)
     );
 
     // Set inside OtherNotes
@@ -747,7 +748,7 @@ export const editVehicle = async (req, res, next) => {
     // ✅ Handle bill of sales file
     const billofsalesFile = req.files?.billofsales?.[0];
     const billofsalesUrl = billofsalesFile
-      ? toPublicUrl(billofsalesFile.path)
+      ? getFullImageUrl(billofsalesFile.filename)
       : '';
 
     // ✅ Vendor Handling
@@ -788,8 +789,8 @@ export const editVehicle = async (req, res, next) => {
     }
 
     // ✅ Image Handling
-    const featuredImageUrl = req.files?.featuredImage?.[0]?.path
-      ? toPublicUrl(req.files.featuredImage[0].path)
+    const featuredImageUrl = req.files?.featuredImage?.[0]?.filename
+      ? getFullImageUrl(req.files.featuredImage[0].filename)
       : existingVehicle.images.featuredImageUrl;
 
     const otherImageFiles = [
@@ -797,7 +798,7 @@ export const editVehicle = async (req, res, next) => {
       ...(req.files?.['otherImages[]'] || []),
     ];
     const otherImageUrls = otherImageFiles.map((file) =>
-      toPublicUrl(file.path)
+      getFullImageUrl(file.filename)
     );
 
     // ✅ Compare category/vehicleType for stockId change
