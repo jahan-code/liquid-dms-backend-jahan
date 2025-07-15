@@ -594,50 +594,31 @@ export const markVehicleAsCompleted = async (req, res, next) => {
 };
 export const getAllVehicles = async (req, res, next) => {
   try {
-    logger.info('📄 Fetching all vehicles (completed and not completed)');
+    logger.info('📄 Fetching all vehicles');
 
     const { page = 1, limit = 10 } = req.query;
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
-    // Fetch completed vehicles
-    const completedVehicles = await Vehicle.find({ markAsCompleted: true })
+    // Fetch all vehicles regardless of completion status
+    const vehicles = await Vehicle.find({})
       .populate({ path: 'vendor', select: '-taxIdOrSSN' })
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 });
 
-    const totalCompleted = await Vehicle.countDocuments({
-      markAsCompleted: true,
-    });
-
-    // Fetch not completed vehicles
-    const notCompletedVehicles = await Vehicle.find({ markAsCompleted: false })
-      .populate({ path: 'vendor', select: '-taxIdOrSSN' })
-      .skip(skip)
-      .limit(parsedLimit)
-      .sort({ createdAt: -1 });
-
-    const totalNotCompleted = await Vehicle.countDocuments({
-      markAsCompleted: false,
-    });
+    const total = await Vehicle.countDocuments({});
 
     const response = {
-      completed: {
-        total: totalCompleted,
-        vehicles: completedVehicles,
-      },
-      notCompleted: {
-        total: totalNotCompleted,
-        vehicles: notCompletedVehicles,
-      },
+      totalVehicles: total,
       currentPage: Number(page),
-      totalPages: Math.ceil((totalCompleted + totalNotCompleted) / parsedLimit),
+      totalPages: Math.ceil(total / parsedLimit),
+      vehicles,
     };
 
     return SuccessHandler(
       response,
       200,
-      'All vehicles (completed and not completed) fetched successfully',
+      'All vehicles fetched successfully',
       res
     );
   } catch (error) {
