@@ -594,35 +594,54 @@ export const markVehicleAsCompleted = async (req, res, next) => {
 };
 export const getAllVehicles = async (req, res, next) => {
   try {
-    logger.info('📄 Fetching all completed vehicles');
+    logger.info('📄 Fetching all vehicles (completed and not completed)');
 
     const { page = 1, limit = 10 } = req.query;
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
-    // 🚙 Fetch only vehicles that are marked as completed
-    const vehicles = await Vehicle.find({ markAsCompleted: true })
+    // Fetch completed vehicles
+    const completedVehicles = await Vehicle.find({ markAsCompleted: true })
       .populate({ path: 'vendor', select: '-taxIdOrSSN' })
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 });
 
-    const total = await Vehicle.countDocuments({ markAsCompleted: true });
+    const totalCompleted = await Vehicle.countDocuments({
+      markAsCompleted: true,
+    });
+
+    // Fetch not completed vehicles
+    const notCompletedVehicles = await Vehicle.find({ markAsCompleted: false })
+      .populate({ path: 'vendor', select: '-taxIdOrSSN' })
+      .skip(skip)
+      .limit(parsedLimit)
+      .sort({ createdAt: -1 });
+
+    const totalNotCompleted = await Vehicle.countDocuments({
+      markAsCompleted: false,
+    });
 
     const response = {
-      totalVehicles: total,
+      completed: {
+        total: totalCompleted,
+        vehicles: completedVehicles,
+      },
+      notCompleted: {
+        total: totalNotCompleted,
+        vehicles: notCompletedVehicles,
+      },
       currentPage: Number(page),
-      totalPages: Math.ceil(total / parsedLimit),
-      vehicles,
+      totalPages: Math.ceil((totalCompleted + totalNotCompleted) / parsedLimit),
     };
 
     return SuccessHandler(
       response,
       200,
-      'Completed vehicles fetched successfully',
+      'All vehicles (completed and not completed) fetched successfully',
       res
     );
   } catch (error) {
-    logger.error('❌ Error fetching completed vehicles:', error);
+    logger.error('❌ Error fetching all vehicles:', error);
     return next(
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
