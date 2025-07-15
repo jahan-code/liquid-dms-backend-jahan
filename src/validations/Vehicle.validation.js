@@ -136,16 +136,6 @@ const passengersValidator = Joi.number().integer().min(1).max(100).messages({
   'number.max': errorConstants.VEHICLE.PASSENGERS_TOO_HIGH,
   'number.integer': errorConstants.VEHICLE.PASSENGERS_INTEGER,
 });
-const mileageValidator = enumValidator('MILEAGE', [
-  '1,000',
-  '10,000',
-  '25,000',
-  '50,000',
-  '75,000',
-  '100,000',
-  '125,000',
-  '150,000+',
-]);
 
 const mileageIsValidator = enumValidator('MILEAGE_STATUS', [
   'Actual',
@@ -334,7 +324,7 @@ export const addVehicleSchema = Joi.object({
     towCapacity: towCapacityValidator,
     passengers: passengersValidator,
     weight: towCapacityValidator,
-    mileage: mileageValidator,
+    mileage: requiredString('MILEAGE'),
     mileageIs: mileageIsValidator,
   }),
 
