@@ -343,7 +343,7 @@ const errorConstants = {
     CONDITION_MUST_BE_STRING: 'Condition must be a string.',
     // Name on Check
     NAME_ON_CHECK_MUST_BE_STRING: 'Name to print on check must be a string.',
-
+    CERTIFIED_MUST_BE_STRING: 'Certified must be a string.',
     // Tax ID / SSN
     TAX_ID_REQUIRED: 'Tax ID or SSN is required.',
     TAX_ID_MUST_BE_STRING: 'Tax ID or SSN must be a string.',

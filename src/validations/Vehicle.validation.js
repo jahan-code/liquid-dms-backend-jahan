@@ -77,7 +77,6 @@ const vehicleTypeValidator = requiredString('TYPE').valid(
   'Other'
 );
 
-const certifiedValidator = enumValidator('CERTIFIED', ['Yes', 'No']);
 const transmissionValidator = enumValidator('TRANSMISSION', [
   'Automatic',
   'Manual',
@@ -304,7 +303,7 @@ export const addVehicleSchema = Joi.object({
     manufacturingYear: yearValidator,
     vehicleType: vehicleTypeValidator,
     condition: optionalString('CONDITION'),
-    certified: certifiedValidator,
+    certified: optionalString('CERTIFIED'),
   }),
 
   specifications: Joi.object({
