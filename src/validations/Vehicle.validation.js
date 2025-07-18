@@ -53,7 +53,6 @@ const styleValidator = enumValidator('STYLE', [
   'Minivan',
   'Roadster',
 ]);
-const bodyTypeValidator = enumValidator('BODY_TYPE', ['2DR', '4DR']);
 const yearValidator = Joi.number()
   .integer()
   .min(1900)
@@ -273,7 +272,7 @@ export const addVehicleSchema = Joi.object({
     make: makeValidator,
     model: modelValidator,
     style: styleValidator,
-    bodyType: bodyTypeValidator,
+    bodyType: optionalString('BODY_TYPE'),
     manufacturingYear: yearValidator,
     vehicleType: vehicleTypeValidator,
     condition: conditionValidator,
