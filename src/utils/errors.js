@@ -236,6 +236,8 @@ const errorConstants = {
     GPS_SERIAL_MUST_BE_STRING: 'GPS serial must be a string.',
 
     // 🔹 Title & Inspection
+
+    EXTERIOR_COLOR_2_MUST_BE_STRING: 'Exterior color 2 must be a string.',
     TITLE_IN_MUST_BE_BOOLEAN: 'Title in must be a boolean.',
     TITLE_IN_REQUIRED: 'Title in is required.',
     STATE_TITLE_IN_MUST_BE_STRING: 'State title in must be a string.',

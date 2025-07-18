@@ -139,21 +139,6 @@ const vehicleSchema = new mongoose.Schema(
       },
       exteriorColor2: {
         type: String,
-        enum: [
-          'White',
-          'Black',
-          'Silver',
-          'Red',
-          'Blue',
-          'Green',
-          'Yellow',
-          'Gray',
-          'Brown',
-          'Orange',
-          'Gold',
-          'Maroon',
-          'Beige',
-        ],
       },
       colorDescription: String,
       interiorColor: {

@@ -299,10 +299,10 @@ export const addVehicleSchema = Joi.object({
 
   exteriorInterior: Joi.object({
     exteriorColor: colorValidator,
-    exteriorColor2: colorValidator,
+    exteriorColor2: optionalString('EXTERIOR_COLOR_2'),
     colorDescription: optionalString('COLOR_DESCRIPTION'),
     interiorColor: interiorColorValidator,
-    tag: optionalString('TAG'),
+    tag: requiredString('TAG'),
     decal: optionalString('DECAL'),
     gpsSerial: optionalString('GPS_SERIAL'),
   }),
