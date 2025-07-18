@@ -107,10 +107,7 @@ const fuelTypeValidator = enumValidator('FUEL_TYPE', [
   'Electric',
   'Hybrid',
 ]);
-const mpgValidator = Joi.number().min(0).messages({
-  'number.base': errorConstants.VEHICLE.MPG_MUST_BE_NUMBER,
-  'number.min': errorConstants.VEHICLE.MPG_NEGATIVE,
-});
+
 const towCapacityValidator = Joi.number().min(0).messages({
   'number.base': errorConstants.VEHICLE.TOW_CAPACITY_MUST_BE_NUMBER,
   'number.min': errorConstants.VEHICLE.TOW_CAPACITY_NEGATIVE,
@@ -303,9 +300,9 @@ export const addVehicleSchema = Joi.object({
     engineCylinders: optionalString('ENGINE_CYLINDERS'),
     engineSize: engineSizeValidator,
     fuelType: fuelTypeValidator,
-    mpgCombined: mpgValidator,
-    mpgCity: mpgValidator,
-    mpgHighway: mpgValidator,
+    mpgCombined: optionalString('MPG_COMBINED'),
+    mpgCity: optionalString('MPG_CITY'),
+    mpgHighway: optionalString('MPG_HIGHWAY'),
     towCapacity: towCapacityValidator,
     passengers: passengersValidator,
     weight: towCapacityValidator,
