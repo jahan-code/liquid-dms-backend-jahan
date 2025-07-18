@@ -119,13 +119,6 @@ const passengersValidator = Joi.number().integer().min(1).max(100).messages({
   'number.integer': errorConstants.VEHICLE.PASSENGERS_INTEGER,
 });
 
-const mileageIsValidator = enumValidator('MILEAGE_STATUS', [
-  'Actual',
-  'Not Actual',
-  'Exempt',
-  'Unknown',
-  'TMU (True Mileage Unknown)',
-]);
 const colorValidator = enumValidator('COLOR', [
   'White',
   'Black',
@@ -307,7 +300,7 @@ export const addVehicleSchema = Joi.object({
     passengers: passengersValidator,
     weight: towCapacityValidator,
     mileage: requiredString('MILEAGE'),
-    mileageIs: mileageIsValidator,
+    mileageIs: optionalString('MILEAGE_IS'),
   }),
 
   exteriorInterior: Joi.object({

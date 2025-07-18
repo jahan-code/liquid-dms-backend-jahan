@@ -115,13 +115,6 @@ const vehicleSchema = new mongoose.Schema(
       },
       mileageIs: {
         type: String,
-        enum: [
-          'Actual',
-          'Not Actual',
-          'Exempt',
-          'Unknown',
-          'TMU (True Mileage Unknown)',
-        ],
       },
     },
     // Exterior & Interior Info

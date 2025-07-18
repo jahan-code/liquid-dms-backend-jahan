@@ -123,6 +123,7 @@ const errorConstants = {
     MPG_COMBINED_MUST_BE_STRING: 'MPG combined must be a number.',
     MPG_CITY_MUST_BE_STRING: 'MPG city must be a number.',
     MPG_HIGHWAY_MUST_BE_STRING: 'MPG highway must be a number.',
+    MILEAGE_IS_MUST_BE_STRING: 'Mileage is must be a string.',
     FUEL_TYPE_MUST_BE_STRING: 'Fuel type must be a string.',
     FUEL_TYPE_REQUIRED: 'Fuel type is required.',
     MPG_MUST_BE_STRING: 'MPG must be a string.',
