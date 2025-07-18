@@ -69,6 +69,7 @@ const vehicleSchema = new mongoose.Schema(
       },
       condition: {
         type: String,
+        enum: ['New', 'Used', 'Rebuild'],
       },
       certified: {
         type: String,
@@ -231,9 +232,9 @@ const vehicleSchema = new mongoose.Schema(
     costDetails: {
       purchaseDate: Date,
       originalCost: { type: Number, default: 0 },
-      buyersFee: { type: Number, default: 0 },
-      transportationFee: { type: Number, default: 0 },
-      lotFee: { type: Number, default: 0 },
+      buyersFee: Number,
+      transportationFee: Number,
+      lotFee: Number,
       addedCosts: [
         {
           title: String,

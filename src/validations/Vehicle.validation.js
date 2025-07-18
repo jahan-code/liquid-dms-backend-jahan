@@ -53,7 +53,7 @@ const styleValidator = enumValidator('STYLE', [
   'Minivan',
   'Roadster',
 ]);
-
+const bodyTypeValidator = enumValidator('BODY_TYPE', ['2DR', '4DR']);
 const yearValidator = Joi.number()
   .integer()
   .min(1900)
@@ -76,7 +76,11 @@ const vehicleTypeValidator = requiredString('TYPE').valid(
   'Commercial',
   'Other'
 );
-
+const conditionValidator = enumValidator('CONDITION', [
+  'New',
+  'Used',
+  'Rebuild',
+]);
 const transmissionValidator = enumValidator('TRANSMISSION', [
   'Automatic',
   'Manual',
@@ -299,10 +303,10 @@ export const addVehicleSchema = Joi.object({
     make: makeValidator,
     model: modelValidator,
     style: styleValidator,
-    bodyType: optionalString('BODY_TYPE'),
+    bodyType: bodyTypeValidator,
     manufacturingYear: yearValidator,
     vehicleType: vehicleTypeValidator,
-    condition: optionalString('CONDITION'),
+    condition: conditionValidator,
     certified: optionalString('CERTIFIED'),
   }),
 
