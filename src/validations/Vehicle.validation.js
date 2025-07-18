@@ -112,12 +112,6 @@ const towCapacityValidator = Joi.number().min(0).messages({
   'number.base': errorConstants.VEHICLE.TOW_CAPACITY_MUST_BE_NUMBER,
   'number.min': errorConstants.VEHICLE.TOW_CAPACITY_NEGATIVE,
 });
-const passengersValidator = Joi.number().integer().min(1).max(100).messages({
-  'number.base': errorConstants.VEHICLE.PASSENGERS_MUST_BE_NUMBER,
-  'number.min': errorConstants.VEHICLE.PASSENGERS_TOO_LOW,
-  'number.max': errorConstants.VEHICLE.PASSENGERS_TOO_HIGH,
-  'number.integer': errorConstants.VEHICLE.PASSENGERS_INTEGER,
-});
 
 const colorValidator = enumValidator('COLOR', [
   'White',
@@ -297,8 +291,8 @@ export const addVehicleSchema = Joi.object({
     mpgCity: optionalString('MPG_CITY'),
     mpgHighway: optionalString('MPG_HIGHWAY'),
     towCapacity: towCapacityValidator,
-    passengers: passengersValidator,
-    weight: towCapacityValidator,
+    passengers: optionalString('PASSENGERS'),
+    weight: optionalString('WEIGHT'),
     mileage: requiredString('MILEAGE'),
     mileageIs: optionalString('MILEAGE_IS'),
   }),

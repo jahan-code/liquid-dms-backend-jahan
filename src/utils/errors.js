@@ -128,8 +128,8 @@ const errorConstants = {
     FUEL_TYPE_REQUIRED: 'Fuel type is required.',
     MPG_MUST_BE_STRING: 'MPG must be a string.',
     MPG_REQUIRED: 'MPG is required.',
-    PASSENGERS_MUST_BE_STRING: 'Passenger count must be a string.',
-    PASSENGERS_REQUIRED: 'Passenger count is required.',
+    PASSENGERS_MUST_BE_STRING: 'Passenger count must be a number.',
+
     MILEAGE_MUST_BE_STRING: 'Mileage must be a string.',
     MILEAGE_REQUIRED: 'Mileage is required.',
     MILEAGE_STATUS_MUST_BE_STRING: 'Mileage status must be a string.',
@@ -204,6 +204,7 @@ const errorConstants = {
     YEAR_INTEGER: 'Year must be an integer.',
     CONDITION_INVALID: 'Condition is invalid.',
     CERTIFIED_INVALID: 'Certified value is invalid.',
+    WEIGHT_MUST_BE_NUMBER: 'Weight must be a number.',
     TRANSMISSION_INVALID: 'Transmission type is invalid.',
     TRAN_SPEED_MUST_BE_NUMBER: 'Transmission speed must be a number.',
     TRAN_SPEED_TOO_LOW: 'Transmission speed too low.',
