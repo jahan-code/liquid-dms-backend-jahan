@@ -449,6 +449,7 @@ const errorConstants = {
     TERM_REQUIRED: 'Term details are required.',
   },
   CUSTOMER: {
+    SECONDARY_CONTACT_MUST_BE_STRING: 'Secondary contact must be a string.',
     FIRST_NAME_REQUIRED: 'First name is required',
     FIRST_NAME_MUST_BE_STRING: 'First name must be a string',
     MIDDLE_NAME_MUST_BE_STRING: 'Middle name must be a string',
