@@ -59,7 +59,7 @@ export const addCustomerSchema = Joi.object({
     ZipCode: requiredString('ZIPCODE'),
     Country: requiredString('COUNTRY'),
     primaryContactNumber: contactNumberValidator.required(),
-    SecondaryContactNumber: contactNumberValidator.optional(),
+    SecondaryContactNumber: optionalString('SECONDARY_CONTACT'),
     email: emailValidator,
     DateOfBirth: dateValidator.optional(),
     Gender: enumValidator('GENDER', ['Male', 'Female', 'Other']),
