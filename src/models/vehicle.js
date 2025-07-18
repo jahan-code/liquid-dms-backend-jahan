@@ -69,11 +69,9 @@ const vehicleSchema = new mongoose.Schema(
       },
       condition: {
         type: String,
-        enum: ['New', 'Used', 'Rebuild'],
       },
       certified: {
         type: String,
-        enum: ['Yes', 'No'],
       },
     },
 

@@ -340,7 +340,7 @@ const errorConstants = {
     MILEAGE_REQUIRED: 'Mileage is required.',
     // Account Number
     ACCOUNT_NUMBER_MUST_BE_STRING: 'Account number must be a string.',
-
+    CONDITION_MUST_BE_STRING: 'Condition must be a string.',
     // Name on Check
     NAME_ON_CHECK_MUST_BE_STRING: 'Name to print on check must be a string.',
 
