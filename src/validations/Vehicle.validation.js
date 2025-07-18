@@ -89,12 +89,7 @@ const transmissionValidator = enumValidator('TRANSMISSION', [
   'Tiptronic',
   'Semi-Automatic',
 ]);
-const tranSpeedValidator = Joi.number().integer().min(1).max(10).messages({
-  'number.base': errorConstants.VEHICLE.TRAN_SPEED_MUST_BE_NUMBER,
-  'number.min': errorConstants.VEHICLE.TRAN_SPEED_TOO_LOW,
-  'number.max': errorConstants.VEHICLE.TRAN_SPEED_TOO_HIGH,
-  'number.integer': errorConstants.VEHICLE.TRAN_SPEED_INTEGER,
-});
+
 const drivetrainValidator = enumValidator('DRIVETRAIN', [
   'FWD (Front-Wheel Drive)',
   'RWD (Rear-Wheel Drive)',
@@ -312,7 +307,7 @@ export const addVehicleSchema = Joi.object({
 
   specifications: Joi.object({
     transmission: transmissionValidator,
-    tranSpeed: tranSpeedValidator,
+    tranSpeed: optionalString('TRAN_SPEED'),
     drivetrain: drivetrainValidator,
     engineCylinders: engineCylindersValidator,
     engineSize: engineSizeValidator,

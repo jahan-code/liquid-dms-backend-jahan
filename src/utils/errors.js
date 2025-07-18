@@ -114,7 +114,7 @@ const errorConstants = {
     CERTIFIED_MUST_BE_STRING: 'Certified must be a string.',
     CERTIFIED_REQUIRED: 'Certified is required.',
     TRAN_SPEED_MUST_BE_STRING: 'Transmission speed must be a string.',
-    TRAN_SPEED_REQUIRED: 'Transmission speed is required.',
+
     DRIVETRAIN_MUST_BE_STRING: 'Drivetrain must be a string.',
     DRIVETRAIN_REQUIRED: 'Drivetrain is required.',
     CYLINDERS_MUST_BE_STRING: 'Cylinders must be a string.',
