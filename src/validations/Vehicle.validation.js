@@ -96,16 +96,7 @@ const drivetrainValidator = enumValidator('DRIVETRAIN', [
   'AWD (All-Wheel Drive)',
   '4WD (Four-Wheel Drive)',
 ]);
-const engineCylindersValidator = Joi.number()
-  .integer()
-  .min(1)
-  .max(16)
-  .messages({
-    'number.base': errorConstants.VEHICLE.CYLINDERS_MUST_BE_NUMBER,
-    'number.min': errorConstants.VEHICLE.CYLINDERS_TOO_LOW,
-    'number.max': errorConstants.VEHICLE.CYLINDERS_TOO_HIGH,
-    'number.integer': errorConstants.VEHICLE.CYLINDERS_INTEGER,
-  });
+
 const engineSizeValidator = Joi.number().positive().messages({
   'number.base': errorConstants.VEHICLE.ENGINE_SIZE_INVALID,
   'number.positive': errorConstants.VEHICLE.ENGINE_SIZE_INVALID,
@@ -309,7 +300,7 @@ export const addVehicleSchema = Joi.object({
     transmission: transmissionValidator,
     tranSpeed: optionalString('TRAN_SPEED'),
     drivetrain: drivetrainValidator,
-    engineCylinders: engineCylindersValidator,
+    engineCylinders: optionalString('ENGINE_CYLINDERS'),
     engineSize: engineSizeValidator,
     fuelType: fuelTypeValidator,
     mpgCombined: mpgValidator,

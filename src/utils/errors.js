@@ -120,7 +120,6 @@ const errorConstants = {
     CYLINDERS_MUST_BE_STRING: 'Cylinders must be a string.',
     CYLINDERS_REQUIRED: 'Cylinders are required.',
     ENGINE_SIZE_MUST_BE_STRING: 'Engine size must be a string.',
-    ENGINE_SIZE_REQUIRED: 'Engine size is required.',
     FUEL_TYPE_MUST_BE_STRING: 'Fuel type must be a string.',
     FUEL_TYPE_REQUIRED: 'Fuel type is required.',
     MPG_MUST_BE_STRING: 'MPG must be a string.',
