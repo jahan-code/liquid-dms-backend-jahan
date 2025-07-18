@@ -46,7 +46,6 @@ const vehicleSchema = new mongoose.Schema(
       },
       bodyType: {
         type: String,
-        enum: ['2DR', '4DR'],
       },
       manufacturingYear: {
         type: Number,

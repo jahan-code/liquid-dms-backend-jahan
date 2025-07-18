@@ -335,7 +335,7 @@ const errorConstants = {
     EMAIL_REQUIRED: 'Email is required.',
     EMAIL_MUST_BE_STRING: 'Email must be a string.',
     EMAIL_INVALID: 'Email must be a valid email address.',
-
+    BODY_TYPE_MUST_BE_STRING: 'Body type must be a string.',
     MILEAGE_MUST_BE_STRING: 'Mileage must be a string.',
     MILEAGE_REQUIRED: 'Mileage is required.',
     // Account Number
