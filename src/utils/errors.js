@@ -119,10 +119,9 @@ const errorConstants = {
     DRIVETRAIN_REQUIRED: 'Drivetrain is required.',
     CYLINDERS_MUST_BE_STRING: 'Cylinders must be a string.',
     CYLINDERS_REQUIRED: 'Cylinders are required.',
+
     ENGINE_SIZE_MUST_BE_STRING: 'Engine size must be a number.',
-    MPG_COMBINED_MUST_BE_STRING: 'MPG combined must be a number.',
-    MPG_CITY_MUST_BE_STRING: 'MPG city must be a number.',
-    MPG_HIGHWAY_MUST_BE_STRING: 'MPG highway must be a number.',
+
     MILEAGE_IS_MUST_BE_STRING: 'Mileage is must be a string.',
     FUEL_TYPE_MUST_BE_STRING: 'Fuel type must be a string.',
     FUEL_TYPE_REQUIRED: 'Fuel type is required.',
@@ -269,6 +268,12 @@ const errorConstants = {
 
     // 🔹 Misc
     FEATURES_MUST_BE_ARRAY: 'Features must be an array.',
+    ENGINE_CYLINDERS_MUST_BE_STRING: 'Engine cylinders must be a string.',
+    MPG_COMBINED_MUST_BE_STRING: 'MPG combined must be a string.',
+    MPG_CITY_MUST_BE_STRING: 'MPG city must be a string.',
+    MPG_HIGHWAY_MUST_BE_STRING: 'MPG highway must be a string.',
+
+    WEIGHT_MUST_BE_STRING: 'Weight must be a string.',
   },
   //🔹 Campaign Login Template Errors
   CAMPAIGN_LOGIN_TEMPLATE: {
