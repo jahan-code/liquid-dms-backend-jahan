@@ -163,9 +163,9 @@ export const getAllCustomers = async (req, res, next) => {
 
     // Fetch paginated customers, most recent first
     const customers = await Customer.find()
+      .sort({ createdAt: -1 }) // Sort by most recent
       .skip(skip)
-      .limit(parsedLimit)
-      .sort({ createdAt: 1 }); // Sort by most recent
+      .limit(parsedLimit);
 
     if (!customers || customers.length === 0) {
       return next(new ApiError('No customers found', 404));
