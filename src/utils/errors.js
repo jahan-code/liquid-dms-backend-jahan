@@ -475,13 +475,14 @@ const errorConstants = {
     CONTACT_INVALID: 'Contact number must be valid',
     CONTACT_MUST_BE_STRING: 'Contact number must be a string',
     DATE_INVALID: 'Invalid date format',
-    HEAR_ABOUT_US_INVALID: 'Invalid option for Hear About Us',
     ALREADY_EXISTS: 'Customer with this email already exists',
     EMPLOYMENT_STATUS_INVALID: 'Employment status is invalid.',
     PREFERRED_METHOD_OF_INCOME_VERIFICATION_INVALID:
       'Preferred method of income verification is invalid.',
     EMPLOYMENT_LENGTH_MUST_BE_STRING: 'Employment length must be a string.',
     EMPLOYMENT_TYPE_MUST_BE_STRING: 'Employment type must be a string.',
+    GENDER_INVALID: 'Gender is invalid.',
+    HEAR_ABOUT_US_INVALID: 'Invalid option for Hear About Us.',
   },
 
   // 🔹 Message Template Errors
