@@ -208,7 +208,7 @@ const vehicleSchema = new mongoose.Schema(
       otherImageUrls: [String],
     },
     costDetails: {
-      purchaseDate: Date,
+      purchaseDate: { type: Date, default: Date.now },
       originalCost: { type: Number, default: 0 },
       buyersFee: { type: Number, default: 0 },
       transportationFee: { type: Number, default: 0 },
