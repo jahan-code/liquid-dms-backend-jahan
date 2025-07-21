@@ -161,11 +161,11 @@ export const getAllCustomers = async (req, res, next) => {
     // Get total count of customers
     const totalCustomers = await Customer.countDocuments();
 
-    // Fetch paginated customers
+    // Fetch paginated customers, most recent first
     const customers = await Customer.find()
       .skip(skip)
       .limit(parsedLimit)
-      .sort({ createdAt: -1 }); // Optional: latest first
+      .sort({ createdAt: -1 }); // Sort by most recent
 
     if (!customers || customers.length === 0) {
       return next(new ApiError('No customers found', 404));
