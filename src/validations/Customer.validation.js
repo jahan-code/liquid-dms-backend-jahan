@@ -103,7 +103,14 @@ const optionalCustomerInfoSchema = customerInfoSchema.fork(
   (field) => field.optional()
 );
 
+const incomeInfoSchema = addCustomerSchema.extract('IncomeInformation');
+const optionalIncomeInfoSchema = incomeInfoSchema.fork(
+  Object.keys(incomeInfoSchema.describe().keys),
+  (field) => field.optional()
+);
+
 // Step 3: Wrap back into the main schema
 export const editCustomerSchema = Joi.object({
   CustomerInformation: optionalCustomerInfoSchema,
+  IncomeInformation: optionalIncomeInfoSchema,
 });
