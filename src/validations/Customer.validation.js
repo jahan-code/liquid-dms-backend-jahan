@@ -75,6 +75,26 @@ export const addCustomerSchema = Joi.object({
       'Other',
     ]),
   }).required(),
+  IncomeInformation: Joi.object({
+    EmploymentStatus: enumValidator('EMPLOYMENT_STATUS', [
+      'Employed Full-Time',
+      'Employed Part-Time',
+      'Self-Employed',
+      'Unemployed',
+      'Retired',
+      'Student',
+    ]).required(),
+    EmploymentLenght: optionalString('EMPLOYMENT_LENGTH'),
+    GrossMonthlyIncome: Joi.number().required().messages({
+      'number.base': 'Gross monthly income must be a number.',
+      'any.required': 'Gross monthly income is required.',
+    }),
+    preferredMethodOfIncomeVerification: enumValidator(
+      'PREFERRED_METHOD_OF_INCOME_VERIFICATION',
+      ['Pay Stub', 'Bank Statement', 'Tax Return', 'Verbal Confirmation']
+    ).required(),
+    EmploymentType: optionalString('EMPLOYMENT_TYPE'),
+  }).required(),
 }).required();
 // inside Customer.validation.js
 const customerInfoSchema = addCustomerSchema.extract('CustomerInformation');

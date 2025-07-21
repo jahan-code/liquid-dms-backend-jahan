@@ -71,6 +71,34 @@ const CustomerSchema = new mongoose.Schema({
       enum: ['Facebook', 'Twitter', 'Other'],
     },
   },
+
+  IncomeInformation: {
+    EmploymentStatus: {
+      type: String,
+      enum: [
+        'Employed Full-Time',
+        'Employed Part-Time',
+        'Self-Employed',
+        'Unemployed',
+        'Retired',
+        'Student',
+      ],
+    },
+    EmploymentLenght: {
+      type: String,
+    },
+    GrossMonthlyIncome: {
+      type: Number,
+    },
+
+    preferredMethodOfIncomeVerification: {
+      type: String,
+      enum: ['Pay Stub', 'Bank Statement', 'Tax Return', 'Verbal Confirmation'],
+    },
+    EmploymentType: {
+      type: String,
+    },
+  },
 });
 
 export default mongoose.model('Customer', CustomerSchema);

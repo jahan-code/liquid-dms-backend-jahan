@@ -454,8 +454,6 @@ const errorConstants = {
     FIRST_NAME_MUST_BE_STRING: 'First name must be a string',
     MIDDLE_NAME_MUST_BE_STRING: 'Middle name must be a string',
     MIDDLE_NAME_REQUIRED: 'Middle name is required', // If required
-    SECONDARYCONTACTNUMBER_MUST_BE_STRING:
-      'Secondary contact number must be a string',
     SSN_MUST_BE_STRING: 'SSN must be a string',
     DRIVER_LICENSE_MUST_BE_STRING: 'Driver license must be a string',
     SPOUSE_NAME_MUST_BE_STRING: 'Spouse name must be a string',
@@ -476,10 +474,14 @@ const errorConstants = {
     EMAIL_INVALID: 'Email must be valid',
     CONTACT_INVALID: 'Contact number must be valid',
     CONTACT_MUST_BE_STRING: 'Contact number must be a string',
-    GENDER_INVALID: 'Gender must be Male, Female, or Other',
     DATE_INVALID: 'Invalid date format',
     HEAR_ABOUT_US_INVALID: 'Invalid option for Hear About Us',
     ALREADY_EXISTS: 'Customer with this email already exists',
+    EMPLOYMENT_STATUS_INVALID: 'Employment status is invalid.',
+    PREFERRED_METHOD_OF_INCOME_VERIFICATION_INVALID:
+      'Preferred method of income verification is invalid.',
+    EMPLOYMENT_LENGTH_MUST_BE_STRING: 'Employment length must be a string.',
+    EMPLOYMENT_TYPE_MUST_BE_STRING: 'Employment type must be a string.',
   },
 
   // 🔹 Message Template Errors

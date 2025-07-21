@@ -23,7 +23,7 @@ export const addCustomer = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    const { CustomerInformation } = value;
+    const { CustomerInformation, IncomeInformation } = value;
     // 🔎 Check if customer already exists by email
     const existingCustomer = await Customer.findOne({
       'CustomerInformation.email': value.CustomerInformation.email,
@@ -41,6 +41,7 @@ export const addCustomer = async (req, res, next) => {
     // ✅ Create new customer
     const newCustomer = new Customer({
       CustomerInformation,
+      IncomeInformation,
       customerId: customId,
     });
 
@@ -130,6 +131,7 @@ export const editCustomerById = async (req, res, next) => {
 
     // ✏️ Update the CustomerInformation
     customer.CustomerInformation = value.CustomerInformation;
+    customer.IncomeInformation = value.IncomeInformation;
 
     const updatedCustomer = await customer.save();
 
