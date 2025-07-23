@@ -25,6 +25,7 @@ const startServer = async () => {
         origin: [
           'https://liquid-dms-admin-panel.vercel.app',
           'http://localhost:3000',
+          'https://liquid-dms-frontend.vercel.app',
         ],
         credentials: true,
       })
