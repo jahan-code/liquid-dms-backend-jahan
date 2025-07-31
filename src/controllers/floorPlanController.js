@@ -158,13 +158,9 @@ export const showAllFloorPlans = async (req, res, next) => {
         new ApiError(errorConstants.FLOOR_PLAN.FLOOR_PLAN_NOT_FOUND, 404)
       );
     }
-    const userResponse = allFloorPlans.map((plan) => ({
-      id: plan._id,
-      companyName: plan.CompanyDetails.companyName,
-    }));
     // ✅ Send success response
     return SuccessHandler(
-      userResponse,
+      allFloorPlans,
       200,
       'All floor plans fetched successfully',
       res
