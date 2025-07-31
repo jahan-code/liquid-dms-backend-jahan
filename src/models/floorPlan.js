@@ -9,8 +9,8 @@ const floorPlanSchema = new mongoose.Schema({
   },
 
   Rate: {
-    apr: { type: Number, default: 0.0 },
-    interestCalculationDays: { type: Number, default: 30 },
+    apr: { type: Number, default: 0 },
+    interestCalculationDays: { type: Number, default: 0 },
   },
   Fees: {
     type: {
@@ -18,16 +18,16 @@ const floorPlanSchema = new mongoose.Schema({
       enum: ['One Time', 'Plus for each Curtailment'],
       default: 'Plus for each Curtailment',
     },
-    adminFee: { type: Number, default: 0.0 },
-    setUpFee: { type: Number, default: 0.0 },
-    additionalFee: { type: Number, default: 0.0 },
+    adminFee: { type: Number, default: 0 },
+    setUpFee: { type: Number, default: 0 },
+    additionalFee: { type: Number, default: 0 },
   },
   term: {
     lengthInDays: { type: Number, default: 0 },
     daysUntilFirstCurtailment: { type: Number, default: 0 },
-    percentPrincipalReduction: { type: Number, default: 0.0 },
+    percentPrincipalReduction: { type: Number, default: 0 },
     daysUntillSecondCurtailment: { type: Number, default: 0 },
-    percentPrincipalReduction2: { type: Number, default: 0.0 },
+    percentPrincipalReduction2: { type: Number, default: 0 },
     interestAndFeesWithEachCurtailment: { type: Boolean, default: false },
   },
   additionalNotes: {
