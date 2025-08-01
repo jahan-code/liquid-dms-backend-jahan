@@ -59,6 +59,8 @@ const validationSchemas = {
   '/floorPlan/get-floor': { GET: null },
   '/floorPlan/edit-floor': { PUT: null },
   '/floorPlan/floors': { GET: null },
+  '/floorPlan/delete-floor': { DELETE: null },
+  '/floorPlan/floors-paginated': { GET: null },
   //Customer
   '/customer/add-customer': { POST: addCustomerSchema },
   '/customer/edit-customer': { PUT: editCustomerSchema },
