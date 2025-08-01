@@ -383,6 +383,10 @@ const errorConstants = {
     STATE_REQUIRED: 'State is required.',
     ZIP_MUST_BE_STRING: 'ZIP code must be a string.',
     ZIP_REQUIRED: 'ZIP code is required.',
+    PHONE_MUST_BE_STRING: 'Phone number must be a string.',
+    PHONE_REQUIRED: 'Phone number is required.',
+    CONTACT_PERSON_MUST_BE_STRING: 'Contact person must be a string.',
+    CONTACT_PERSON_REQUIRED: 'Contact person is required.',
 
     // 🔹 Rate
     APR_MUST_BE_NUMBER: 'APR must be a number.',

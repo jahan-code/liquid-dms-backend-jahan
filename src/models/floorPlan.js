@@ -6,6 +6,8 @@ const floorPlanSchema = new mongoose.Schema({
     city: { type: String, required: true },
     state: { type: String, required: true },
     zip: { type: String, required: true },
+    phone: { type: String, required: true },
+    contactPerson: { type: String, required: true },
   },
 
   Rate: {

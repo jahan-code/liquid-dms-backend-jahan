@@ -33,6 +33,37 @@ const streetValidator = requiredString('STREET');
 const cityValidator = requiredString('CITY');
 const stateValidator = requiredString('STATE');
 const zipValidator = requiredString('ZIP');
+const phoneValidator = Joi.string()
+  .trim()
+  .required()
+  .min(10)
+  .max(20)
+  .pattern(/^[+]?[\d\s\-().]+$/)
+  .messages({
+    'string.base': errorConstants.FLOOR_PLAN.PHONE_MUST_BE_STRING,
+    'string.empty': errorConstants.FLOOR_PLAN.PHONE_REQUIRED,
+    'any.required': errorConstants.FLOOR_PLAN.PHONE_REQUIRED,
+    'string.min': 'Phone number must be at least 10 characters long',
+    'string.max': 'Phone number cannot exceed 20 characters',
+    'string.pattern.base':
+      'Phone number must be a valid format (e.g., 555-123-4567, (555) 123-4567, or +1-555-123-4567)',
+  });
+
+const contactPersonValidator = Joi.string()
+  .trim()
+  .required()
+  .min(2)
+  .max(100)
+  .pattern(/^[a-zA-Z\s\-.]+$/)
+  .messages({
+    'string.base': errorConstants.FLOOR_PLAN.CONTACT_PERSON_MUST_BE_STRING,
+    'string.empty': errorConstants.FLOOR_PLAN.CONTACT_PERSON_REQUIRED,
+    'any.required': errorConstants.FLOOR_PLAN.CONTACT_PERSON_REQUIRED,
+    'string.min': 'Contact person name must be at least 2 characters long',
+    'string.max': 'Contact person name cannot exceed 100 characters',
+    'string.pattern.base':
+      'Contact person name can only contain letters, spaces, hyphens, and periods',
+  });
 
 const aprValidator = Joi.number()
   .min(0)
@@ -98,6 +129,8 @@ const companyDetailsSchema = Joi.object({
   city: cityValidator.required(),
   state: stateValidator.required(),
   zip: zipValidator.required(),
+  phone: phoneValidator.required(),
+  contactPerson: contactPersonValidator.required(),
 }).required();
 
 const rateSchema = Joi.object({
