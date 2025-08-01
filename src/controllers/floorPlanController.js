@@ -67,6 +67,15 @@ export const getFloorPlanById = async (req, res, next) => {
 
     const { id } = req.query;
 
+    // Validate if ID is provided
+    if (!id) {
+      logger.warn({
+        message: '❌ Floor plan ID is required',
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError('Floor plan ID is required', 400));
+    }
+
     const floorPlan = await FloorPlan.findById(id);
 
     if (!floorPlan) {
@@ -74,7 +83,9 @@ export const getFloorPlanById = async (req, res, next) => {
         message: `❌ Floor plan not found for ID: ${id}`,
         timestamp: new Date().toISOString(),
       });
-      return next(new ApiError(errorConstants.FLOOR_PLAN.NOT_FOUND, 404));
+      return next(
+        new ApiError(errorConstants.FLOOR_PLAN.FLOOR_PLAN_NOT_FOUND, 404)
+      );
     }
 
     return SuccessHandler(
@@ -119,10 +130,11 @@ export const editFloorPlan = async (req, res, next) => {
 
     if (!updatedFloorPlan) {
       logger.warn({
-        message: `❌ Floor plan not found for update with ID: ${id}`,
         timestamp: new Date().toISOString(),
       });
-      return next(new ApiError(errorConstants.FLOOR_PLAN.NOT_FOUND, 404));
+      return next(
+        new ApiError(errorConstants.FLOOR_PLAN.FLOOR_PLAN_NOT_FOUND, 404)
+      );
     }
 
     return SuccessHandler(

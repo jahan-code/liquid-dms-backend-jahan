@@ -56,7 +56,7 @@ const validationSchemas = {
   '/vehicle/deletebyId': { DELETE: null },
   //FloorPlan
   '/floorPlan/add-floor': { POST: addFloorPlanSchema },
-  '/floorPlan': { GET: null },
+  '/floorPlan/get-floor': { GET: null },
   '/floorPlan/edit-floor': { PUT: null },
   '/floorPlan/floors': { GET: null },
   //Customer

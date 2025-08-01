@@ -10,7 +10,7 @@ import { verifyToken } from '../middleware/auth.middleware.js';
 const router = express.Router();
 
 router.post('/add-floor', verifyToken, addFloorPlan);
-router.get('/', verifyToken, getFloorPlanById);
+router.get('/get-floor', verifyToken, getFloorPlanById);
 router.put('/edit-floor', verifyToken, editFloorPlan);
-router.get('/floors', verifyToken, showAllFloorPlans); // Assuming this is to get all floors
+router.get('/floors', verifyToken, showAllFloorPlans);
 export default router;
