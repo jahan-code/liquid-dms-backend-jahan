@@ -8,6 +8,12 @@ const floorPlanSchema = new mongoose.Schema({
     zip: { type: String, required: true },
     phone: { type: String, required: true },
     contactPerson: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['Active', 'Inactive'],
+      default: 'Active',
+      required: true,
+    },
   },
 
   Rate: {

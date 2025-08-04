@@ -388,6 +388,11 @@ const errorConstants = {
     CONTACT_PERSON_MUST_BE_STRING: 'Contact person must be a string.',
     CONTACT_PERSON_REQUIRED: 'Contact person is required.',
 
+    // 🔹 Status
+    STATUS_MUST_BE_STRING: 'Status must be a string.',
+    STATUS_REQUIRED: 'Status is required.',
+    STATUS_INVALID: 'Status must be either "active" or "inactive".',
+
     // 🔹 Rate
     APR_MUST_BE_NUMBER: 'APR must be a number.',
     APR_TOO_LOW: 'APR cannot be negative.',
