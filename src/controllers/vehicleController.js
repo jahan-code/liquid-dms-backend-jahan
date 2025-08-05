@@ -242,9 +242,12 @@ export const addVehicleCost = async (req, res, next) => {
       });
     }
     if (value.floorPlanDetails) {
-      // Remove dateOpened if it is an empty string
+      // Remove deprecated fields if present
       if (value.floorPlanDetails.dateOpened === '') {
         delete value.floorPlanDetails.dateOpened;
+      }
+      if (value.floorPlanDetails.notes === '') {
+        delete value.floorPlanDetails.notes;
       }
 
       // Handle floor plan logic
@@ -285,6 +288,20 @@ export const addVehicleCost = async (req, res, next) => {
               )
             );
           }
+          // Ensure dateOpened is set in CompanyDetails if provided at the top level
+          if (value.floorPlanDetails.dateOpened) {
+            value.floorPlanDetails.newFloorPlan.CompanyDetails = {
+              ...value.floorPlanDetails.newFloorPlan.CompanyDetails,
+              dateOpened: value.floorPlanDetails.dateOpened,
+            };
+          }
+          // Ensure notes is set in Fees if provided at the top level
+          if (value.floorPlanDetails.notes) {
+            value.floorPlanDetails.newFloorPlan.Fees = {
+              ...value.floorPlanDetails.newFloorPlan.Fees,
+              notes: value.floorPlanDetails.notes,
+            };
+          }
           const newFloorPlan = new FloorPlan(
             value.floorPlanDetails.newFloorPlan
           );
@@ -295,21 +312,10 @@ export const addVehicleCost = async (req, res, next) => {
         // Update the floor plan reference
         updateData['floorPlanDetails.floorPlan'] = floorPlanId;
         updateData['floorPlanDetails.isFloorPlanned'] = true;
-
-        // Keep other floor plan details
-        if (value.floorPlanDetails.dateOpened) {
-          updateData['floorPlanDetails.dateOpened'] =
-            value.floorPlanDetails.dateOpened;
-        }
-        if (value.floorPlanDetails.notes) {
-          updateData['floorPlanDetails.notes'] = value.floorPlanDetails.notes;
-        }
       } else {
         // If not floor planned, clear the floor plan reference
         updateData['floorPlanDetails.isFloorPlanned'] = false;
         updateData['floorPlanDetails.floorPlan'] = null;
-        updateData['floorPlanDetails.dateOpened'] = null;
-        updateData['floorPlanDetails.notes'] = null;
       }
     }
 

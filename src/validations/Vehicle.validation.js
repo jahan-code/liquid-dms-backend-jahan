@@ -371,6 +371,7 @@ export const AddVehicleCostSchema = Joi.object({
         phone: Joi.string().required(),
         contactPerson: Joi.string().required(),
         status: Joi.string().valid('Active', 'Inactive').default('Active'),
+        dateOpened: Joi.date().allow('').optional(),
       }).required(),
       Rate: Joi.object({
         apr: Joi.number().min(0).default(0),
@@ -383,6 +384,7 @@ export const AddVehicleCostSchema = Joi.object({
         adminFee: Joi.number().min(0).default(0),
         setUpFee: Joi.number().min(0).default(0),
         additionalFee: Joi.number().min(0).default(0),
+        notes: Joi.string().allow('', null).optional(),
       }).optional(),
       term: Joi.object({
         lengthInDays: Joi.number().min(0).default(0),
@@ -394,8 +396,6 @@ export const AddVehicleCostSchema = Joi.object({
       }).optional(),
       additionalNotes: Joi.string().default(''),
     }).optional(), // New floor plan data
-    dateOpened: Joi.date().allow('').optional(),
-    notes: Joi.string().allow('', null).optional(),
   }).optional(),
 })
   .or('costDetails', 'floorPlanDetails')

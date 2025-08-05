@@ -230,8 +230,7 @@ const vehicleSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'FloorPlan',
       },
-      dateOpened: Date,
-      notes: String,
+      // dateOpened and notes removed as they are now inside FloorPlan model
     },
     Price: {
       Retail: Number,
