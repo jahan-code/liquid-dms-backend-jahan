@@ -1,5 +1,6 @@
 import Vehicle from '../models/vehicle.js';
 import Vendor from '../models/vendor.js';
+import FloorPlan from '../models/floorPlan.js';
 import ApiError from '../utils/ApiError.js';
 import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';
@@ -141,7 +142,10 @@ export const addVehicle = async (req, res, next) => {
     });
 
     await newVehicle.save();
-    await newVehicle.populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    await newVehicle.populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     // Reorder vehicle object for response
     const vehicleObject = newVehicle.toObject();
@@ -173,6 +177,13 @@ export const addVehicle = async (req, res, next) => {
 export const addVehicleCost = async (req, res, next) => {
   try {
     logger.info('💰 Add vehicle Cost request received');
+
+    // New Floor Plan Logic:
+    // 1. isExistingFloor = true: Use existing floor plan (provide companyName)
+    // 2. isExistingFloor = false (default): Create new floor plan (provide newFloorPlan object)
+    // 3. Floor plan data (company details, rates, fees, terms) is stored in FloorPlan collection
+    // 4. Vehicle only stores reference to floor plan, not the actual data
+    // 5. When companyName is provided, it automatically finds and references the existing floor plan
 
     // 1. Validate vehicle ID from query
     const { error: queryError } = vehicleIdQuerySchema.validate(req.query);
@@ -235,14 +246,71 @@ export const addVehicleCost = async (req, res, next) => {
       if (value.floorPlanDetails.dateOpened === '') {
         delete value.floorPlanDetails.dateOpened;
       }
-      Object.keys(value.floorPlanDetails).forEach((key) => {
-        updateData[`floorPlanDetails.${key}`] = value.floorPlanDetails[key];
-      });
-    }
-    if (value.Curtailments) {
-      Object.keys(value.Curtailments).forEach((key) => {
-        updateData[`Curtailments.${key}`] = value.Curtailments[key];
-      });
+
+      // Handle floor plan logic
+      if (value.floorPlanDetails.isFloorPlanned) {
+        let floorPlanId = null;
+
+        // Check if using existing floor plan or creating new one
+        if (value.floorPlanDetails.isExistingFloor === true) {
+          // Use existing floor plan
+          if (value.floorPlanDetails.companyName) {
+            const existingFloorPlan = await FloorPlan.findOne({
+              'CompanyDetails.companyName': value.floorPlanDetails.companyName,
+            });
+            if (!existingFloorPlan) {
+              return next(
+                new ApiError(
+                  `Floor plan company '${value.floorPlanDetails.companyName}' not found`,
+                  404
+                )
+              );
+            }
+            floorPlanId = existingFloorPlan._id;
+          } else {
+            return next(
+              new ApiError(
+                'companyName is required when using existing floor plan',
+                400
+              )
+            );
+          }
+        } else {
+          // Default: Create new floor plan (isExistingFloor = false)
+          if (!value.floorPlanDetails.newFloorPlan) {
+            return next(
+              new ApiError(
+                'newFloorPlan is required when creating new floor plan',
+                400
+              )
+            );
+          }
+          const newFloorPlan = new FloorPlan(
+            value.floorPlanDetails.newFloorPlan
+          );
+          const savedFloorPlan = await newFloorPlan.save();
+          floorPlanId = savedFloorPlan._id;
+        }
+
+        // Update the floor plan reference
+        updateData['floorPlanDetails.floorPlan'] = floorPlanId;
+        updateData['floorPlanDetails.isFloorPlanned'] = true;
+
+        // Keep other floor plan details
+        if (value.floorPlanDetails.dateOpened) {
+          updateData['floorPlanDetails.dateOpened'] =
+            value.floorPlanDetails.dateOpened;
+        }
+        if (value.floorPlanDetails.notes) {
+          updateData['floorPlanDetails.notes'] = value.floorPlanDetails.notes;
+        }
+      } else {
+        // If not floor planned, clear the floor plan reference
+        updateData['floorPlanDetails.isFloorPlanned'] = false;
+        updateData['floorPlanDetails.floorPlan'] = null;
+        updateData['floorPlanDetails.dateOpened'] = null;
+        updateData['floorPlanDetails.notes'] = null;
+      }
     }
 
     // 4. Update the vehicle
@@ -250,7 +318,10 @@ export const addVehicleCost = async (req, res, next) => {
       vehicleId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    ).populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     if (!updatedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
@@ -351,7 +422,10 @@ export const addVehicleSales = async (req, res, next) => {
       vehicleId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    ).populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
     // 5. Save the updated vehicle
 
     // 6. Reorder vehicle object for response
@@ -428,7 +502,10 @@ export const addVehiclePreviousOwner = async (req, res, next) => {
       vehicleId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    ).populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     if (!updatedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
@@ -520,7 +597,10 @@ export const addVehicleNotes = async (req, res, next) => {
       vehicleId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    ).populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     if (!updatedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
@@ -562,7 +642,10 @@ export const markVehicleAsCompleted = async (req, res, next) => {
       vehicleId,
       { $set: { markAsCompleted: true } },
       { new: true, runValidators: true }
-    ).populate({ path: 'vendor', select: '-taxIdOrSSN' });
+    ).populate([
+      { path: 'vendor', select: '-taxIdOrSSN' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     if (!updatedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
@@ -601,7 +684,10 @@ export const getAllVehicles = async (req, res, next) => {
 
     // Fetch all vehicles regardless of completion status
     const vehicles = await Vehicle.find({})
-      .populate({ path: 'vendor', select: '-taxIdOrSSN' })
+      .populate([
+        { path: 'vendor', select: '-taxIdOrSSN' },
+        { path: 'floorPlanDetails.floorPlan' },
+      ])
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 });
@@ -643,9 +729,10 @@ export const getVehicleById = async (req, res, next) => {
     const { id: vehicleId } = req.query;
 
     // 2. Fetch vehicle
-    const vehicle = await Vehicle.findById(vehicleId).populate({
-      path: 'vendor',
-    });
+    const vehicle = await Vehicle.findById(vehicleId).populate([
+      { path: 'vendor' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     if (!vehicle) {
       return next(new ApiError('Vehicle not found', 404));
@@ -832,7 +919,10 @@ export const editVehicle = async (req, res, next) => {
     });
 
     await existingVehicle.save();
-    await existingVehicle.populate({ path: 'vendor' });
+    await existingVehicle.populate([
+      { path: 'vendor' },
+      { path: 'floorPlanDetails.floorPlan' },
+    ]);
 
     // Reorder vehicle object for response
     const vehicleObject = existingVehicle.toObject();

@@ -359,25 +359,49 @@ export const AddVehicleCostSchema = Joi.object({
   }).optional(),
   floorPlanDetails: Joi.object({
     isFloorPlanned: Joi.boolean().optional(),
-    company: Joi.string().allow('', null).optional(),
+    isExistingFloor: Joi.boolean().default(false), // true = use existing, false = create new (default)
+    companyName: Joi.string().optional(), // Company name for existing floor plan lookup
+    newFloorPlan: Joi.object({
+      CompanyDetails: Joi.object({
+        companyName: Joi.string().required(),
+        street: Joi.string().required(),
+        city: Joi.string().required(),
+        state: Joi.string().required(),
+        zip: Joi.string().required(),
+        phone: Joi.string().required(),
+        contactPerson: Joi.string().required(),
+        status: Joi.string().valid('Active', 'Inactive').default('Active'),
+      }).required(),
+      Rate: Joi.object({
+        apr: Joi.number().min(0).default(0),
+        interestCalculationDays: Joi.number().min(0).default(0),
+      }).optional(),
+      Fees: Joi.object({
+        type: Joi.string()
+          .valid('One Time', 'Plus for each Curtailment')
+          .default('Plus for each Curtailment'),
+        adminFee: Joi.number().min(0).default(0),
+        setUpFee: Joi.number().min(0).default(0),
+        additionalFee: Joi.number().min(0).default(0),
+      }).optional(),
+      term: Joi.object({
+        lengthInDays: Joi.number().min(0).default(0),
+        daysUntilFirstCurtailment: Joi.number().min(0).default(0),
+        percentPrincipalReduction: Joi.number().min(0).default(0),
+        daysUntillSecondCurtailment: Joi.number().min(0).default(0),
+        percentPrincipalReduction2: Joi.number().min(0).default(0),
+        interestAndFeesWithEachCurtailment: Joi.boolean().default(false),
+      }).optional(),
+      additionalNotes: Joi.string().default(''),
+    }).optional(), // New floor plan data
     dateOpened: Joi.date().allow('').optional(),
-    setUpFee: Joi.number().min(0).optional(),
-    adminFee: Joi.number().min(0).optional(),
-    additionalFee: Joi.number().min(0).optional(),
-    aprRate: Joi.number().min(0).optional(),
     notes: Joi.string().allow('', null).optional(),
   }).optional(),
-  Curtailments: Joi.object({
-    lengthFloorPlan: Joi.number().min(0).optional(),
-    daysUntil1stCurtailment: Joi.number().min(0).integer().optional(),
-    lengthFloorPlan2: Joi.number().min(0).optional(),
-    daysUntil2ndCurtailment: Joi.number().min(0).integer().optional(),
-  }).optional(),
 })
-  .or('costDetails', 'floorPlanDetails', 'Curtailments')
+  .or('costDetails', 'floorPlanDetails')
   .messages({
     'object.missing':
-      'At least one of costDetails, floorPlanDetails, or Curtailments is required.',
+      'At least one of costDetails or floorPlanDetails is required.',
   });
 
 export const vehicleIdQuerySchema = Joi.object({

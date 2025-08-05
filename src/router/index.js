@@ -4,6 +4,7 @@ import vendor from './vendor.js';
 import floorPlan from './floorPlan.js';
 import { Router } from 'express';
 import customer from './customer.js';
+import sales from './sales.js';
 
 const router = Router();
 router.use('/auth', auth);
@@ -11,4 +12,5 @@ router.use('/vendor', vendor);
 router.use('/vehicle', vehicle);
 router.use('/floorPlan', floorPlan);
 router.use('/customer', customer);
+router.use('/sales', sales);
 export default router;
