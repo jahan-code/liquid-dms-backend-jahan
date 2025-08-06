@@ -26,6 +26,5 @@ const SalesSchema = new mongoose.Schema(
 
 // Index for better query performance
 SalesSchema.index({ customerInfo: 1 });
-SalesSchema.index({ receiptId: 1 });
 
 export default mongoose.model('Sales', SalesSchema);
