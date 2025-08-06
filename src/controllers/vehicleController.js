@@ -246,9 +246,6 @@ export const addVehicleCost = async (req, res, next) => {
       if (value.floorPlanDetails.dateOpened === '') {
         delete value.floorPlanDetails.dateOpened;
       }
-      if (value.floorPlanDetails.notes === '') {
-        delete value.floorPlanDetails.notes;
-      }
 
       // Handle floor plan logic
       if (value.floorPlanDetails.isFloorPlanned) {
@@ -316,13 +313,6 @@ export const addVehicleCost = async (req, res, next) => {
             value.floorPlanDetails.newFloorPlan.CompanyDetails = {
               ...value.floorPlanDetails.newFloorPlan.CompanyDetails,
               dateOpened: value.floorPlanDetails.dateOpened,
-            };
-          }
-          // Ensure notes is set in Fees if provided at the top level
-          if (value.floorPlanDetails.notes) {
-            value.floorPlanDetails.newFloorPlan.Fees = {
-              ...value.floorPlanDetails.newFloorPlan.Fees,
-              notes: value.floorPlanDetails.notes,
             };
           }
 
