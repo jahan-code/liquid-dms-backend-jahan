@@ -136,6 +136,7 @@ const companyDetailsSchema = Joi.object({
   phone: phoneValidator.required(),
   contactPerson: contactPersonValidator.required(),
   status: statusValidator.required(),
+  dateOpened: Joi.date().allow('').optional(),
 }).required();
 
 const rateSchema = Joi.object({

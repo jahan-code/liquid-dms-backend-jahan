@@ -30,7 +30,6 @@ const floorPlanSchema = new mongoose.Schema({
     adminFee: { type: Number, default: 0 },
     setUpFee: { type: Number, default: 0 },
     additionalFee: { type: Number, default: 0 },
-    notes: { type: String },
   },
   term: {
     lengthInDays: { type: Number, default: 0 },
