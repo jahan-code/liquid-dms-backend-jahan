@@ -139,6 +139,9 @@ export const addVehicle = async (req, res, next) => {
         featuredImageUrl,
         otherImageUrls,
       },
+      vendorInfo: {
+        isExistingVendor: vendorInfo.isExistingVendor,
+      },
     });
 
     await newVehicle.save();
@@ -335,6 +338,10 @@ export const addVehicleCost = async (req, res, next) => {
         // If not floor planned, clear the floor plan reference
         updateData['floorPlanDetails.isFloorPlanned'] = false;
         updateData['floorPlanDetails.floorPlan'] = null;
+      }
+      if (typeof value.floorPlanDetails.isExistingFloor !== 'undefined') {
+        updateData['floorPlanDetails.isExistingFloor'] =
+          value.floorPlanDetails.isExistingFloor;
       }
     }
 
@@ -718,11 +725,27 @@ export const getAllVehicles = async (req, res, next) => {
 
     const total = await Vehicle.countDocuments({});
 
+    const vehiclesWithFlags = vehicles.map((vehicle) => {
+      const vehicleObject = vehicle.toObject();
+      return {
+        _id: vehicleObject._id,
+        stockId: vehicleObject.stockId,
+        ...vehicleObject,
+        vendorInfo: {
+          isExistingVendor: vehicleObject.vendorInfo?.isExistingVendor,
+        },
+        floorPlanDetails: {
+          ...vehicleObject.floorPlanDetails,
+          isExistingFloor: vehicleObject.floorPlanDetails?.isExistingFloor,
+        },
+      };
+    });
+
     const response = {
       totalVehicles: total,
       currentPage: Number(page),
       totalPages: Math.ceil(total / parsedLimit),
-      vehicles,
+      vehicles: vehiclesWithFlags,
     };
 
     return SuccessHandler(
@@ -768,6 +791,13 @@ export const getVehicleById = async (req, res, next) => {
       _id: vehicleObject._id,
       stockId: vehicleObject.stockId,
       ...vehicleObject,
+      vendorInfo: {
+        isExistingVendor: vehicleObject.vendorInfo?.isExistingVendor,
+      },
+      floorPlanDetails: {
+        ...vehicleObject.floorPlanDetails,
+        isExistingFloor: vehicleObject.floorPlanDetails?.isExistingFloor,
+      },
     };
 
     return SuccessHandler(
@@ -939,6 +969,9 @@ export const editVehicle = async (req, res, next) => {
       images: {
         featuredImageUrl,
         otherImageUrls,
+      },
+      vendorInfo: {
+        isExistingVendor: vendorInfo.isExistingVendor,
       },
     });
 

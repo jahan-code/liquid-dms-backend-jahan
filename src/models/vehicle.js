@@ -203,6 +203,10 @@ const vehicleSchema = new mongoose.Schema(
       ref: 'vendor',
       required: true,
     },
+    vendorInfo: {
+      isExistingVendor: { type: Boolean },
+      // You can add more fields here if needed in the future
+    },
 
     images: {
       featuredImageUrl: String,
@@ -227,7 +231,7 @@ const vehicleSchema = new mongoose.Schema(
 
     floorPlanDetails: {
       isFloorPlanned: { type: Boolean, default: false },
-
+      isExistingFloor: { type: Boolean },
       floorPlan: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'FloorPlan',
