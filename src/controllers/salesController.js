@@ -1,20 +1,27 @@
 import Sales from '../models/Sales.js';
 import Customer from '../models/customer.js';
+import Vehicle from '../models/vehicle.js';
 import ApiError from '../utils/ApiError.js';
 import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';
-import { addSalesSchema } from '../validations/Sales.validation.js';
+import {
+  createSalesSchema,
+  addSalesDetailsSchema,
+  addDealerCostsSchema,
+  updateSalesStatusSchema,
+  addSalesSchema,
+} from '../validations/Sales.validation.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import generateCustomerId from '../utils/generateCustomerId.js';
 import generateReceiptId from '../utils/generateReceiptId.js';
 
-// ✅ Add Sales Controller
-export const addSales = async (req, res, next) => {
+// ✅ Step 1: Create Sales Record Controller
+export const createSales = async (req, res, next) => {
   try {
-    logger.info('💰 Add sales request received');
+    logger.info('💰 Create sales record request received');
 
     // 🔍 Validate request body
-    const { error, value } = addSalesSchema.validate(req.body, {
+    const { error, value } = createSalesSchema.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
@@ -25,8 +32,9 @@ export const addSales = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    const { customerInfo } = value;
+    const { customerInfo, vehicleInfo, salesType } = value;
     let customer;
+    let vehicle;
 
     // 📦 Handle Existing Customer
     if (customerInfo.isExistingCustomer) {
@@ -74,19 +82,31 @@ export const addSales = async (req, res, next) => {
       });
     }
 
+    // 🚗 Handle Vehicle
+    vehicle = await Vehicle.findById(vehicleInfo.vehicleId);
+    if (!vehicle) {
+      logger.warn({
+        message: `❌ Vehicle not found: ${vehicleInfo.vehicleId}`,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
     // Generate receipt ID
     const receiptId = await generateReceiptId();
 
-    // Create sales record with receipt ID
+    // Create sales record
     const sales = new Sales({
       receiptId: receiptId,
       customerInfo: customer._id,
+      vehicleInfo: vehicle._id,
+      salesType: salesType,
     });
 
     const salesResponse = await sales.save();
 
-    // Populate customer details
-    await salesResponse.populate('customerInfo');
+    // Populate customer and vehicle details
+    await salesResponse.populate(['customerInfo', 'vehicleInfo']);
 
     logger.info({
       message: `✅ Sales record created successfully with receipt ID: ${receiptId}`,
@@ -100,7 +120,190 @@ export const addSales = async (req, res, next) => {
       res
     );
   } catch (error) {
-    logger.error('❌ Add sales error:', error);
+    logger.error('❌ Create sales error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Step 2: Add Sales Details Controller (Updated to handle both common + type-specific)
+export const addSalesDetails = async (req, res, next) => {
+  try {
+    logger.info('💰 Add sales details request received');
+
+    // 1. Validate sales ID from query
+    const { id: salesId } = req.query;
+    if (!salesId) {
+      return next(new ApiError('Sales ID is required', 400));
+    }
+
+    // 2. Validate request body
+    const { error, value } = addSalesDetailsSchema.validate(req.body, {
+      abortEarly: false,
+    });
+    if (error) {
+      logger.warn({
+        message: error.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(error.details[0].message, 400));
+    }
+
+    // 3. Find the sales record to update
+    const sales = await Sales.findById(salesId);
+    if (!sales) {
+      return next(new ApiError('Sales record not found', 404));
+    }
+
+    // 4. Validate sales type matches
+    if (sales.salesType !== value.salesType) {
+      return next(new ApiError('Sales type mismatch', 400));
+    }
+
+    // 5. Apply updates to the document
+    const updateData = {};
+
+    // Update sales details
+    Object.keys(value.salesDetails).forEach((key) => {
+      updateData[`salesDetails.${key}`] = value.salesDetails[key];
+    });
+
+    // Update type-specific details
+    if (value.salesType === 'Cash Sales' && value.cashSalesDetails) {
+      Object.keys(value.cashSalesDetails).forEach((key) => {
+        updateData[`cashSalesDetails.${key}`] = value.cashSalesDetails[key];
+      });
+    } else if (
+      value.salesType === 'Buy Here Pay Here' &&
+      value.buyHerePayHereDetails
+    ) {
+      Object.keys(value.buyHerePayHereDetails).forEach((key) => {
+        updateData[`buyHerePayHereDetails.${key}`] =
+          value.buyHerePayHereDetails[key];
+      });
+    }
+
+    const updatedSales = await Sales.findByIdAndUpdate(
+      salesId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate(['customerInfo', 'vehicleInfo']);
+
+    return SuccessHandler(
+      { sales: updatedSales },
+      200,
+      'Sales details updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Add sales details error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Step 3: Add Dealer Costs Controller
+export const addDealerCosts = async (req, res, next) => {
+  try {
+    logger.info('💰 Add dealer costs request received');
+
+    // 1. Validate sales ID from query
+    const { id: salesId } = req.query;
+    if (!salesId) {
+      return next(new ApiError('Sales ID is required', 400));
+    }
+
+    // 2. Validate request body
+    const { error, value } = addDealerCostsSchema.validate(req.body, {
+      abortEarly: false,
+    });
+    if (error) {
+      logger.warn({
+        message: error.details.map((d) => d.message).join(', '),
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(error.details[0].message, 400));
+    }
+
+    // 3. Find the sales record to update
+    const sales = await Sales.findById(salesId);
+    if (!sales) {
+      return next(new ApiError('Sales record not found', 404));
+    }
+
+    // 4. Apply updates to the document
+    const updateData = {};
+    Object.keys(value.dealerCosts).forEach((key) => {
+      updateData[`dealerCosts.${key}`] = value.dealerCosts[key];
+    });
+
+    const updatedSales = await Sales.findByIdAndUpdate(
+      salesId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate(['customerInfo', 'vehicleInfo']);
+
+    return SuccessHandler(
+      { sales: updatedSales },
+      200,
+      'Dealer costs updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Add dealer costs error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Update Sales Status Controller
+export const updateSalesStatus = async (req, res, next) => {
+  try {
+    logger.info('🔄 Update sales status request received');
+
+    const { id } = req.query;
+    const { error, value } = updateSalesStatusSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return next(new ApiError(error.details[0].message, 400));
+    }
+
+    if (!id) {
+      return next(new ApiError('Sales ID is required', 400));
+    }
+
+    const updatedSales = await Sales.findByIdAndUpdate(
+      id,
+      { $set: { salesStatus: value.salesStatus } },
+      { new: true }
+    ).populate(['customerInfo', 'vehicleInfo']);
+
+    if (!updatedSales) {
+      return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
+    }
+
+    return SuccessHandler(
+      updatedSales,
+      200,
+      'Sales status updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Update sales status error:', error);
     next(
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
@@ -125,7 +328,10 @@ export const getSalesById = async (req, res, next) => {
       return next(new ApiError('Sales ID is required', 400));
     }
 
-    const sales = await Sales.findById(id).populate('customerInfo');
+    const sales = await Sales.findById(id).populate([
+      'customerInfo',
+      'vehicleInfo',
+    ]);
 
     if (!sales) {
       logger.warn({
@@ -147,7 +353,7 @@ export const getSalesById = async (req, res, next) => {
   }
 };
 
-// ✅ Edit Sales Controller
+// ✅ Edit Sales Controller (Legacy - for backward compatibility)
 export const editSales = async (req, res, next) => {
   try {
     logger.info('✏️ Edit sales request received');
@@ -165,8 +371,17 @@ export const editSales = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    const { customerInfo } = value;
+    const {
+      customerInfo,
+      vehicleInfo,
+      salesType,
+      salesDetails,
+      cashSalesDetails,
+      buyHerePayHereDetails,
+      salesStatus,
+    } = value;
     let customer;
+    let vehicle;
 
     // Handle customer updates
     if (customerInfo.isExistingCustomer) {
@@ -201,15 +416,35 @@ export const editSales = async (req, res, next) => {
       await customer.save();
     }
 
+    // Handle vehicle updates
+    vehicle = await Vehicle.findById(vehicleInfo.vehicleId);
+    if (!vehicle) {
+      return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // Prepare update data
+    const updateData = {
+      customerInfo: customer._id,
+      vehicleInfo: vehicle._id,
+      salesType: salesType,
+      salesDetails: salesDetails,
+      salesStatus: salesStatus,
+    };
+
+    // Add type-specific details
+    if (salesType === 'Cash Sales') {
+      updateData.cashSalesDetails = cashSalesDetails;
+      updateData.buyHerePayHereDetails = undefined; // Remove BHPH details
+    } else if (salesType === 'Buy Here Pay Here') {
+      updateData.buyHerePayHereDetails = buyHerePayHereDetails;
+      updateData.cashSalesDetails = undefined; // Remove cash sales details
+    }
+
     const updatedSales = await Sales.findByIdAndUpdate(
       id,
-      {
-        $set: {
-          customerInfo: customer._id,
-        },
-      },
+      { $set: updateData },
       { new: true }
-    ).populate('customerInfo');
+    ).populate(['customerInfo', 'vehicleInfo']);
 
     if (!updatedSales) {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
@@ -237,7 +472,10 @@ export const showAllSales = async (req, res, next) => {
   try {
     logger.info('📄 Show all sales request received');
 
-    const allSales = await Sales.find().populate('customerInfo');
+    const allSales = await Sales.find().populate([
+      'customerInfo',
+      'vehicleInfo',
+    ]);
 
     if (allSales.length === 0) {
       logger.warn({
@@ -303,6 +541,116 @@ export const deleteSales = async (req, res, next) => {
     );
   } catch (error) {
     logger.error('❌ Delete sales error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Get Sales by Type Controller
+export const getSalesByType = async (req, res, next) => {
+  try {
+    logger.info('🔍 Get sales by type request received');
+
+    const { type } = req.query;
+
+    if (!type || !['Cash Sales', 'Buy Here Pay Here'].includes(type)) {
+      logger.warn({
+        message: '❌ Valid sales type is required',
+        timestamp: new Date().toISOString(),
+      });
+      return next(
+        new ApiError(
+          'Valid sales type is required (Cash Sales or Buy Here Pay Here)',
+          400
+        )
+      );
+    }
+
+    const sales = await Sales.find({ salesType: type }).populate([
+      'customerInfo',
+      'vehicleInfo',
+    ]);
+
+    if (sales.length === 0) {
+      logger.warn({
+        message: `❌ No ${type} records found`,
+        timestamp: new Date().toISOString(),
+      });
+      return next(new ApiError(`No ${type} records found`, 404));
+    }
+
+    return SuccessHandler(
+      sales,
+      200,
+      `${type} records fetched successfully`,
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get sales by type error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Get Sales Statistics Controller
+export const getSalesStatistics = async (req, res, next) => {
+  try {
+    logger.info('📊 Get sales statistics request received');
+
+    const totalSales = await Sales.countDocuments();
+    const cashSales = await Sales.countDocuments({ salesType: 'Cash Sales' });
+    const buyHerePayHereSales = await Sales.countDocuments({
+      salesType: 'Buy Here Pay Here',
+    });
+
+    const pendingSales = await Sales.countDocuments({ salesStatus: 'Pending' });
+    const completedSales = await Sales.countDocuments({
+      salesStatus: 'Completed',
+    });
+    const cancelledSales = await Sales.countDocuments({
+      salesStatus: 'Cancelled',
+    });
+    const refundedSales = await Sales.countDocuments({
+      salesStatus: 'Refunded',
+    });
+
+    // Calculate total revenue
+    const totalRevenue = await Sales.aggregate([
+      { $match: { salesStatus: 'Completed' } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+    ]);
+
+    const statistics = {
+      totalSales,
+      salesByType: {
+        cashSales,
+        buyHerePayHereSales,
+      },
+      salesByStatus: {
+        pending: pendingSales,
+        completed: completedSales,
+        cancelled: cancelledSales,
+        refunded: refundedSales,
+      },
+      totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0,
+    };
+
+    return SuccessHandler(
+      statistics,
+      200,
+      'Sales statistics fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get sales statistics error:', error);
     next(
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,

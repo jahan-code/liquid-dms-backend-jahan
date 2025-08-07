@@ -308,7 +308,7 @@ export const addVehicleSchema = Joi.object({
 
   titleRegistration: Joi.object({
     titleApplication: requiredString('TITLE_APPLICATION'),
-    titleIn: Joi.boolean().required(),
+    titleId: Joi.boolean().required(),
     stateTitleIn: optionalString('STATE_TITLE_IN'),
     title: optionalString('TITLE'),
     titleDate: optionalString('TITLE_DATE'),
