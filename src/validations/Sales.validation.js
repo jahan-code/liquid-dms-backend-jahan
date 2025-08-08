@@ -198,31 +198,60 @@ const dealerCostsSchema = Joi.object({
 
 // 🔹 Step 1: Create Sales Record Schema
 export const createSalesSchema = Joi.object({
-  customerInfo: customerInfoSchema.required(),
-  vehicleInfo: vehicleInfoSchema.required(),
-  salesType: enumValidator('SALES_TYPE', [
-    'Cash Sales',
-    'Buy Here Pay Here',
-  ]).required(),
-}).required();
+  customerInfo: customerInfoSchema.optional(),
+  vehicleInfo: vehicleInfoSchema.optional(),
+  salesType: Joi.string().optional(),
+}).optional();
 
-// 🔹 Step 2: Sales Details Schema (Updated to handle both common + type-specific)
+// 🔹 Step 2: Sales Details Schema (Updated to match UI structure)
 export const addSalesDetailsSchema = Joi.object({
-  salesDetails: salesDetailsSchema.required(),
-  cashSalesDetails: Joi.when('salesType', {
-    is: 'Cash Sales',
-    then: cashSalesDetailsSchema.optional(),
+  isCashSale: Joi.boolean().required(),
+  salesDetails: Joi.object({
+    saleDate: Joi.date().required(),
+    vehiclePrice: Joi.number().min(0).required(),
+    governmentFees: Joi.number().min(0).required(),
+    salesTax: Joi.number().min(0).required(),
+    otherTaxes: Joi.number().min(0).optional(),
+    dealerServiceFee: Joi.number().min(0).required(),
+    netTradeIn: Joi.number().min(0).optional(),
+    deposit: Joi.number().min(0).required(),
+    paymentType: Joi.string()
+      .valid('Cash', 'Check', 'Credit Card', 'Other')
+      .required(),
+    dateDepositReceived: Joi.date().required(),
+    enterYourInitials: Joi.string().optional(),
+    pickUpNote: Joi.string().optional(),
+    serviceContract: Joi.number().min(0).optional(),
+  }).required(),
+  paymentSchedule: Joi.when('isCashSale', {
+    is: false,
+    then: Joi.object({
+      paymentSchedule: Joi.string()
+        .valid('Monthly', 'Weekly', 'Bi-weekly')
+        .required(),
+      financingCalculationMethod: Joi.string()
+        .valid('Simple Interest', 'Payment Amount')
+        .required(),
+      numberOfPayments: Joi.number().min(1).required(),
+      firstPaymentStarts: Joi.date().required(),
+    }).required(),
     otherwise: Joi.forbidden(),
   }),
-  buyHerePayHereDetails: Joi.when('salesType', {
-    is: 'Buy Here Pay Here',
-    then: buyHerePayHereDetailsSchema.optional(),
+  paymentDetails: Joi.when('isCashSale', {
+    is: false,
+    then: Joi.object({
+      totalLoanAmount: Joi.number().min(0).required(),
+      downPayment1: Joi.number().min(0).required(),
+      amountToFinance: Joi.number().min(0).required(),
+      firstPaymentDate: Joi.date().required(),
+      nextPaymentDueDate: Joi.date().required(),
+      note: Joi.string().optional(),
+      apr: Joi.number().min(0).required(),
+      ertFee: Joi.number().min(0).optional(),
+    }).required(),
     otherwise: Joi.forbidden(),
   }),
-  salesType: enumValidator('SALES_TYPE', [
-    'Cash Sales',
-    'Buy Here Pay Here',
-  ]).required(),
+  salesType: Joi.string().optional(),
 }).required();
 
 // 🔹 Step 3: Dealer Costs Schema
@@ -242,30 +271,14 @@ export const updateSalesStatusSchema = Joi.object({
 
 // 🔹 Legacy Schema (for backward compatibility)
 export const addSalesSchema = Joi.object({
-  customerInfo: customerInfoSchema.required(),
-  vehicleInfo: vehicleInfoSchema.required(),
-  salesType: enumValidator('SALES_TYPE', [
-    'Cash Sales',
-    'Buy Here Pay Here',
-  ]).required(),
-  salesDetails: salesDetailsSchema.required(),
-  cashSalesDetails: Joi.when('salesType', {
-    is: 'Cash Sales',
-    then: cashSalesDetailsSchema.required(),
-    otherwise: Joi.forbidden(),
-  }),
-  buyHerePayHereDetails: Joi.when('salesType', {
-    is: 'Buy Here Pay Here',
-    then: buyHerePayHereDetailsSchema.required(),
-    otherwise: Joi.forbidden(),
-  }),
-  salesStatus: enumValidator('SALES_STATUS', [
-    'Pending',
-    'Completed',
-    'Cancelled',
-    'Refunded',
-  ]).default('Pending'),
-}).required();
+  customerInfo: customerInfoSchema.optional(),
+  vehicleInfo: vehicleInfoSchema.optional(),
+  salesType: Joi.string().optional(),
+  salesDetails: salesDetailsSchema.optional(),
+  cashSalesDetails: cashSalesDetailsSchema.optional(),
+  buyHerePayHereDetails: buyHerePayHereDetailsSchema.optional(),
+  salesStatus: Joi.string().optional(),
+}).optional();
 
 export const editSalesSchema = addSalesSchema.fork(
   Object.keys(addSalesSchema.describe().keys),

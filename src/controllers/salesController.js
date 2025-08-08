@@ -32,7 +32,7 @@ export const createSales = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    const { customerInfo, vehicleInfo, salesType } = value;
+    const { customerInfo, vehicleInfo } = value;
     let customer;
     let vehicle;
 
@@ -58,9 +58,7 @@ export const createSales = async (req, res, next) => {
           message: `❌ Customer with email already exists: ${customerInfo.CustomerInformation.email}`,
           timestamp: new Date().toISOString(),
         });
-        return next(
-          new ApiError(errorConstants.SALES.EMAIL_ALREADY_EXISTS, 409)
-        );
+        return next(new ApiError(errorConstants.CUSTOMER.ALREADY_EXISTS, 409));
       }
 
       // Generate customer ID using the same utility as customerController
@@ -83,13 +81,17 @@ export const createSales = async (req, res, next) => {
     }
 
     // 🚗 Handle Vehicle
-    vehicle = await Vehicle.findById(vehicleInfo.vehicleId);
-    if (!vehicle) {
-      logger.warn({
-        message: `❌ Vehicle not found: ${vehicleInfo.vehicleId}`,
-        timestamp: new Date().toISOString(),
-      });
-      return next(new ApiError('Vehicle not found', 404));
+    if (vehicleInfo && vehicleInfo.vehicleId) {
+      vehicle = await Vehicle.findById(vehicleInfo.vehicleId);
+      if (!vehicle) {
+        logger.warn({
+          message: `❌ Vehicle not found: ${vehicleInfo.vehicleId}`,
+          timestamp: new Date().toISOString(),
+        });
+        return next(new ApiError('Vehicle not found', 404));
+      }
+    } else {
+      vehicle = undefined;
     }
 
     // Generate receipt ID
@@ -98,15 +100,63 @@ export const createSales = async (req, res, next) => {
     // Create sales record
     const sales = new Sales({
       receiptId: receiptId,
-      customerInfo: customer._id,
-      vehicleInfo: vehicle._id,
-      salesType: salesType,
+      customerInfo: customer ? customer._id : undefined,
+      isCashSale: req.body?.isCashSale ?? undefined,
+      salesType: req.body?.salesType ?? undefined,
     });
 
     const salesResponse = await sales.save();
 
-    // Populate customer and vehicle details
-    await salesResponse.populate(['customerInfo', 'vehicleInfo']);
+    // Populate customer details only (vehicleInfo removed from schema)
+    await salesResponse.populate(['customerInfo']);
+
+    // Shape response: omit irrelevant pricing block at creation time
+    const salesObj = salesResponse.toObject();
+
+    // Create beautifully structured response
+    const structuredResponse = {
+      _id: salesObj._id,
+      receiptId: salesObj.receiptId,
+      salesStatus: salesObj.salesStatus,
+      totalAmount: salesObj.totalAmount,
+      createdAt: salesObj.createdAt,
+      updatedAt: salesObj.updatedAt,
+
+      // Customer Information Section
+      customerInfo: {
+        _id: salesObj.customerInfo?._id,
+        customerId: salesObj.customerInfo?.customerId,
+        CustomerInformation: salesObj.customerInfo?.CustomerInformation,
+        IncomeInformation: salesObj.customerInfo?.IncomeInformation,
+        createdAt: salesObj.customerInfo?.createdAt,
+        updatedAt: salesObj.customerInfo?.updatedAt,
+      },
+
+      // Pricing Section - Conditional based on sales type
+      pricing: {
+        isCashSale: salesObj.isCashSale,
+        salesType: salesObj.salesType,
+        salesDetails: salesObj.salesDetails,
+        // Cash Sales specific data
+        ...(salesObj.isCashSale && {
+          cashSalesData: {
+            serviceContract: salesObj.salesDetails?.serviceContract || 0,
+          },
+        }),
+        // Buy Here Pay Here specific data
+        ...(!salesObj.isCashSale && {
+          paymentSchedule: salesObj.paymentSchedule,
+          paymentDetails: salesObj.paymentDetails,
+        }),
+      },
+
+      // Dealer Costs Section
+      dealerCosts: {
+        totalDealerCosts: salesObj.dealerCosts?.totalDealerCosts || 0,
+        notes: salesObj.dealerCosts?.notes || '',
+        additionalCosts: salesObj.dealerCosts?.additionalCosts || [],
+      },
+    };
 
     logger.info({
       message: `✅ Sales record created successfully with receipt ID: ${receiptId}`,
@@ -114,7 +164,7 @@ export const createSales = async (req, res, next) => {
     });
 
     return SuccessHandler(
-      salesResponse,
+      structuredResponse,
       200,
       'Sales record created successfully',
       res
@@ -142,71 +192,118 @@ export const addSalesDetails = async (req, res, next) => {
     }
 
     // 2. Validate request body
-    const { error, value } = addSalesDetailsSchema.validate(req.body, {
-      abortEarly: false,
-    });
+    const { error, value } = addSalesDetailsSchema.validate(req.body);
     if (error) {
       logger.warn({
-        message: error.details.map((d) => d.message).join(', '),
+        message: `❌ Joi validation error in route PUT /sales/sales-details: ${error.details[0].message}`,
         timestamp: new Date().toISOString(),
       });
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    // 3. Find the sales record to update
-    const sales = await Sales.findById(salesId);
-    if (!sales) {
+    const { isCashSale, salesDetails, paymentSchedule, paymentDetails } = value;
+
+    // 3. Find existing sales record
+    const existingSales = await Sales.findById(salesId);
+    if (!existingSales) {
+      logger.warn({
+        message: `❌ Sales record not found: ${salesId}`,
+        timestamp: new Date().toISOString(),
+      });
       return next(new ApiError('Sales record not found', 404));
     }
 
-    // 4. Validate sales type matches
-    if (sales.salesType !== value.salesType) {
-      return next(new ApiError('Sales type mismatch', 400));
+    // 4. Update sales record based on type
+    const updateData = {
+      isCashSale,
+      salesType: isCashSale ? 'Cash Sales' : 'Buy Here Pay Here',
+    };
+
+    if (isCashSale) {
+      // Cash Sales: store everything in salesDetails
+      updateData.salesDetails = salesDetails;
+      // Unset the other objects
+      updateData.$unset = {
+        paymentSchedule: 1,
+        paymentDetails: 1,
+      };
+    } else {
+      // Buy Here Pay Here: store in three separate objects
+      updateData.salesDetails = salesDetails;
+      updateData.paymentSchedule = paymentSchedule;
+      updateData.paymentDetails = paymentDetails;
     }
 
-    // 5. Apply updates to the document
-    const updateData = {};
-
-    // Update sales details
-    Object.keys(value.salesDetails).forEach((key) => {
-      updateData[`salesDetails.${key}`] = value.salesDetails[key];
+    const updatedSales = await Sales.findByIdAndUpdate(salesId, updateData, {
+      new: true,
+      runValidators: true,
     });
 
-    // Update type-specific details
-    if (value.salesType === 'Cash Sales' && value.cashSalesDetails) {
-      Object.keys(value.cashSalesDetails).forEach((key) => {
-        updateData[`cashSalesDetails.${key}`] = value.cashSalesDetails[key];
-      });
-    } else if (
-      value.salesType === 'Buy Here Pay Here' &&
-      value.buyHerePayHereDetails
-    ) {
-      Object.keys(value.buyHerePayHereDetails).forEach((key) => {
-        updateData[`buyHerePayHereDetails.${key}`] =
-          value.buyHerePayHereDetails[key];
-      });
-    }
+    // 5. Populate customer details
+    await updatedSales.populate(['customerInfo']);
 
-    const updatedSales = await Sales.findByIdAndUpdate(
-      salesId,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).populate(['customerInfo', 'vehicleInfo']);
+    // 6. Shape response based on type
+    const salesObj = updatedSales.toObject();
+
+    // Create beautifully structured response
+    const structuredResponse = {
+      _id: salesObj._id,
+      receiptId: salesObj.receiptId,
+      salesStatus: salesObj.salesStatus,
+      totalAmount: salesObj.totalAmount,
+      createdAt: salesObj.createdAt,
+      updatedAt: salesObj.updatedAt,
+
+      // Customer Information Section
+      customerInfo: {
+        _id: salesObj.customerInfo?._id,
+        customerId: salesObj.customerInfo?.customerId,
+        CustomerInformation: salesObj.customerInfo?.CustomerInformation,
+        IncomeInformation: salesObj.customerInfo?.IncomeInformation,
+        createdAt: salesObj.customerInfo?.createdAt,
+        updatedAt: salesObj.customerInfo?.updatedAt,
+      },
+
+      // Pricing Section - Conditional based on sales type
+      pricing: {
+        isCashSale: salesObj.isCashSale,
+        salesType: salesObj.salesType,
+        salesDetails: salesObj.salesDetails,
+        // Cash Sales specific data
+        ...(salesObj.isCashSale && {
+          cashSalesData: {
+            serviceContract: salesObj.salesDetails?.serviceContract || 0,
+          },
+        }),
+        // Buy Here Pay Here specific data
+        ...(!salesObj.isCashSale && {
+          paymentSchedule: salesObj.paymentSchedule,
+          paymentDetails: salesObj.paymentDetails,
+        }),
+      },
+
+      // Dealer Costs Section
+      dealerCosts: {
+        totalDealerCosts: salesObj.dealerCosts?.totalDealerCosts || 0,
+        notes: salesObj.dealerCosts?.notes || '',
+        additionalCosts: salesObj.dealerCosts?.additionalCosts || [],
+      },
+    };
+
+    logger.info({
+      message: `✅ Sales details updated successfully for sales ID: ${salesId}`,
+      timestamp: new Date().toISOString(),
+    });
 
     return SuccessHandler(
-      { sales: updatedSales },
+      { sales: structuredResponse },
       200,
       'Sales details updated successfully',
       res
     );
   } catch (error) {
     logger.error('❌ Add sales details error:', error);
-    next(
-      new ApiError(
-        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
-        500
-      )
-    );
+    return next(new ApiError('Internal Server Error', 500));
   }
 };
 

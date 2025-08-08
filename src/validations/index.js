@@ -24,7 +24,11 @@ import {
   addCustomerSchema,
   editCustomerSchema,
 } from './Customer.validation.js';
-import { addSalesSchema, editSalesSchema } from './Sales.validation.js';
+import {
+  addSalesSchema,
+  editSalesSchema,
+  addSalesDetailsSchema,
+} from './Sales.validation.js';
 const validationSchemas = {
   // Authentication
 
@@ -71,6 +75,7 @@ const validationSchemas = {
   //Sales
   '/sales/add-sales': { POST: addSalesSchema },
   '/sales/edit-sales': { PUT: editSalesSchema },
+  '/sales/sales-details': { PUT: addSalesDetailsSchema },
   '/sales/get-sales': { GET: null },
   '/sales/delete-sales': { DELETE: null },
   '/sales/sales': { GET: null },

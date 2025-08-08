@@ -151,7 +151,7 @@ const errorConstants = {
     DOOR_KEY_CODE_REQUIRED: 'Door key code is required.',
     VALET_KEY_CODE_REQUIRED: 'Valet key code is required.',
     ACCOUNT_NUMBER_REQUIRED: 'Account number is required.',
-    NOTES_REQUIRED: 'Notes are required.',
+    NOTE_REQUIRED: 'Note are required.',
     BILL_OF_SALES_REQUIRED: 'Bill of sales is required.',
 
     // 🔹 Previous Owner
@@ -192,7 +192,7 @@ const errorConstants = {
     TAX_ID_OR_SSN_REQUIRED: 'Tax ID or SSN is required.',
     BILL_OF_SALES_MUST_BE_STRING: 'Bill of sales must be a string.',
     ACCOUNT_NUMBER_MUST_BE_STRING: 'Account number must be a string.',
-    NOTES_MUST_BE_STRING: 'Notes must be a string.',
+    NOTE_MUST_BE_STRING: 'Note must be a string.',
 
     // 🔹 Specifications
     STYLE_INVALID: 'Style is invalid.',

@@ -252,9 +252,9 @@ const vendorInfoSchema = Joi.object({
     then: requiredString('TAX_ID_OR_SSN'),
     otherwise: Joi.forbidden(),
   }),
-  notes: Joi.when('isExistingVendor', {
+  note: Joi.when('isExistingVendor', {
     is: false,
-    then: optionalString('NOTES'),
+    then: optionalString('NOTE'),
     otherwise: Joi.forbidden(),
   }),
   billofsales: Joi.when('isExistingVendor', {
