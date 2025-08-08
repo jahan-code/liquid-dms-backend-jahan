@@ -446,6 +446,9 @@ export const addVehicleSales = async (req, res, next) => {
         updateData[`WindowSheetOptions.${key}`] = value.WindowSheetOptions[key];
       });
     }
+    if (value.SalesComments !== undefined) {
+      updateData.SalesComments = value.SalesComments;
+    }
     if (value.Notes) {
       updateData.Notes = value.Notes;
     }
