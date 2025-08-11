@@ -254,7 +254,12 @@ export const addVehicleCost = async (req, res, next) => {
       if (value.floorPlanDetails.isFloorPlanned) {
         let floorPlanId = null;
 
-        // Check if using existing floor plan or creating new one
+        // Fetch current vehicle's existing floor plan link (if any)
+        const currentVehicleLink = await Vehicle.findById(vehicleId).select(
+          'floorPlanDetails.floorPlan'
+        );
+
+        // Check if using existing floor plan or creating/updating one
         if (value.floorPlanDetails.isExistingFloor === true) {
           // Use existing floor plan
           if (value.floorPlanDetails.companyName) {
@@ -279,69 +284,98 @@ export const addVehicleCost = async (req, res, next) => {
             );
           }
         } else {
-          // Default: Create new floor plan (isExistingFloor = false)
-          if (!value.floorPlanDetails.newFloorPlan) {
-            return next(
-              new ApiError(
-                'newFloorPlan is required when creating new floor plan',
-                400
-              )
+          // Default path: create new OR update current linked floor plan if already linked
+          const hasLinkedFloorPlan = Boolean(
+            currentVehicleLink?.floorPlanDetails?.floorPlan
+          );
+
+          if (hasLinkedFloorPlan) {
+            // Update the existing linked floor plan with provided fields
+            const linkedId = currentVehicleLink.floorPlanDetails.floorPlan;
+
+            // Attach dateOpened if provided at top level
+            if (value.floorPlanDetails.dateOpened) {
+              value.floorPlanDetails.newFloorPlan = {
+                ...(value.floorPlanDetails.newFloorPlan || {}),
+                CompanyDetails: {
+                  ...(value.floorPlanDetails.newFloorPlan?.CompanyDetails ||
+                    {}),
+                  dateOpened: value.floorPlanDetails.dateOpened,
+                },
+              };
+            }
+
+            await FloorPlan.findByIdAndUpdate(
+              linkedId,
+              value.floorPlanDetails.newFloorPlan || {},
+              { new: true }
             );
-          }
-
-          // ✅ CHECK FOR DUPLICATE COMPANY NAME WHEN CREATING NEW FLOOR PLAN
-          const newCompanyName =
-            value.floorPlanDetails.newFloorPlan.CompanyDetails?.companyName;
-          if (newCompanyName) {
-            const existingFloorPlanWithSameName = await FloorPlan.findOne({
-              'CompanyDetails.companyName': newCompanyName,
-            });
-
-            if (existingFloorPlanWithSameName) {
-              logger.warn({
-                message: `❌ Floor plan already exists for company: ${newCompanyName}`,
-                timestamp: new Date().toISOString(),
-              });
+            floorPlanId = linkedId;
+          } else {
+            // Create a brand new floor plan (first-time link for this vehicle)
+            if (!value.floorPlanDetails.newFloorPlan) {
               return next(
                 new ApiError(
-                  `Floor plan already exists for company '${newCompanyName}'. Please use existing floor plan or choose a different company name.`,
-                  409
+                  'newFloorPlan is required when creating new floor plan',
+                  400
                 )
               );
             }
+
+            // ✅ Duplicate check only on create
+            const newCompanyName =
+              value.floorPlanDetails.newFloorPlan.CompanyDetails?.companyName;
+            if (newCompanyName) {
+              const existingFloorPlanWithSameName = await FloorPlan.findOne({
+                'CompanyDetails.companyName': newCompanyName,
+              });
+
+              if (existingFloorPlanWithSameName) {
+                logger.warn({
+                  message: `❌ Floor plan already exists for company: ${newCompanyName}`,
+                  timestamp: new Date().toISOString(),
+                });
+                return next(
+                  new ApiError(
+                    `Floor plan already exists for company '${newCompanyName}'. Please use existing floor plan or choose a different company name.`,
+                    409
+                  )
+                );
+              }
+            }
+
+            // Ensure dateOpened is set in CompanyDetails if provided at the top level
+            if (value.floorPlanDetails.dateOpened) {
+              value.floorPlanDetails.newFloorPlan.CompanyDetails = {
+                ...value.floorPlanDetails.newFloorPlan.CompanyDetails,
+                dateOpened: value.floorPlanDetails.dateOpened,
+              };
+            }
+
+            const newFloorPlan = new FloorPlan(
+              value.floorPlanDetails.newFloorPlan
+            );
+            const savedFloorPlan = await newFloorPlan.save();
+            floorPlanId = savedFloorPlan._id;
+
+            logger.info({
+              message: `✅ New floor plan created for company: ${newCompanyName}`,
+              timestamp: new Date().toISOString(),
+            });
           }
-
-          // Ensure dateOpened is set in CompanyDetails if provided at the top level
-          if (value.floorPlanDetails.dateOpened) {
-            value.floorPlanDetails.newFloorPlan.CompanyDetails = {
-              ...value.floorPlanDetails.newFloorPlan.CompanyDetails,
-              dateOpened: value.floorPlanDetails.dateOpened,
-            };
-          }
-
-          const newFloorPlan = new FloorPlan(
-            value.floorPlanDetails.newFloorPlan
-          );
-          const savedFloorPlan = await newFloorPlan.save();
-          floorPlanId = savedFloorPlan._id;
-
-          logger.info({
-            message: `✅ New floor plan created for company: ${newCompanyName}`,
-            timestamp: new Date().toISOString(),
-          });
         }
 
-        // Update the floor plan reference
+        // Update the floor plan reference and flags on the vehicle
         updateData['floorPlanDetails.floorPlan'] = floorPlanId;
         updateData['floorPlanDetails.isFloorPlanned'] = true;
+        updateData['floorPlanDetails.isExistingFloor'] = Boolean(
+          value.floorPlanDetails.isExistingFloor
+        );
       } else {
-        // If not floor planned, clear the floor plan reference
+        // If not floor planned, clear the floor plan reference and flags
         updateData['floorPlanDetails.isFloorPlanned'] = false;
+        updateData['floorPlanDetails.isExistingFloor'] = false;
         updateData['floorPlanDetails.floorPlan'] = null;
-      }
-      if (typeof value.floorPlanDetails.isExistingFloor !== 'undefined') {
-        updateData['floorPlanDetails.isExistingFloor'] =
-          value.floorPlanDetails.isExistingFloor;
       }
     }
 
