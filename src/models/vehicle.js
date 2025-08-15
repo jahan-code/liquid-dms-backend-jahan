@@ -9,6 +9,7 @@ const vehicleSchema = new mongoose.Schema(
   {
     stockId: {
       type: String,
+      unique: true,
     },
 
     basicDetails: {

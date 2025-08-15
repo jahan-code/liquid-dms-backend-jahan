@@ -28,7 +28,13 @@ import {
   addSalesSchema,
   editSalesSchema,
   addSalesDetailsSchema,
+  addDealerCostsSchema,
+  updateNetTradeInInfoSchema,
 } from './Sales.validation.js';
+import {
+  addNetTradeInSchema,
+  editNetTradeInSchema,
+} from './NetTradeIn.validation.js';
 const validationSchemas = {
   // Authentication
 
@@ -76,9 +82,17 @@ const validationSchemas = {
   '/sales/add-sales': { POST: addSalesSchema },
   '/sales/edit-sales': { PUT: editSalesSchema },
   '/sales/sales-details': { PUT: addSalesDetailsSchema },
+  '/sales/net-trade-in-info': { PUT: updateNetTradeInInfoSchema },
   '/sales/get-sales': { GET: null },
   '/sales/delete-sales': { DELETE: null },
   '/sales/sales': { GET: null },
+  '/sales/dealer-costs': { PUT: addDealerCostsSchema },
+  // Net Trade-In
+  '/net-trade-in/add-net-trade-in': { POST: addNetTradeInSchema },
+  '/net-trade-in/edit-net-trade-in': { PUT: editNetTradeInSchema },
+  '/net-trade-in/net-trade-ins': { GET: null },
+  '/net-trade-in': { GET: null },
+  '/net-trade-in/delete-net-trade-in': { DELETE: null },
 };
 
 export { validationSchemas };

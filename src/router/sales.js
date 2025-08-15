@@ -10,6 +10,7 @@ import {
   deleteSales,
   getSalesByType,
   getSalesStatistics,
+  updateNetTradeInInfo,
 } from '../controllers/salesController.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -20,6 +21,7 @@ router.post('/add-sales', verifyToken, createSales);
 router.put('/sales-details', verifyToken, addSalesDetails);
 router.put('/dealer-costs', verifyToken, addDealerCosts);
 router.put('/update-status', verifyToken, updateSalesStatus);
+router.put('/net-trade-in-info', verifyToken, updateNetTradeInInfo);
 
 // Management routes
 router.get('/get-sales', verifyToken, getSalesById);

@@ -18,6 +18,16 @@ const SalesSchema = new mongoose.Schema(
 
     // Reference to Vehicle
 
+    // Net Trade-In info (UI toggle + reference)
+    netTradeInInfo: {
+      enabled: { type: Boolean, default: false },
+      netTradeInId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NetTradeIn',
+        default: null,
+      },
+    },
+
     // Sales Type: Cash Sales or Buy Here Pay Here
     salesType: {
       type: String,
@@ -55,6 +65,13 @@ const SalesSchema = new mongoose.Schema(
         type: Number,
         min: 0,
       },
+      otherTaxesBreakdown: [
+        {
+          category: { type: String },
+          ratePercent: { type: Number, min: 0 },
+          calculatedAmount: { type: Number, min: 0 },
+        },
+      ],
       dealerServiceFee: {
         type: Number,
         min: 0,
@@ -62,6 +79,15 @@ const SalesSchema = new mongoose.Schema(
       netTradeIn: {
         type: Number,
         min: 0,
+      },
+      netTradeInEnabled: {
+        type: Boolean,
+        default: false,
+      },
+      netTradeInId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NetTradeIn',
+        default: null,
       },
       deposit: {
         type: Number,
@@ -140,28 +166,28 @@ const SalesSchema = new mongoose.Schema(
 
     // Dealer Costs
     dealerCosts: {
-      totalDealerCosts: {
+      serviceContractCost: {
         type: Number,
         min: 0,
         default: 0,
       },
-      notes: {
+      serviceProvider: {
         type: String,
         default: '',
       },
-      additionalCosts: [
-        {
-          description: {
-            type: String,
-            required: true,
-          },
-          amount: {
-            type: Number,
-            min: 0,
-            required: true,
-          },
-        },
-      ],
+      termOfServiceContract: {
+        type: String,
+        default: '',
+      },
+      salesman: {
+        type: String,
+        default: '',
+      },
+      salesCommission: {
+        type: Number,
+        min: 0,
+        optional: true,
+      },
     },
 
     // Sales Status

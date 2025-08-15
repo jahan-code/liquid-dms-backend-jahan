@@ -5,6 +5,7 @@ import floorPlan from './floorPlan.js';
 import { Router } from 'express';
 import customer from './customer.js';
 import sales from './sales.js';
+import netTradeIn from './netTradeIn.js';
 
 const router = Router();
 router.use('/auth', auth);
@@ -13,4 +14,5 @@ router.use('/vehicle', vehicle);
 router.use('/floorPlan', floorPlan);
 router.use('/customer', customer);
 router.use('/sales', sales);
+router.use('/net-trade-in', netTradeIn);
 export default router;

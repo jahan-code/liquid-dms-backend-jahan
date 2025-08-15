@@ -7,9 +7,15 @@ const requiredString = (field) =>
     .trim()
     .required()
     .messages({
-      'string.base': errorConstants.SALES[`${field}_MUST_BE_STRING`],
-      'string.empty': errorConstants.SALES[`${field}_REQUIRED`],
-      'any.required': errorConstants.SALES[`${field}_REQUIRED`],
+      'string.base':
+        errorConstants.SALES?.[`${field}_MUST_BE_STRING`] ||
+        `${field.replace(/_/g, ' ')} must be a string`,
+      'string.empty':
+        errorConstants.SALES?.[`${field}_REQUIRED`] ||
+        `${field.replace(/_/g, ' ')} is required`,
+      'any.required':
+        errorConstants.SALES?.[`${field}_REQUIRED`] ||
+        `${field.replace(/_/g, ' ')} is required`,
     });
 
 const optionalString = (field) =>
@@ -17,7 +23,9 @@ const optionalString = (field) =>
     .trim()
     .allow('', null)
     .messages({
-      'string.base': errorConstants.SALES[`${field}_MUST_BE_STRING`],
+      'string.base':
+        errorConstants.SALES?.[`${field}_MUST_BE_STRING`] ||
+        `${field.replace(/_/g, ' ')} must be a string`,
     });
 
 const enumValidator = (field, values) =>
@@ -36,8 +44,12 @@ const optionalNumber = (field) =>
     .min(0)
     .default(0)
     .messages({
-      'number.base': errorConstants.SALES[`${field}_MUST_BE_NUMBER`],
-      'number.min': errorConstants.SALES[`${field}_NEGATIVE`],
+      'number.base':
+        errorConstants.SALES?.[`${field}_MUST_BE_NUMBER`] ||
+        `${field.replace(/_/g, ' ')} must be a number`,
+      'number.min':
+        errorConstants.SALES?.[`${field}_NEGATIVE`] ||
+        `${field.replace(/_/g, ' ')} cannot be negative`,
     });
 
 // 🔹 Customer Information Validators
@@ -127,6 +139,18 @@ const salesDetailsSchema = Joi.object({
   governmentFees: optionalNumber('GOVERNMENT_FEES'),
   salesTax: optionalNumber('SALES_TAX'),
   otherTaxes: optionalNumber('OTHER_TAXES'),
+  otherTaxesBreakdown: Joi.array()
+    .items(
+      Joi.object({
+        category: optionalString('TAX_CATEGORY'),
+        ratePercent: Joi.number().min(0).messages({
+          'number.base': 'Tax % must be a number',
+          'number.min': 'Tax % cannot be negative',
+        }),
+        calculatedAmount: optionalNumber('CALCULATED_TAX'),
+      })
+    )
+    .default([]),
   dealerServiceFee: optionalNumber('DEALER_SERVICE_FEE'),
   netTradeIn: optionalNumber('NET_TRADE_IN'),
   deposit: optionalNumber('DEPOSIT'),
@@ -181,21 +205,6 @@ const buyHerePayHereDetailsSchema = Joi.object({
   note: optionalString('NOTE'),
 });
 
-// 🔹 Dealer Costs Schema
-const dealerCostsSchema = Joi.object({
-  additionalCosts: Joi.array()
-    .items(
-      Joi.object({
-        costName: optionalString('COST_NAME'),
-        costAmount: optionalNumber('COST_AMOUNT'),
-        costDescription: optionalString('COST_DESCRIPTION'),
-      })
-    )
-    .default([]),
-  totalDealerCosts: optionalNumber('TOTAL_DEALER_COSTS'),
-  notes: optionalString('DEALER_COSTS_NOTES'),
-});
-
 // 🔹 Step 1: Create Sales Record Schema
 export const createSalesSchema = Joi.object({
   customerInfo: customerInfoSchema.optional(),
@@ -212,6 +221,21 @@ export const addSalesDetailsSchema = Joi.object({
     governmentFees: Joi.number().min(0).required(),
     salesTax: Joi.number().min(0).required(),
     otherTaxes: Joi.number().min(0).optional(),
+    otherTaxesBreakdown: Joi.array()
+      .items(
+        Joi.object({
+          category: Joi.string().allow('', null),
+          ratePercent: Joi.number().min(0).messages({
+            'number.base': 'Tax % must be a number',
+            'number.min': 'Tax % cannot be negative',
+          }),
+          calculatedAmount: Joi.number().min(0).messages({
+            'number.base': 'Calculated tax must be a number',
+            'number.min': 'Calculated tax cannot be negative',
+          }),
+        })
+      )
+      .default([]),
     dealerServiceFee: Joi.number().min(0).required(),
     netTradeIn: Joi.number().min(0).optional(),
     deposit: Joi.number().min(0).required(),
@@ -256,8 +280,14 @@ export const addSalesDetailsSchema = Joi.object({
 
 // 🔹 Step 3: Dealer Costs Schema
 export const addDealerCostsSchema = Joi.object({
-  dealerCosts: dealerCostsSchema.required(),
-}).required();
+  dealerCosts: Joi.object({
+    serviceContractCost: Joi.number().min(0).default(0),
+    serviceProvider: Joi.string().allow('', null).default(''),
+    termOfServiceContract: Joi.string().allow('', null).default(''),
+    salesman: Joi.string().allow('', null).default(''),
+    salesCommission: Joi.number().min(0).optional(),
+  }).required(),
+});
 
 // 🔹 Update Sales Status Schema
 export const updateSalesStatusSchema = Joi.object({
@@ -267,6 +297,12 @@ export const updateSalesStatusSchema = Joi.object({
     'Cancelled',
     'Refunded',
   ]).required(),
+}).required();
+
+// 🔹 Net Trade-In Toggle Schema
+export const updateNetTradeInInfoSchema = Joi.object({
+  enabled: Joi.boolean().required(),
+  netTradeInId: Joi.string().optional(),
 }).required();
 
 // 🔹 Legacy Schema (for backward compatibility)

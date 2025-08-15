@@ -14,6 +14,7 @@ import {
   addVehicleNotesSchema,
 } from '../validations/Vehicle.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
+import getNextStockIdForPrefix from '../utils/generateStockId.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import mongoose from 'mongoose';
 import paginate from '../utils/paginate.js';
@@ -116,13 +117,11 @@ export const addVehicle = async (req, res, next) => {
       getFullImageUrl(file.filename)
     );
 
-    // 🆔 Generate stockId (e.g. DL-SUV-0001)
+    // 🆔 Generate stockId (atomic, shared with NetTradeIn)
     const vehicleTypeCode = basicDetails?.vehicleType?.toUpperCase(); // e.g., SUV
-    const vehicleCount = await Vehicle.countDocuments({
-      stockId: new RegExp(`^${categoryCode}-${vehicleTypeCode}-\\d{4}$`, 'i'),
-    });
-
-    const stockId = `${categoryCode}-${vehicleTypeCode}-${String(vehicleCount + 1).padStart(4, '0')}`;
+    const stockId = await getNextStockIdForPrefix(
+      `${categoryCode}-${vehicleTypeCode}`
+    );
 
     // 🚙 Save Vehicle
     const newVehicle = new Vehicle({
@@ -986,10 +985,9 @@ export const editVehicle = async (req, res, next) => {
     if (oldCategory !== newCategory || oldVehicleType !== newVehicleType) {
       const categoryCode = extractCategoryCode(vendor.category);
       const vehicleTypeCode = basicDetails.vehicleType.toUpperCase();
-      const vehicleCount = await Vehicle.countDocuments({
-        stockId: new RegExp(`^${categoryCode}-${vehicleTypeCode}-\\d{4}$`, 'i'),
-      });
-      updatedStockId = `${categoryCode}-${vehicleTypeCode}-${String(vehicleCount + 1).padStart(4, '0')}`;
+      updatedStockId = await getNextStockIdForPrefix(
+        `${categoryCode}-${vehicleTypeCode}`
+      );
     }
 
     // ✅ Update Vehicle

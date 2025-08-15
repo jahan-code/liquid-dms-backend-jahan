@@ -12,6 +12,7 @@ import {
   addSalesSchema,
 } from '../validations/Sales.validation.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
+import NetTradeIn from '../models/netTradeIn.js';
 import generateCustomerId from '../utils/generateCustomerId.js';
 import generateReceiptId from '../utils/generateReceiptId.js';
 
@@ -103,6 +104,7 @@ export const createSales = async (req, res, next) => {
       customerInfo: customer ? customer._id : undefined,
       isCashSale: req.body?.isCashSale ?? undefined,
       salesType: req.body?.salesType ?? undefined,
+      netTradeInInfo: { enabled: false, netTradeInId: null },
     });
 
     const salesResponse = await sales.save();
@@ -152,9 +154,12 @@ export const createSales = async (req, res, next) => {
 
       // Dealer Costs Section
       dealerCosts: {
-        totalDealerCosts: salesObj.dealerCosts?.totalDealerCosts || 0,
-        notes: salesObj.dealerCosts?.notes || '',
-        additionalCosts: salesObj.dealerCosts?.additionalCosts || [],
+        serviceContractCost: salesObj.dealerCosts?.serviceContractCost || 0,
+        serviceProvider: salesObj.dealerCosts?.serviceProvider || '',
+        termOfServiceContract:
+          salesObj.dealerCosts?.termOfServiceContract || '',
+        salesman: salesObj.dealerCosts?.salesman || '',
+        salesCommission: salesObj.dealerCosts?.salesCommission || 0,
       },
     };
 
@@ -219,19 +224,77 @@ export const addSalesDetails = async (req, res, next) => {
       salesType: isCashSale ? 'Cash Sales' : 'Buy Here Pay Here',
     };
 
+    const computeOtherTaxes = (vehiclePrice, breakdown) => {
+      const base = Number(vehiclePrice || 0);
+      const items = Array.isArray(breakdown) ? breakdown : [];
+      let total = 0;
+      const enriched = items.map((t) => {
+        const rate = Number(t?.ratePercent || 0);
+        const amount = Math.max(0, (base * rate) / 100);
+        total += amount;
+        return {
+          category: t?.category || 'Custom Tax',
+          ratePercent: rate,
+          calculatedAmount: amount,
+        };
+      });
+      return { totalOtherTaxes: total, enriched };
+    };
+
+    const existingDetails =
+      (existingSales.salesDetails &&
+        (existingSales.salesDetails.toObject?.() ||
+          existingSales.salesDetails)) ||
+      {};
+    const mergedInput = { ...existingDetails, ...(salesDetails || {}) };
+
     if (isCashSale) {
-      // Cash Sales: store everything in salesDetails
-      updateData.salesDetails = salesDetails;
+      // Cash Sales: store everything in salesDetails (merge to preserve netTradeIn fields)
+      if (salesDetails?.otherTaxesBreakdown?.length) {
+        const { totalOtherTaxes, enriched } = computeOtherTaxes(
+          mergedInput?.vehiclePrice,
+          mergedInput?.otherTaxesBreakdown
+        );
+        updateData.salesDetails = {
+          ...mergedInput,
+          otherTaxes: totalOtherTaxes,
+          otherTaxesBreakdown: enriched,
+        };
+      } else {
+        updateData.salesDetails = mergedInput;
+      }
       // Unset the other objects
       updateData.$unset = {
         paymentSchedule: 1,
         paymentDetails: 1,
       };
     } else {
-      // Buy Here Pay Here: store in three separate objects
-      updateData.salesDetails = salesDetails;
-      updateData.paymentSchedule = paymentSchedule;
-      updateData.paymentDetails = paymentDetails;
+      // Buy Here Pay Here: store in three separate objects (merge to preserve netTradeIn fields)
+      if (salesDetails?.otherTaxesBreakdown?.length) {
+        const { totalOtherTaxes, enriched } = computeOtherTaxes(
+          mergedInput?.vehiclePrice,
+          mergedInput?.otherTaxesBreakdown
+        );
+        updateData.salesDetails = {
+          ...mergedInput,
+          otherTaxes: totalOtherTaxes,
+          otherTaxesBreakdown: enriched,
+        };
+      } else {
+        updateData.salesDetails = mergedInput;
+      }
+      updateData.paymentSchedule = {
+        ...(existingSales.paymentSchedule?.toObject?.() ||
+          existingSales.paymentSchedule ||
+          {}),
+        ...(paymentSchedule || {}),
+      };
+      updateData.paymentDetails = {
+        ...(existingSales.paymentDetails?.toObject?.() ||
+          existingSales.paymentDetails ||
+          {}),
+        ...(paymentDetails || {}),
+      };
     }
 
     const updatedSales = await Sales.findByIdAndUpdate(salesId, updateData, {
@@ -284,9 +347,12 @@ export const addSalesDetails = async (req, res, next) => {
 
       // Dealer Costs Section
       dealerCosts: {
-        totalDealerCosts: salesObj.dealerCosts?.totalDealerCosts || 0,
-        notes: salesObj.dealerCosts?.notes || '',
-        additionalCosts: salesObj.dealerCosts?.additionalCosts || [],
+        serviceContractCost: salesObj.dealerCosts?.serviceContractCost || 0,
+        serviceProvider: salesObj.dealerCosts?.serviceProvider || '',
+        termOfServiceContract:
+          salesObj.dealerCosts?.termOfServiceContract || '',
+        salesman: salesObj.dealerCosts?.salesman || '',
+        salesCommission: salesObj.dealerCosts?.salesCommission || 0,
       },
     };
 
@@ -346,7 +412,7 @@ export const addDealerCosts = async (req, res, next) => {
       salesId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate(['customerInfo', 'vehicleInfo']);
+    ).populate(['customerInfo']);
 
     return SuccessHandler(
       { sales: updatedSales },
@@ -387,7 +453,7 @@ export const updateSalesStatus = async (req, res, next) => {
       id,
       { $set: { salesStatus: value.salesStatus } },
       { new: true }
-    ).populate(['customerInfo', 'vehicleInfo']);
+    ).populate(['customerInfo']);
 
     if (!updatedSales) {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
@@ -425,10 +491,7 @@ export const getSalesById = async (req, res, next) => {
       return next(new ApiError('Sales ID is required', 400));
     }
 
-    const sales = await Sales.findById(id).populate([
-      'customerInfo',
-      'vehicleInfo',
-    ]);
+    const sales = await Sales.findById(id).populate(['customerInfo']);
 
     if (!sales) {
       logger.warn({
@@ -541,7 +604,7 @@ export const editSales = async (req, res, next) => {
       id,
       { $set: updateData },
       { new: true }
-    ).populate(['customerInfo', 'vehicleInfo']);
+    ).populate(['customerInfo']);
 
     if (!updatedSales) {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
@@ -569,10 +632,7 @@ export const showAllSales = async (req, res, next) => {
   try {
     logger.info('📄 Show all sales request received');
 
-    const allSales = await Sales.find().populate([
-      'customerInfo',
-      'vehicleInfo',
-    ]);
+    const allSales = await Sales.find().populate(['customerInfo']);
 
     if (allSales.length === 0) {
       logger.warn({
@@ -669,7 +729,6 @@ export const getSalesByType = async (req, res, next) => {
 
     const sales = await Sales.find({ salesType: type }).populate([
       'customerInfo',
-      'vehicleInfo',
     ]);
 
     if (sales.length === 0) {
@@ -748,6 +807,60 @@ export const getSalesStatistics = async (req, res, next) => {
     );
   } catch (error) {
     logger.error('❌ Get sales statistics error:', error);
+    next(
+      new ApiError(
+        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
+
+// ✅ Update Net Trade-In Info (toggle + reference)
+export const updateNetTradeInInfo = async (req, res, next) => {
+  try {
+    logger.info('🔁 Update net trade-in info request received');
+
+    const { id } = req.query;
+    if (!id) return next(new ApiError('Sales ID is required', 400));
+
+    const { enabled, netTradeInId } = req.body || {};
+    if (enabled === undefined)
+      return next(new ApiError('enabled is required', 400));
+
+    const sales = await Sales.findById(id);
+    if (!sales) return next(new ApiError('Sales record not found', 404));
+
+    const update = {
+      'netTradeInInfo.enabled': Boolean(enabled),
+      'netTradeInInfo.netTradeInId': enabled ? netTradeInId || null : null,
+      'salesDetails.netTradeInEnabled': Boolean(enabled),
+      'salesDetails.netTradeInId': enabled ? netTradeInId || null : null,
+    };
+
+    const updated = await Sales.findByIdAndUpdate(
+      id,
+      { $set: update },
+      { new: true, runValidators: true }
+    ).populate(['customerInfo']);
+
+    // Link NetTradeIn back to this sale when enabled and id provided
+    if (Boolean(enabled) && netTradeInId) {
+      await NetTradeIn.findByIdAndUpdate(
+        netTradeInId,
+        { $set: { linkedSales: updated._id } },
+        { new: true }
+      );
+    }
+
+    return SuccessHandler(
+      updated,
+      200,
+      'Net trade-in info updated successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Update net trade-in info error:', error);
     next(
       new ApiError(
         error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,

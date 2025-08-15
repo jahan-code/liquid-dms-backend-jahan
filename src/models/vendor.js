@@ -100,6 +100,7 @@ const vendorSchema = new Schema(
     },
     vendorId: {
       type: String,
+      unique: true,
     },
   },
   { timestamps: true }
