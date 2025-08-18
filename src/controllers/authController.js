@@ -292,7 +292,7 @@ const login = async (req, res, next) => {
       fullname: user.fullname,
       vendors: user.vendors, // Assuming vendorId is part of the User model
     };
-    const token = generateAndSetJwtCookie(userResponse, res); // ✅ pass userResponse here
+    const token = generateAndSetJwtCookie(user, res); // ✅ pass the full user object here
     userResponse.token = token;
     return SuccessHandler(
       userResponse,

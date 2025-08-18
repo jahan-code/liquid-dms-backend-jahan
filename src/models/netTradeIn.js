@@ -31,6 +31,26 @@ const NetTradeInSchema = new mongoose.Schema(
     linkedSales: { type: mongoose.Schema.Types.ObjectId, ref: 'Sales' },
     linkedVehicle: { type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle' },
 
+    // Vendor Information
+    vendorInfo: {
+      isExistingVendor: { type: Boolean, default: false },
+      vendorId: { type: String }, // For existing vendors
+      category: { type: String },
+      name: { type: String },
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zip: { type: String },
+      primaryContactNumber: { type: String },
+      alternativeContactNumber: { type: String },
+      contactPerson: { type: String },
+      email: { type: String },
+      accountNumber: { type: String },
+      taxIdOrSSN: { type: String },
+      note: { type: String },
+      billofsales: { type: String },
+    },
+
     vehicleInfo: {
       basicDetails: {
         vehicleTitle: String,
@@ -91,11 +111,10 @@ const NetTradeInSchema = new mongoose.Schema(
         valetKeyCode: String,
       },
       features: { type: [String], default: [] },
-    },
-
-    images: {
-      featuredImageUrl: String,
-      otherImageUrls: [String],
+      images: {
+        featuredImageUrl: String,
+        otherImageUrls: [String],
+      },
     },
 
     addToInventory: { type: Boolean, default: false },

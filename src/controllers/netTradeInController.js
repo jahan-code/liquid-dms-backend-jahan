@@ -43,8 +43,9 @@ export const createNetTradeIn = async (req, res, next) => {
     );
 
     let linkedVehicle = null;
+    let vendorDoc = null; // Move declaration to function level
+
     if (addToInventory) {
-      let vendorDoc = null;
       const billofsalesFile = req.files?.billofsales?.[0];
       const billofsalesUrl = billofsalesFile
         ? getFullImageUrl(billofsalesFile.filename)
@@ -130,8 +131,32 @@ export const createNetTradeIn = async (req, res, next) => {
       payoffInformation: payoffApplicable
         ? { ...payoffInformation, payoffApplicable: true }
         : undefined,
-      vehicleInfo,
-      images: { featuredImageUrl, otherImageUrls },
+      vehicleInfo: {
+        ...vehicleInfo,
+        images: { featuredImageUrl, otherImageUrls },
+      },
+      // Add vendorInfo to NetTradeIn
+      vendorInfo:
+        addToInventory && vendorDoc
+          ? {
+              isExistingVendor: vendorInfo?.isExistingVendor || false,
+              vendorId: vendorDoc.vendorId,
+              category: vendorDoc.category,
+              name: vendorDoc.name,
+              street: vendorDoc.street,
+              city: vendorDoc.city,
+              state: vendorDoc.state,
+              zip: vendorDoc.zip,
+              primaryContactNumber: vendorDoc.primaryContactNumber,
+              alternativeContactNumber: vendorDoc.alternativeContactNumber,
+              contactPerson: vendorDoc.contactPerson,
+              email: vendorDoc.email,
+              accountNumber: vendorDoc.accountNumber,
+              taxIdOrSSN: vendorDoc.taxIdOrSSN,
+              note: vendorDoc.note,
+              billofsales: vendorDoc.billofsales,
+            }
+          : undefined,
       addToInventory: Boolean(addToInventory),
       linkedVehicle,
       createdBy: req.user?._id || req.user?.userId,
@@ -141,8 +166,117 @@ export const createNetTradeIn = async (req, res, next) => {
     const populated = await NetTradeIn.findById(saved._id)
       .populate('linkedSales')
       .populate({ path: 'linkedVehicle', populate: { path: 'vendor' } });
+
+    // Shape response for better structure
+    const doc = populated.toObject();
+    const structuredResponse = {
+      _id: doc._id,
+      stockId: doc.linkedVehicle?.stockId || null,
+      isBuyHerePayHere: doc.isBuyHerePayHere,
+      addToInventory: doc.addToInventory,
+
+      // Trade-in details
+      tradeInDetails: {
+        amountAllowed: doc.tradeInDetails?.amountAllowed || 0,
+        actualCashValue: doc.tradeInDetails?.actualCashValue || 0,
+        previousSoldVehicle: doc.tradeInDetails?.previousSoldVehicle || false,
+      },
+
+      // Payoff information (if applicable)
+      payoffInformation: doc.payoffInformation
+        ? {
+            payoffApplicable: doc.payoffInformation.payoffApplicable,
+            payoffOwed: doc.payoffInformation.payoffOwed,
+            payoffToYou: doc.payoffInformation.payoffToYou,
+            accountNumber: doc.payoffInformation.accountNumber,
+            payoffAmount: doc.payoffInformation.payoffAmount,
+            payoffToLenderName: doc.payoffInformation.payoffToLenderName,
+            phone: doc.payoffInformation.phone,
+            quotedBy: doc.payoffInformation.quotedBy,
+            goodThrough: doc.payoffInformation.goodThrough,
+            address: doc.payoffInformation.address,
+          }
+        : null,
+
+      // Vendor information (from NetTradeIn)
+      vendorInfo: doc.vendorInfo
+        ? {
+            isExistingVendor: doc.vendorInfo.isExistingVendor,
+            vendorId: doc.vendorInfo.vendorId,
+            category: doc.vendorInfo.category,
+            name: doc.vendorInfo.name,
+            street: doc.vendorInfo.street,
+            city: doc.vendorInfo.city,
+            state: doc.vendorInfo.state,
+            zip: doc.vendorInfo.zip,
+            primaryContactNumber: doc.vendorInfo.primaryContactNumber,
+            alternativeContactNumber: doc.vendorInfo.alternativeContactNumber,
+            contactPerson: doc.vendorInfo.contactPerson,
+            email: doc.vendorInfo.email,
+            accountNumber: doc.vendorInfo.accountNumber,
+            taxIdOrSSN: doc.vendorInfo.taxIdOrSSN,
+            note: doc.vendorInfo.note,
+            billofsales: doc.vendorInfo.billofsales,
+          }
+        : null,
+
+      // Complete linked vehicle (instead of vehicleInfo)
+      linkedVehicle: doc.linkedVehicle
+        ? {
+            _id: doc.linkedVehicle._id,
+            stockId: doc.linkedVehicle.stockId,
+            basicDetails: doc.linkedVehicle.basicDetails,
+            specifications: doc.linkedVehicle.specifications,
+            exteriorInterior: doc.linkedVehicle.exteriorInterior,
+            titleRegistration: doc.linkedVehicle.titleRegistration,
+            inspection: doc.linkedVehicle.inspection,
+            keySecurity: doc.linkedVehicle.keySecurity,
+            vendorInfo: doc.linkedVehicle.vendorInfo,
+            images: doc.linkedVehicle.images,
+            costDetails: doc.linkedVehicle.costDetails,
+            floorPlanDetails: doc.linkedVehicle.floorPlanDetails,
+            WindowSheetOptions: doc.linkedVehicle.WindowSheetOptions,
+            PreviousOwnerDetail: doc.linkedVehicle.PreviousOwnerDetail,
+            features: doc.linkedVehicle.features || [],
+            uploadedNotes: doc.linkedVehicle.uploadedNotes || [],
+            markAsCompleted: doc.linkedVehicle.markAsCompleted,
+            vendor: doc.linkedVehicle.vendor
+              ? {
+                  _id: doc.linkedVehicle.vendor._id,
+                  vendorId: doc.linkedVehicle.vendor.vendorId,
+                  name: doc.linkedVehicle.vendor.name,
+                  category: doc.linkedVehicle.vendor.category,
+                  street: doc.linkedVehicle.vendor.street,
+                  city: doc.linkedVehicle.vendor.city,
+                  state: doc.linkedVehicle.vendor.state,
+                  zip: doc.linkedVehicle.vendor.zip,
+                  primaryContactNumber:
+                    doc.linkedVehicle.vendor.primaryContactNumber,
+                  contactPerson: doc.linkedVehicle.vendor.contactPerson,
+                  email: doc.linkedVehicle.vendor.email,
+                  accountNumber: doc.linkedVehicle.vendor.accountNumber,
+                }
+              : null,
+            createdAt: doc.linkedVehicle.createdAt,
+            updatedAt: doc.linkedVehicle.updatedAt,
+          }
+        : null,
+
+      // Sales link
+      linkedSales: doc.linkedSales
+        ? {
+            _id: doc.linkedSales._id,
+            receiptId: doc.linkedSales.receiptId,
+            salesStatus: doc.linkedSales.salesStatus,
+          }
+        : null,
+
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
+
     return SuccessHandler(
-      populated,
+      structuredResponse,
       200,
       'Net Trade-In created successfully',
       res
@@ -182,15 +316,110 @@ export const getNetTradeInById = async (req, res, next) => {
       .populate('linkedSales')
       .populate({ path: 'linkedVehicle', populate: { path: 'vendor' } });
     if (!item) return next(new ApiError('Net Trade-In not found', 404));
+
     const doc = item.toObject();
     const response = {
       _id: doc._id,
+      stockId: doc.linkedVehicle?.stockId || null,
       isBuyHerePayHere: doc.isBuyHerePayHere,
-      tradeInDetails: doc.tradeInDetails,
-      payoffInformation: doc.payoffInformation || null,
       addToInventory: doc.addToInventory,
-      linkedSales: doc.linkedSales || null,
-      linkedVehicle: doc.linkedVehicle || null, // full vehicle with populated vendor
+
+      // Trade-in details
+      tradeInDetails: {
+        amountAllowed: doc.tradeInDetails?.amountAllowed || 0,
+        actualCashValue: doc.tradeInDetails?.actualCashValue || 0,
+        previousSoldVehicle: doc.tradeInDetails?.previousSoldVehicle || false,
+      },
+
+      // Payoff information (if applicable)
+      payoffInformation: doc.payoffInformation
+        ? {
+            payoffApplicable: doc.payoffInformation.payoffApplicable,
+            payoffOwed: doc.payoffInformation.payoffOwed,
+            payoffToYou: doc.payoffInformation.payoffToYou,
+            accountNumber: doc.payoffInformation.accountNumber,
+            payoffAmount: doc.payoffInformation.payoffAmount,
+            payoffToLenderName: doc.payoffInformation.payoffToLenderName,
+            phone: doc.payoffInformation.phone,
+            quotedBy: doc.payoffInformation.quotedBy,
+            goodThrough: doc.payoffInformation.goodThrough,
+            address: doc.payoffInformation.address,
+          }
+        : null,
+
+      // Vendor information (from NetTradeIn)
+      vendorInfo: doc.vendorInfo
+        ? {
+            isExistingVendor: doc.vendorInfo.isExistingVendor,
+            vendorId: doc.vendorInfo.vendorId,
+            category: doc.vendorInfo.category,
+            name: doc.vendorInfo.name,
+            street: doc.vendorInfo.street,
+            city: doc.vendorInfo.city,
+            state: doc.vendorInfo.state,
+            zip: doc.vendorInfo.zip,
+            primaryContactNumber: doc.vendorInfo.primaryContactNumber,
+            alternativeContactNumber: doc.vendorInfo.alternativeContactNumber,
+            contactPerson: doc.vendorInfo.contactPerson,
+            email: doc.vendorInfo.email,
+            accountNumber: doc.vendorInfo.accountNumber,
+            taxIdOrSSN: doc.vendorInfo.taxIdOrSSN,
+            note: doc.vendorInfo.note,
+            billofsales: doc.vendorInfo.billofsales,
+          }
+        : null,
+
+      // Complete linked vehicle (instead of vehicleInfo)
+      linkedVehicle: doc.linkedVehicle
+        ? {
+            _id: doc.linkedVehicle._id,
+            stockId: doc.linkedVehicle.stockId,
+            basicDetails: doc.linkedVehicle.basicDetails,
+            specifications: doc.linkedVehicle.specifications,
+            exteriorInterior: doc.linkedVehicle.exteriorInterior,
+            titleRegistration: doc.linkedVehicle.titleRegistration,
+            inspection: doc.linkedVehicle.inspection,
+            keySecurity: doc.linkedVehicle.keySecurity,
+            vendorInfo: doc.linkedVehicle.vendorInfo,
+            images: doc.linkedVehicle.images,
+            costDetails: doc.linkedVehicle.costDetails,
+            floorPlanDetails: doc.linkedVehicle.floorPlanDetails,
+            WindowSheetOptions: doc.linkedVehicle.WindowSheetOptions,
+            PreviousOwnerDetail: doc.linkedVehicle.PreviousOwnerDetail,
+            features: doc.linkedVehicle.features || [],
+            uploadedNotes: doc.linkedVehicle.uploadedNotes || [],
+            markAsCompleted: doc.linkedVehicle.markAsCompleted,
+            vendor: doc.linkedVehicle.vendor
+              ? {
+                  _id: doc.linkedVehicle.vendor._id,
+                  vendorId: doc.linkedVehicle.vendor.vendorId,
+                  name: doc.linkedVehicle.vendor.name,
+                  category: doc.linkedVehicle.vendor.category,
+                  street: doc.linkedVehicle.vendor.street,
+                  city: doc.linkedVehicle.vendor.city,
+                  state: doc.linkedVehicle.vendor.state,
+                  zip: doc.linkedVehicle.vendor.zip,
+                  primaryContactNumber:
+                    doc.linkedVehicle.vendor.primaryContactNumber,
+                  contactPerson: doc.linkedVehicle.vendor.contactPerson,
+                  email: doc.linkedVehicle.vendor.email,
+                  accountNumber: doc.linkedVehicle.vendor.accountNumber,
+                }
+              : null,
+            createdAt: doc.linkedVehicle.createdAt,
+            updatedAt: doc.linkedVehicle.updatedAt,
+          }
+        : null,
+
+      // Sales link
+      linkedSales: doc.linkedSales
+        ? {
+            _id: doc.linkedSales._id,
+            receiptId: doc.linkedSales.receiptId,
+            salesStatus: doc.linkedSales.salesStatus,
+          }
+        : null,
+
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     };
@@ -427,51 +656,53 @@ export const updateNetTradeIn = async (req, res, next) => {
             `${categoryCodeForStock}-${vehicleTypeCode}`
           );
         }
-        await Vehicle.findByIdAndUpdate(
-          vehicleDoc._id,
-          {
-            stockId,
-            basicDetails: {
-              ...(vehicleDoc.basicDetails.toObject?.() ||
-                vehicleDoc.basicDetails),
-              ...(value.vehicleInfo?.basicDetails || {}),
-            },
-            specifications: {
-              ...(vehicleDoc.specifications.toObject?.() ||
-                vehicleDoc.specifications),
-              ...(value.vehicleInfo?.specifications || {}),
-            },
-            exteriorInterior: {
-              ...(vehicleDoc.exteriorInterior.toObject?.() ||
-                vehicleDoc.exteriorInterior),
-              ...(value.vehicleInfo?.exteriorInterior || {}),
-            },
-            titleRegistration: {
-              ...(vehicleDoc.titleRegistration.toObject?.() ||
-                vehicleDoc.titleRegistration),
-              ...(value.vehicleInfo?.titleRegistration || {}),
-            },
-            inspection: {
-              ...(vehicleDoc.inspection.toObject?.() || vehicleDoc.inspection),
-              ...(value.vehicleInfo?.inspection || {}),
-            },
-            keySecurity: {
-              ...(vehicleDoc.keySecurity.toObject?.() ||
-                vehicleDoc.keySecurity),
-              ...(value.vehicleInfo?.keySecurity || {}),
-            },
-            features: value.vehicleInfo?.features || vehicleDoc.features,
-            vendor: vendorDoc?._id || vehicleDoc.vendor,
-            images: { featuredImageUrl, otherImageUrls },
-            vendorInfo: {
-              isExistingVendor: Boolean(
-                vendorInfo?.isExistingVendor ??
-                  vehicleDoc.vendorInfo?.isExistingVendor
-              ),
-            },
+
+        // Prepare vehicle update data with nested images
+        const vehicleUpdateData = {
+          stockId,
+          basicDetails: {
+            ...(vehicleDoc.basicDetails.toObject?.() ||
+              vehicleDoc.basicDetails),
+            ...(value.vehicleInfo?.basicDetails || {}),
           },
-          { new: true, runValidators: true }
-        );
+          specifications: {
+            ...(vehicleDoc.specifications.toObject?.() ||
+              vehicleDoc.specifications),
+            ...(value.vehicleInfo?.specifications || {}),
+          },
+          exteriorInterior: {
+            ...(vehicleDoc.exteriorInterior.toObject?.() ||
+              vehicleDoc.exteriorInterior),
+            ...(value.vehicleInfo?.exteriorInterior || {}),
+          },
+          titleRegistration: {
+            ...(vehicleDoc.titleRegistration.toObject?.() ||
+              vehicleDoc.titleRegistration),
+            ...(value.vehicleInfo?.titleRegistration || {}),
+          },
+          inspection: {
+            ...(vehicleDoc.inspection.toObject?.() || vehicleDoc.inspection),
+            ...(value.vehicleInfo?.inspection || {}),
+          },
+          keySecurity: {
+            ...(vehicleDoc.keySecurity.toObject?.() || vehicleDoc.keySecurity),
+            ...(value.vehicleInfo?.keySecurity || {}),
+          },
+          features: value.vehicleInfo?.features || vehicleDoc.features,
+          vendor: vendorDoc?._id || vehicleDoc.vendor,
+          images: { featuredImageUrl, otherImageUrls },
+          vendorInfo: {
+            isExistingVendor: Boolean(
+              vendorInfo?.isExistingVendor ??
+                vehicleDoc.vendorInfo?.isExistingVendor
+            ),
+          },
+        };
+
+        await Vehicle.findByIdAndUpdate(vehicleDoc._id, vehicleUpdateData, {
+          new: true,
+          runValidators: true,
+        });
       }
     }
 

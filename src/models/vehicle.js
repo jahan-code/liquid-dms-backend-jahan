@@ -12,6 +12,13 @@ const vehicleSchema = new mongoose.Schema(
       unique: true,
     },
 
+    // Sales lifecycle status for this vehicle
+    salesStatus: {
+      type: String,
+      enum: ['Available', 'Pending', 'Sold'],
+      default: 'Available',
+    },
+
     basicDetails: {
       vehicleTitle: String,
       vin: String,

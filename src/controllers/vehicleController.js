@@ -707,7 +707,7 @@ export const markVehicleAsCompleted = async (req, res, next) => {
     // 2. Update markAsCompleted field
     const updatedVehicle = await Vehicle.findByIdAndUpdate(
       vehicleId,
-      { $set: { markAsCompleted: true } },
+      { $set: { markAsCompleted: true, salesStatus: 'Available' } },
       { new: true, runValidators: true }
     ).populate([
       { path: 'vendor', select: '-taxIdOrSSN' },

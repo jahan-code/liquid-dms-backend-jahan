@@ -28,23 +28,26 @@ import {
   addSalesSchema,
   editSalesSchema,
   addSalesDetailsSchema,
-  addDealerCostsSchema,
   updateNetTradeInInfoSchema,
 } from './Sales.validation.js';
 import {
   addNetTradeInSchema,
   editNetTradeInSchema,
 } from './NetTradeIn.validation.js';
+import { updateProfileAndPasswordSchema } from './profile.validation.js';
+
 const validationSchemas = {
   // Authentication
-
   '/auth/register': { POST: registerSchema },
   '/auth/login': { POST: loginSchema },
   '/auth/forget-password': { POST: forgotPasswordSchema },
   '/auth/verify-otp': { POST: verifyOtpSchema },
   '/auth/reset-password': { POST: resetPasswordSchema },
   '/auth/resend-otp': { POST: resendOtpSchema }, // Or a separate schema if different
-  '/health': { health: { GET: null } },
+  '/health': { GET: null },
+
+  // Profile
+  '/user/profile': { GET: null, PUT: updateProfileAndPasswordSchema },
 
   //Vendor
   '/vendor/add-vendor': { POST: addVendorSchema },
@@ -86,12 +89,11 @@ const validationSchemas = {
   '/sales/get-sales': { GET: null },
   '/sales/delete-sales': { DELETE: null },
   '/sales/sales': { GET: null },
-  '/sales/dealer-costs': { PUT: addDealerCostsSchema },
-  // Net Trade-In
+  //NetTradeIn
   '/net-trade-in/add-net-trade-in': { POST: addNetTradeInSchema },
   '/net-trade-in/edit-net-trade-in': { PUT: editNetTradeInSchema },
-  '/net-trade-in/net-trade-ins': { GET: null },
   '/net-trade-in': { GET: null },
+  '/net-trade-in/net-trade-ins': { GET: null },
   '/net-trade-in/delete-net-trade-in': { DELETE: null },
 };
 

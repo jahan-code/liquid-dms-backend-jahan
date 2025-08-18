@@ -215,79 +215,74 @@ export const createSalesSchema = Joi.object({
 // 🔹 Step 2: Sales Details Schema (Updated to match UI structure)
 export const addSalesDetailsSchema = Joi.object({
   isCashSale: Joi.boolean().required(),
-  salesDetails: Joi.object({
-    saleDate: Joi.date().required(),
-    vehiclePrice: Joi.number().min(0).required(),
-    governmentFees: Joi.number().min(0).required(),
-    salesTax: Joi.number().min(0).required(),
-    otherTaxes: Joi.number().min(0).optional(),
-    otherTaxesBreakdown: Joi.array()
-      .items(
-        Joi.object({
-          category: Joi.string().allow('', null),
-          ratePercent: Joi.number().min(0).messages({
-            'number.base': 'Tax % must be a number',
-            'number.min': 'Tax % cannot be negative',
-          }),
-          calculatedAmount: Joi.number().min(0).messages({
-            'number.base': 'Calculated tax must be a number',
-            'number.min': 'Calculated tax cannot be negative',
-          }),
-        })
-      )
-      .default([]),
-    dealerServiceFee: Joi.number().min(0).required(),
-    netTradeIn: Joi.number().min(0).optional(),
-    deposit: Joi.number().min(0).required(),
-    paymentType: Joi.string()
-      .valid('Cash', 'Check', 'Credit Card', 'Other')
-      .required(),
-    dateDepositReceived: Joi.date().required(),
-    enterYourInitials: Joi.string().optional(),
-    pickUpNote: Joi.string().optional(),
-    serviceContract: Joi.number().min(0).optional(),
+  pricing: Joi.object({
+    isCashSale: Joi.boolean().required(),
+    salesType: Joi.string().optional(),
+    salesDetails: Joi.object({
+      saleDate: Joi.date().required(),
+      vehiclePrice: Joi.number().min(0).required(),
+      governmentFees: Joi.number().min(0).required(),
+      salesTax: Joi.number().min(0).required(),
+      otherTaxes: Joi.number().min(0).optional(),
+      otherTaxesBreakdown: Joi.array()
+        .items(
+          Joi.object({
+            category: Joi.string().allow('', null),
+            ratePercent: Joi.number().min(0).messages({
+              'number.base': 'Tax % must be a number',
+              'number.min': 'Tax % cannot be negative',
+            }),
+            calculatedAmount: Joi.number().min(0).messages({
+              'number.base': 'Calculated tax must be a number',
+              'number.min': 'Calculated tax cannot be negative',
+            }),
+          })
+        )
+        .default([]),
+      dealerServiceFee: Joi.number().min(0).required(),
+      netTradeIn: Joi.forbidden(),
+      deposit: Joi.number().min(0).required(),
+      paymentType: Joi.string()
+        .valid('Cash', 'Check', 'Credit Card', 'Other')
+        .required(),
+      dateDepositReceived: Joi.date().required(),
+      enterYourInitials: Joi.string().optional(),
+      pickUpNote: Joi.string().optional(),
+      serviceContract: Joi.number().min(0).optional(),
+    }).required(),
+    paymentSchedule: Joi.when('isCashSale', {
+      is: false,
+      then: Joi.object({
+        paymentSchedule: Joi.string()
+          .valid('Monthly', 'Weekly', 'Bi-weekly')
+          .required(),
+        financingCalculationMethod: Joi.string()
+          .valid('Simple Interest', 'Payment Amount')
+          .required(),
+        numberOfPayments: Joi.number().min(1).required(),
+        firstPaymentStarts: Joi.date().required(),
+      }).required(),
+      otherwise: Joi.forbidden(),
+    }),
+    paymentDetails: Joi.when('isCashSale', {
+      is: false,
+      then: Joi.object({
+        totalLoanAmount: Joi.number().min(0).required(),
+        downPayment1: Joi.number().min(0).required(),
+        amountToFinance: Joi.number().min(0).required(),
+        firstPaymentDate: Joi.date().required(),
+        nextPaymentDueDate: Joi.date().required(),
+        note: Joi.string().optional(),
+        apr: Joi.number().min(0).required(),
+        ertFee: Joi.number().min(0).optional(),
+      }).required(),
+      otherwise: Joi.forbidden(),
+    }),
   }).required(),
-  paymentSchedule: Joi.when('isCashSale', {
-    is: false,
-    then: Joi.object({
-      paymentSchedule: Joi.string()
-        .valid('Monthly', 'Weekly', 'Bi-weekly')
-        .required(),
-      financingCalculationMethod: Joi.string()
-        .valid('Simple Interest', 'Payment Amount')
-        .required(),
-      numberOfPayments: Joi.number().min(1).required(),
-      firstPaymentStarts: Joi.date().required(),
-    }).required(),
-    otherwise: Joi.forbidden(),
-  }),
-  paymentDetails: Joi.when('isCashSale', {
-    is: false,
-    then: Joi.object({
-      totalLoanAmount: Joi.number().min(0).required(),
-      downPayment1: Joi.number().min(0).required(),
-      amountToFinance: Joi.number().min(0).required(),
-      firstPaymentDate: Joi.date().required(),
-      nextPaymentDueDate: Joi.date().required(),
-      note: Joi.string().optional(),
-      apr: Joi.number().min(0).required(),
-      ertFee: Joi.number().min(0).optional(),
-    }).required(),
-    otherwise: Joi.forbidden(),
-  }),
   salesType: Joi.string().optional(),
 }).required();
 
-// 🔹 Step 3: Dealer Costs Schema
-export const addDealerCostsSchema = Joi.object({
-  dealerCosts: Joi.object({
-    serviceContractCost: Joi.number().min(0).default(0),
-    serviceProvider: Joi.string().allow('', null).default(''),
-    termOfServiceContract: Joi.string().allow('', null).default(''),
-    salesman: Joi.string().allow('', null).default(''),
-    salesCommission: Joi.number().min(0).optional(),
-  }).required(),
-});
+// Dealer costs removed
 
 // 🔹 Update Sales Status Schema
 export const updateSalesStatusSchema = Joi.object({

@@ -18,183 +18,141 @@ const SalesSchema = new mongoose.Schema(
 
     // Reference to Vehicle
 
-    // Net Trade-In info (UI toggle + reference)
-    netTradeInInfo: {
-      enabled: { type: Boolean, default: false },
-      netTradeInId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'NetTradeIn',
-        default: null,
-      },
-    },
-
-    // Sales Type: Cash Sales or Buy Here Pay Here
-    salesType: {
-      type: String,
-      enum: ['Cash Sales', 'Buy Here Pay Here'],
-      required: false,
-    },
-    // Radio flag for sales type selection
-    isCashSale: {
-      type: Boolean,
-      default: null,
-    },
-
-    // Sales Details (restructured based on UI)
-    salesDetails: {
-      // Common fields for both types
-      receiptId: {
+    // Pricing (grouped isCashSale, salesType, schedule, details)
+    pricing: {
+      isCashSale: { type: Boolean, default: null },
+      salesType: {
         type: String,
+        enum: ['Cash Sales', 'Buy Here Pay Here'],
+        required: false,
       },
-      saleDate: {
-        type: Date,
-      },
-      vehiclePrice: {
-        type: Number,
-        min: 0,
-      },
-      governmentFees: {
-        type: Number,
-        min: 0,
-      },
-      salesTax: {
-        type: Number,
-        min: 0,
-      },
-      otherTaxes: {
-        type: Number,
-        min: 0,
-      },
-      otherTaxesBreakdown: [
-        {
-          category: { type: String },
-          ratePercent: { type: Number, min: 0 },
-          calculatedAmount: { type: Number, min: 0 },
+      // Sales Details (common for both types)
+      salesDetails: {
+        // Common fields for both types
+        receiptId: {
+          type: String,
         },
-      ],
-      dealerServiceFee: {
-        type: Number,
-        min: 0,
+        saleDate: {
+          type: Date,
+        },
+        vehiclePrice: {
+          type: Number,
+          min: 0,
+        },
+        governmentFees: {
+          type: Number,
+          min: 0,
+        },
+        salesTax: {
+          type: Number,
+          min: 0,
+        },
+        otherTaxes: {
+          type: Number,
+          min: 0,
+        },
+        otherTaxesBreakdown: [
+          {
+            category: { type: String },
+            ratePercent: { type: Number, min: 0 },
+            calculatedAmount: { type: Number, min: 0 },
+          },
+        ],
+        dealerServiceFee: {
+          type: Number,
+          min: 0,
+        },
+        // netTradeIn numeric amount removed per requirement. Use netTradeInId link only.
+        netTradeInEnabled: {
+          type: Boolean,
+          default: false,
+        },
+        netTradeInId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'NetTradeIn',
+          default: null,
+        },
+        deposit: {
+          type: Number,
+          min: 0,
+        },
+        paymentType: {
+          type: String,
+          enum: ['Cash', 'Check', 'Credit Card', 'Other'],
+        },
+        dateDepositReceived: {
+          type: Date,
+        },
+        enterYourInitials: {
+          type: String,
+        },
+        pickUpNote: {
+          type: String,
+        },
+        // Cash sales specific fields
+        serviceContract: {
+          type: Number,
+          min: 0,
+        },
       },
-      netTradeIn: {
-        type: Number,
-        min: 0,
-      },
-      netTradeInEnabled: {
-        type: Boolean,
-        default: false,
-      },
-      netTradeInId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'NetTradeIn',
-        default: null,
-      },
-      deposit: {
-        type: Number,
-        min: 0,
-      },
-      paymentType: {
-        type: String,
-        enum: ['Cash', 'Check', 'Credit Card', 'Other'],
-      },
-      dateDepositReceived: {
-        type: Date,
-      },
-      enterYourInitials: {
-        type: String,
-      },
-      pickUpNote: {
-        type: String,
-      },
-      // Cash sales specific fields
-      serviceContract: {
-        type: Number,
-        min: 0,
-      },
-    },
-    // Payment Schedule (Buy Here Pay Here only)
-    paymentSchedule: {
+      // Payment Schedule (Buy Here Pay Here only)
       paymentSchedule: {
-        type: String,
-        enum: ['Monthly', 'Weekly', 'Bi-weekly'],
+        paymentSchedule: {
+          type: String,
+          enum: ['Monthly', 'Weekly', 'Bi-weekly'],
+        },
+        financingCalculationMethod: {
+          type: String,
+          enum: ['Simple Interest', 'Payment Amount'],
+        },
+        numberOfPayments: {
+          type: Number,
+          min: 1,
+        },
+        firstPaymentStarts: {
+          type: Date,
+        },
       },
-      financingCalculationMethod: {
-        type: String,
-        enum: ['Simple Interest', 'Payment Amount'],
-      },
-      numberOfPayments: {
-        type: Number,
-        min: 1,
-      },
-      firstPaymentStarts: {
-        type: Date,
-      },
-    },
-    // Payment Details (Buy Here Pay Here only)
-    paymentDetails: {
-      totalLoanAmount: {
-        type: Number,
-        min: 0,
-      },
-      downPayment1: {
-        type: Number,
-        min: 0,
-      },
-      amountToFinance: {
-        type: Number,
-        min: 0,
-      },
-      firstPaymentDate: {
-        type: Date,
-      },
-      nextPaymentDueDate: {
-        type: Date,
-      },
-      note: {
-        type: String,
-      },
-      // Buy Here Pay Here specific fields
-      apr: {
-        type: Number,
-        min: 0,
-      },
-      ertFee: {
-        type: Number,
-        min: 0,
-      },
-    },
-
-    // Dealer Costs
-    dealerCosts: {
-      serviceContractCost: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      serviceProvider: {
-        type: String,
-        default: '',
-      },
-      termOfServiceContract: {
-        type: String,
-        default: '',
-      },
-      salesman: {
-        type: String,
-        default: '',
-      },
-      salesCommission: {
-        type: Number,
-        min: 0,
-        optional: true,
+      // Payment Details (Buy Here Pay Here only)
+      paymentDetails: {
+        totalLoanAmount: {
+          type: Number,
+          min: 0,
+        },
+        downPayment1: {
+          type: Number,
+          min: 0,
+        },
+        amountToFinance: {
+          type: Number,
+          min: 0,
+        },
+        firstPaymentDate: {
+          type: Date,
+        },
+        nextPaymentDueDate: {
+          type: Date,
+        },
+        note: {
+          type: String,
+        },
+        // Buy Here Pay Here specific fields
+        apr: {
+          type: Number,
+          min: 0,
+        },
+        ertFee: {
+          type: Number,
+          min: 0,
+        },
       },
     },
 
     // Sales Status
     salesStatus: {
       type: String,
-      enum: ['Pending', 'Completed', 'Cancelled', 'Refunded'],
-      default: 'Pending',
+      enum: ['Available', 'Pending', 'Sold'],
+      default: 'Available',
     },
 
     // Total Amount (calculated)
@@ -213,16 +171,14 @@ const SalesSchema = new mongoose.Schema(
 SalesSchema.index({
   customerInfo: 1,
   vehicleInfo: 1,
-  salesType: 1,
+  'pricing.salesType': 1,
   salesStatus: 1,
 });
 
 // Pre-save middleware to calculate total amount
 SalesSchema.pre('save', function (next) {
-  const sd = this.salesDetails || {};
-  const cash = this.cashSalesDetails || {};
-  const bhph = this.buyHerePayHereDetails || {};
-  const dealer = this.dealerCosts || {};
+  const sd = this.pricing?.salesDetails || {};
+  const pricing = this.pricing || {};
 
   let total = 0;
   total += sd.vehiclePrice ?? 0;
@@ -230,18 +186,16 @@ SalesSchema.pre('save', function (next) {
   total += sd.salesTax ?? 0;
   total += sd.otherTaxes ?? 0;
   total += sd.dealerServiceFee ?? 0;
-  total -= sd.netTradeIn ?? 0;
+  // netTradeIn numeric value removed; do not subtract
   total -= sd.deposit ?? 0;
 
-  if (this.isCashSale === true) {
-    total += cash.serviceContract ?? 0;
-  } else if (this.isCashSale === false) {
-    total += bhph.serviceContract ?? 0;
-    total += bhph.ertFee ?? 0;
+  if (pricing.isCashSale === true) {
+    total += sd.serviceContract ?? 0;
+  } else if (pricing.isCashSale === false) {
+    total += pricing.paymentDetails?.ertFee ?? 0;
   }
 
-  total += dealer.totalDealerCosts ?? 0;
-
+  // dealerCosts are informational; do not add removed totalDealerCosts
   this.totalAmount = Math.max(0, total);
   next();
 });

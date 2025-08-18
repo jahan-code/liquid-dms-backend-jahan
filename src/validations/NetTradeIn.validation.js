@@ -66,14 +66,18 @@ const vehicleKeySecurity = Joi.object({
   valetKeyCode: Joi.string().allow('', null),
 });
 
-const vehicleInfoSchema = Joi.object({
-  basicDetails: vehicleBasicDetails.required(),
-  specifications: vehicleSpecifications.optional(),
-  exteriorInterior: vehicleExteriorInterior.optional(),
-  titleRegistration: vehicleTitleRegistration.optional(),
-  inspection: vehicleInspection.optional(),
-  keySecurity: vehicleKeySecurity.optional(),
+const vehicleInfo = Joi.object({
+  basicDetails: vehicleBasicDetails,
+  specifications: vehicleSpecifications,
+  exteriorInterior: vehicleExteriorInterior,
+  titleRegistration: vehicleTitleRegistration,
+  inspection: vehicleInspection,
+  keySecurity: vehicleKeySecurity,
   features: Joi.array().items(Joi.string()).default([]),
+  images: Joi.object({
+    featuredImageUrl: Joi.string().allow('', null),
+    otherImageUrls: Joi.array().items(Joi.string()).default([]),
+  }).optional(),
 });
 
 export const addNetTradeInSchema = Joi.object({
@@ -108,7 +112,7 @@ export const addNetTradeInSchema = Joi.object({
     }).required(),
     otherwise: Joi.forbidden(),
   }),
-  vehicleInfo: vehicleInfoSchema.required(),
+  vehicleInfo: vehicleInfo.required(),
   addToInventory: Joi.boolean().default(false),
   vendorInfo: Joi.object({
     isExistingVendor: Joi.boolean().default(false),
@@ -163,7 +167,7 @@ export const editNetTradeInSchema = Joi.object({
     }).required(),
     otherwise: Joi.forbidden(),
   }),
-  vehicleInfo: vehicleInfoSchema.optional(),
+  vehicleInfo: vehicleInfo.optional(),
   addToInventory: Joi.boolean().optional(),
   vendorInfo: Joi.object({
     isExistingVendor: Joi.boolean().optional(),

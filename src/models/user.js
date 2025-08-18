@@ -18,6 +18,31 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    gender: {
+      type: String,
+      enum: ['Male', 'Female', 'Other'],
+      default: 'Male',
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    address: {
+      type: String,
+      default: '',
+    },
+    zipCode: {
+      type: String,
+      default: '',
+    },
+    language: {
+      type: String,
+      default: 'English',
+    },
+    profileImage: {
+      type: String,
+      default: '',
+    },
     isVerified: {
       type: Boolean,
       default: false, // User is not verified upon registration

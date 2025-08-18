@@ -54,6 +54,17 @@ const fileFilter = (req, file, cb) => {
         false
       );
     }
+  } else if (field === 'profileImage') {
+    if (imageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          'Only image files (jpeg, png, webp) are allowed for profile images'
+        ),
+        false
+      );
+    }
   } else if (field === 'billofsales') {
     if ([...imageTypes, ...pdfTypes].includes(file.mimetype)) {
       cb(null, true);

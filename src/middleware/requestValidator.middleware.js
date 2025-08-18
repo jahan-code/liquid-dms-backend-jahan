@@ -13,6 +13,12 @@ const requestValidator = (req, res, next) => {
     const fullURL = originalUrl.split('?')[0];
     console.log(`🔍 Validating request: ${method} ${fullURL}`);
 
+    // Check if this is a multipart request
+    const isMultipart = req.is('multipart/form-data');
+    if (isMultipart) {
+      console.log(`📁 Multipart request detected, will skip body validation`);
+    }
+
     // Match the route using path-to-regexp
     const matchedRoute = Object.keys(validationSchemas).find((route) => {
       try {
@@ -70,8 +76,9 @@ const requestValidator = (req, res, next) => {
       return next();
     }
 
-    if (req.is('multipart/form-data')) {
-      console.log(`📁 Skipping validation for multipart/form-data`);
+    // Skip body validation for multipart requests
+    if (isMultipart) {
+      console.log(`📁 Skipping body validation for multipart/form-data`);
       return next();
     }
 
