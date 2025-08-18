@@ -2,7 +2,6 @@ import express from 'express';
 import {
   createSales,
   addSalesDetails,
-  updateSalesStatus,
   editSales,
   getSalesById,
   showAllSales,
@@ -17,7 +16,7 @@ const router = express.Router();
 router.post('/add-sales', verifyToken, createSales);
 router.put('/sales-details', verifyToken, addSalesDetails);
 // dealer-costs route removed
-router.put('/update-status', verifyToken, updateSalesStatus);
+// removed manual update-status route; vehicle status updates are automatic
 router.put('/net-trade-in-info', verifyToken, updateNetTradeInInfo);
 
 // Management routes

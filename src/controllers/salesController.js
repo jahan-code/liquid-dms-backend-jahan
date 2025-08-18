@@ -7,8 +7,6 @@ import logger from '../functions/logger.js';
 import {
   createSalesSchema,
   addSalesDetailsSchema,
-  addDealerCostsSchema,
-  updateSalesStatusSchema,
   addSalesSchema,
 } from '../validations/Sales.validation.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
@@ -403,140 +401,10 @@ export const addSalesDetails = async (req, res, next) => {
 };
 
 // ✅ Step 3: Add Dealer Costs Controller
-export const addDealerCosts = async (req, res, next) => {
-  try {
-    logger.info('💰 Add dealer costs request received');
-
-    // 1. Validate sales ID from query
-    const { id: salesId } = req.query;
-    if (!salesId) {
-      return next(new ApiError('Sales ID is required', 400));
-    }
-
-    // 2. Validate request body
-    const { error } = addDealerCostsSchema.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      logger.warn({
-        message: error.details.map((d) => d.message).join(', '),
-        timestamp: new Date().toISOString(),
-      });
-      return next(new ApiError(error.details[0].message, 400));
-    }
-
-    // 3. Find the sales record to update
-    const sales = await Sales.findById(salesId);
-    if (!sales) {
-      return next(new ApiError('Sales record not found', 404));
-    }
-
-    // 4. Apply updates to the document
-    const updateData = {};
-    // dealerCosts removed; ignore incoming keys
-
-    const updatedSales = await Sales.findByIdAndUpdate(
-      salesId,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).populate(['customerInfo']);
-
-    // Shape response to match other functions
-    const salesObj = updatedSales.toObject();
-    const structuredResponse = {
-      _id: salesObj._id,
-      receiptId: salesObj.receiptId,
-      salesStatus: salesObj.salesStatus,
-      totalAmount: salesObj.totalAmount,
-      createdAt: salesObj.createdAt,
-      updatedAt: salesObj.updatedAt,
-
-      // Customer Information Section
-      customerInfo: {
-        _id: salesObj.customerInfo?._id,
-        customerId: salesObj.customerInfo?.customerId,
-        CustomerInformation: salesObj.customerInfo?.CustomerInformation,
-        IncomeInformation: salesObj.customerInfo?.IncomeInformation,
-        createdAt: salesObj.customerInfo?.createdAt,
-        updatedAt: salesObj.customerInfo?.updatedAt,
-      },
-
-      // Pricing Section - Conditional based on sales type
-      pricing: {
-        isCashSale: salesObj.pricing?.isCashSale,
-        salesType: salesObj.pricing?.salesType,
-        salesDetails: salesObj.pricing?.salesDetails || {},
-        // Buy Here Pay Here specific data
-        ...(!salesObj.pricing?.isCashSale && {
-          paymentSchedule: salesObj.pricing?.paymentSchedule,
-          paymentDetails: salesObj.pricing?.paymentDetails,
-        }),
-      },
-
-      // Dealer costs removed
-    };
-
-    return SuccessHandler(
-      { sales: structuredResponse },
-      200,
-      'Dealer costs updated successfully',
-      res
-    );
-  } catch (error) {
-    logger.error('❌ Add dealer costs error:', error);
-    next(
-      new ApiError(
-        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
-        500
-      )
-    );
-  }
-};
+// removed addDealerCosts
 
 // ✅ Update Sales Status Controller
-export const updateSalesStatus = async (req, res, next) => {
-  try {
-    logger.info('🔄 Update sales status request received');
-
-    const { id } = req.query;
-    const { error, value } = updateSalesStatusSchema.validate(req.body, {
-      abortEarly: false,
-    });
-
-    if (error) {
-      return next(new ApiError(error.details[0].message, 400));
-    }
-
-    if (!id) {
-      return next(new ApiError('Sales ID is required', 400));
-    }
-
-    const updatedSales = await Sales.findByIdAndUpdate(
-      id,
-      { $set: { salesStatus: value.salesStatus } },
-      { new: true }
-    ).populate(['customerInfo']);
-
-    if (!updatedSales) {
-      return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
-    }
-
-    return SuccessHandler(
-      updatedSales,
-      200,
-      'Sales status updated successfully',
-      res
-    );
-  } catch (error) {
-    logger.error('❌ Update sales status error:', error);
-    next(
-      new ApiError(
-        error.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
-        500
-      )
-    );
-  }
-};
+// removed updateSalesStatus
 
 // ✅ Get Sales by ID Controller
 export const getSalesById = async (req, res, next) => {
