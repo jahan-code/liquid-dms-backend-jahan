@@ -241,13 +241,30 @@ export const addSalesDetailsSchema = Joi.object({
       dealerServiceFee: Joi.number().min(0).required(),
       netTradeIn: Joi.forbidden(),
       deposit: Joi.number().min(0).required(),
-      paymentType: Joi.string()
-        .valid('Cash', 'Check', 'Credit Card', 'Other')
-        .required(),
-      dateDepositReceived: Joi.date().required(),
-      enterYourInitials: Joi.string().optional(),
+      // Cash-only fields
+      paymentType: Joi.when(Joi.ref('/pricing/isCashSale'), {
+        is: true,
+        then: Joi.string()
+          .valid('Cash', 'Check', 'Credit Card', 'Other')
+          .required(),
+        otherwise: Joi.forbidden(),
+      }),
+      dateDepositReceived: Joi.when(Joi.ref('/pricing/isCashSale'), {
+        is: true,
+        then: Joi.date().required(),
+        otherwise: Joi.forbidden(),
+      }),
+      enterYourInitials: Joi.when(Joi.ref('/pricing/isCashSale'), {
+        is: true,
+        then: Joi.string().optional(),
+        otherwise: Joi.forbidden(),
+      }),
       pickUpNote: Joi.string().optional(),
-      serviceContract: Joi.number().min(0).optional(),
+      serviceContract: Joi.when(Joi.ref('/pricing/isCashSale'), {
+        is: true,
+        then: Joi.number().min(0).optional(),
+        otherwise: Joi.forbidden(),
+      }),
     }).required(),
     paymentSchedule: Joi.when('isCashSale', {
       is: false,
@@ -273,7 +290,8 @@ export const addSalesDetailsSchema = Joi.object({
         nextPaymentDueDate: Joi.date().required(),
         note: Joi.string().optional(),
         apr: Joi.number().min(0).required(),
-        ertFee: Joi.number().min(0).optional(),
+        // BHPH-only field
+        ertFee: Joi.number().min(0).required(),
       }).required(),
       otherwise: Joi.forbidden(),
     }),
