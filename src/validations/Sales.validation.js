@@ -230,7 +230,11 @@ export const addSalesDetailsSchema = Joi.object({
         .default([]),
       dealerServiceFee: Joi.number().min(0).required(),
       netTradeIn: Joi.forbidden(),
-      deposit: Joi.number().min(0).required(),
+      deposit: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+        is: true,
+        then: Joi.required(),
+        otherwise: Joi.optional(),
+      }),
       // Allow for both cash and BHPH
       ertFee: Joi.number().min(0).optional(),
       paymentType: Joi.string().valid('Manual', 'Card', 'Cash').optional(),
@@ -243,9 +247,7 @@ export const addSalesDetailsSchema = Joi.object({
       is: false,
       then: Joi.object({
         paymentSchedule: Joi.string().trim().required(),
-        financingCalculationMethod: Joi.string()
-          .valid('Simple Interest', 'Payment Amount')
-          .required(),
+        financingCalculationMethod: Joi.string().trim().required(),
         numberOfPayments: Joi.number().min(1).required(),
         firstPaymentStarts: Joi.date().required(),
         firstPaymentDate: Joi.when('paymentSchedule', {
@@ -277,7 +279,9 @@ export const addSalesDetailsSchema = Joi.object({
     }),
   }).required(),
   salesType: Joi.string().optional(),
-}).required();
+})
+  .required()
+  .unknown(true);
 
 // Dealer costs removed
 
