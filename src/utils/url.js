@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8001';
+const BASE_URL = 'https://liquid.thedevapp.online';
 export function getFullImageUrl(filename) {
   return `${BASE_URL}/uploads/${filename}`;
 }
