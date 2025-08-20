@@ -70,6 +70,7 @@ const customerInfoSchema = Joi.object({
       firstName: requiredString('FIRST_NAME'),
       middleName: optionalString('MIDDLE_NAME'),
       lastName: requiredString('LAST_NAME'),
+
       Street: requiredString('STREET'),
       City: requiredString('CITY'),
       State: requiredString('STATE'),
@@ -231,17 +232,10 @@ export const addSalesDetailsSchema = Joi.object({
       netTradeIn: Joi.forbidden(),
       deposit: Joi.number().min(0).required(),
       // Allow for both cash and BHPH
+      ertFee: Joi.number().min(0).optional(),
       paymentType: Joi.string().valid('Manual', 'Card', 'Cash').optional(),
-      dateDepositReceived: Joi.when(Joi.ref('/pricing/isCashSale'), {
-        is: true,
-        then: Joi.date().required(),
-        otherwise: Joi.forbidden(),
-      }),
-      enterYourInitials: Joi.when(Joi.ref('/pricing/isCashSale'), {
-        is: true,
-        then: Joi.string().optional(),
-        otherwise: Joi.forbidden(),
-      }),
+      dateDepositReceived: Joi.date().optional(),
+      enterYourInitials: Joi.string().optional(),
       pickUpNote: Joi.string().optional(),
       serviceContract: Joi.number().min(0).optional(),
     }).required(),
@@ -278,7 +272,6 @@ export const addSalesDetailsSchema = Joi.object({
         note: Joi.string().optional(),
         apr: Joi.number().min(0).required(),
         // BHPH-only field
-        ertFee: Joi.number().min(0).required(),
       }).required(),
       otherwise: Joi.forbidden(),
     }),
