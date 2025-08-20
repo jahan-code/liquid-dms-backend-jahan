@@ -27,8 +27,8 @@ export const updateProfileAndPasswordSchema = Joi.object({
   language: Joi.string().trim().optional().messages({
     'string.empty': 'Language cannot be empty',
   }),
-  profileImage: Joi.string().trim().optional().messages({
-    'string.empty': 'Profile image URL cannot be empty',
+  profileImage: Joi.string().trim().allow('', null).optional().messages({
+    'string.empty': 'Profile image can be empty',
   }),
 
   // Password fields (all optional - only validate if provided)

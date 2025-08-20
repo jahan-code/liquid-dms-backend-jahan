@@ -53,7 +53,13 @@ export const getUserProfile = async (req, res, next) => {
       return next(new ApiError('User not found', 404));
     }
 
-    // Structure the response
+    // Structure the response (fallback to default image if none)
+    const defaultProfileUrl = getFullImageUrl('default-profile.png');
+    const profileImageUrl =
+      typeof user.profileImage === 'string' && user.profileImage.trim() !== ''
+        ? user.profileImage
+        : defaultProfileUrl;
+
     const profileResponse = {
       fullname: user.fullname,
       email: user.email,
@@ -62,7 +68,7 @@ export const getUserProfile = async (req, res, next) => {
       address: user.address,
       zipCode: user.zipCode,
       language: user.language,
-      profileImage: user.profileImage,
+      profileImage: profileImageUrl,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -220,6 +226,14 @@ export const updateProfileAndPassword = async (req, res, next) => {
     // Get updated user without password
     const updatedUser = await User.findById(userId).select('-password');
 
+    // Structure the response (fallback to default image if none)
+    const defaultProfileUrl = getFullImageUrl('default-profile.png');
+    const profileImageUrl =
+      typeof updatedUser.profileImage === 'string' &&
+      updatedUser.profileImage.trim() !== ''
+        ? updatedUser.profileImage
+        : defaultProfileUrl;
+
     // Structure the response
     const profileResponse = {
       fullname: updatedUser.fullname,
@@ -229,7 +243,7 @@ export const updateProfileAndPassword = async (req, res, next) => {
       address: updatedUser.address,
       zipCode: updatedUser.zipCode,
       language: updatedUser.language,
-      profileImage: updatedUser.profileImage,
+      profileImage: profileImageUrl,
       isVerified: updatedUser.isVerified,
       createdAt: updatedUser.createdAt,
       updatedAt: updatedUser.updatedAt,
