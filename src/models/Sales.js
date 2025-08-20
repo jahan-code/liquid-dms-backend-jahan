@@ -78,7 +78,7 @@ const SalesSchema = new mongoose.Schema(
         },
         paymentType: {
           type: String,
-          enum: ['Cash', 'Check', 'Credit Card', 'Other'],
+          enum: ['Manual', 'Card', 'Cash'],
         },
         dateDepositReceived: {
           type: Date,
@@ -99,7 +99,6 @@ const SalesSchema = new mongoose.Schema(
       paymentSchedule: {
         paymentSchedule: {
           type: String,
-          enum: ['Monthly', 'Weekly', 'Bi-weekly'],
         },
         financingCalculationMethod: {
           type: String,
@@ -110,6 +109,13 @@ const SalesSchema = new mongoose.Schema(
           min: 1,
         },
         firstPaymentStarts: {
+          type: Date,
+        },
+        // Semi-Monthly only
+        firstPaymentDate: {
+          type: Date,
+        },
+        secondPaymentDate: {
           type: Date,
         },
       },

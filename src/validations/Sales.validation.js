@@ -154,14 +154,7 @@ const salesDetailsSchema = Joi.object({
   dealerServiceFee: optionalNumber('DEALER_SERVICE_FEE'),
   netTradeIn: optionalNumber('NET_TRADE_IN'),
   deposit: optionalNumber('DEPOSIT'),
-  paymentType: enumValidator('PAYMENT_TYPE', [
-    'Cash',
-    'Check',
-    'Credit Card',
-    'Debit Card',
-    'Bank Transfer',
-    'Other',
-  ]),
+  paymentType: enumValidator('PAYMENT_TYPE', ['Manual', 'Card', 'Cash']),
   dateDepositReceived: Joi.date().default(Date.now),
   enterYourInitials: optionalString('INITIALS'),
   pickUpNote: optionalString('PICKUP_NOTE'),
@@ -181,11 +174,7 @@ const buyHerePayHereDetailsSchema = Joi.object({
   }),
   serviceContract: optionalNumber('SERVICE_CONTRACT'),
   ertFee: optionalNumber('ERT_FEE'),
-  paymentSchedule: enumValidator('PAYMENT_SCHEDULE', [
-    'Weekly',
-    'Bi-Weekly',
-    'Monthly',
-  ]).default('Monthly'),
+  paymentSchedule: Joi.string().trim().required().default('Monthly'),
   financingCalculationMethod: enumValidator('FINANCING_CALCULATION_METHOD', [
     'Simple Interest',
     'Add-On Interest',
@@ -244,9 +233,7 @@ export const addSalesDetailsSchema = Joi.object({
       // Cash-only fields
       paymentType: Joi.when(Joi.ref('/pricing/isCashSale'), {
         is: true,
-        then: Joi.string()
-          .valid('Cash', 'Check', 'Credit Card', 'Other')
-          .required(),
+        then: Joi.string().valid('Manual', 'Card', 'Cash').required(),
         otherwise: Joi.forbidden(),
       }),
       dateDepositReceived: Joi.when(Joi.ref('/pricing/isCashSale'), {
@@ -260,23 +247,27 @@ export const addSalesDetailsSchema = Joi.object({
         otherwise: Joi.forbidden(),
       }),
       pickUpNote: Joi.string().optional(),
-      serviceContract: Joi.when(Joi.ref('/pricing/isCashSale'), {
-        is: true,
-        then: Joi.number().min(0).optional(),
-        otherwise: Joi.forbidden(),
-      }),
+      serviceContract: Joi.number().min(0).optional(),
     }).required(),
     paymentSchedule: Joi.when('isCashSale', {
       is: false,
       then: Joi.object({
-        paymentSchedule: Joi.string()
-          .valid('Monthly', 'Weekly', 'Bi-weekly')
-          .required(),
+        paymentSchedule: Joi.string().trim().required(),
         financingCalculationMethod: Joi.string()
           .valid('Simple Interest', 'Payment Amount')
           .required(),
         numberOfPayments: Joi.number().min(1).required(),
         firstPaymentStarts: Joi.date().required(),
+        firstPaymentDate: Joi.when('paymentSchedule', {
+          is: 'Semi-Monthly',
+          then: Joi.date().required(),
+          otherwise: Joi.forbidden(),
+        }),
+        secondPaymentDate: Joi.when('paymentSchedule', {
+          is: 'Semi-Monthly',
+          then: Joi.date().required(),
+          otherwise: Joi.forbidden(),
+        }),
       }).required(),
       otherwise: Joi.forbidden(),
     }),
