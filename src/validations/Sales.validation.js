@@ -230,12 +230,8 @@ export const addSalesDetailsSchema = Joi.object({
       dealerServiceFee: Joi.number().min(0).required(),
       netTradeIn: Joi.forbidden(),
       deposit: Joi.number().min(0).required(),
-      // Cash-only fields
-      paymentType: Joi.when(Joi.ref('/pricing/isCashSale'), {
-        is: true,
-        then: Joi.string().valid('Manual', 'Card', 'Cash').required(),
-        otherwise: Joi.forbidden(),
-      }),
+      // Allow for both cash and BHPH
+      paymentType: Joi.string().valid('Manual', 'Card', 'Cash').optional(),
       dateDepositReceived: Joi.when(Joi.ref('/pricing/isCashSale'), {
         is: true,
         then: Joi.date().required(),
