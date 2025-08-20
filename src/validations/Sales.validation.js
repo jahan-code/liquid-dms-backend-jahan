@@ -214,7 +214,6 @@ export const createSalesSchema = Joi.object({
 
 // 🔹 Step 2: Sales Details Schema (Updated to match UI structure)
 export const addSalesDetailsSchema = Joi.object({
-  isCashSale: Joi.boolean().required(),
   pricing: Joi.object({
     isCashSale: Joi.boolean().required(),
     salesType: Joi.string().optional(),
