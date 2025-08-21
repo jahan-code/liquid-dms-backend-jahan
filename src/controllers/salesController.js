@@ -111,6 +111,7 @@ export const createSales = async (req, res, next) => {
     const sales = new Sales({
       receiptId: receiptId,
       customerInfo: customer ? customer._id : undefined,
+      vehicleInfo: vehicle ? vehicle._id : undefined,
       pricing: {
         isCashSale: req.body?.pricing?.isCashSale ?? undefined,
         salesType: req.body?.pricing?.salesType ?? undefined,
@@ -120,7 +121,7 @@ export const createSales = async (req, res, next) => {
 
     const salesResponse = await sales.save();
 
-    // Populate customer details only (vehicleInfo removed from schema)
+    // Populate customer details only
     await salesResponse.populate(['customerInfo']);
 
     // Shape response: omit irrelevant pricing block at creation time
@@ -144,6 +145,9 @@ export const createSales = async (req, res, next) => {
         createdAt: salesObj.customerInfo?.createdAt,
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
+
+      // Vehicle Reference (ID only)
+      vehicleInfo: salesObj.vehicleInfo ? String(salesObj.vehicleInfo) : null,
 
       // Pricing Section - Conditional based on sales type
       pricing: {

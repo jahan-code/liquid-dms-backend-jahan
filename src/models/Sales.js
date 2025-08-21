@@ -9,6 +9,11 @@ const SalesSchema = new mongoose.Schema(
       required: true,
     },
 
+    vehicleInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vehicle',
+      required: false,
+    },
     // Reference to Customer (always required, will be created if new)
     customerInfo: {
       type: mongoose.Schema.Types.ObjectId,

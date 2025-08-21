@@ -194,6 +194,30 @@ export const getAllCustomers = async (req, res, next) => {
     );
   }
 };
+export const getAllCustomersWithoutPagination = async (req, res, next) => {
+  try {
+    const customers = await Customer.find().sort({ createdAt: -1 });
+
+    if (!customers || customers.length === 0) {
+      return next(new ApiError('No customers found', 404));
+    }
+
+    return SuccessHandler(
+      customers,
+      200,
+      'Customers fetched successfully',
+      res
+    );
+  } catch (err) {
+    logger.error('❌ Get all customers (no pagination) error:', err);
+    next(
+      new ApiError(
+        err.message || errorConstants.GENERAL.INTERNAL_SERVER_ERROR,
+        500
+      )
+    );
+  }
+};
 export const deleteCustomerById = async (req, res, next) => {
   try {
     const customerId = req.query.id;

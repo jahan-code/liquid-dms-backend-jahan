@@ -80,6 +80,7 @@ const validationSchemas = {
   '/customer/edit-customer': { PUT: editCustomerSchema },
   '/customer': { GET: null },
   '/customer/customers': { GET: null },
+  '/customer/customers/all': { GET: null },
   '/customer/delete-customer': { DELETE: null },
   //Sales
   '/sales/add-sales': { POST: addSalesSchema },
