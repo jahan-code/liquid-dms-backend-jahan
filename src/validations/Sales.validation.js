@@ -240,7 +240,7 @@ export const addSalesDetailsSchema = Joi.object({
       paymentType: Joi.string().valid('Manual', 'Card', 'Cash').optional(),
       dateDepositReceived: Joi.date().optional(),
       enterYourInitials: Joi.string().optional(),
-      pickUpNote: Joi.string().optional(),
+      pickUpNote: Joi.string().allow('', null).optional(),
       serviceContract: Joi.number().min(0).optional(),
     }).required(),
     paymentSchedule: Joi.when('isCashSale', {
