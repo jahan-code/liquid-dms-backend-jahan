@@ -253,12 +253,16 @@ export const addSalesDetailsSchema = Joi.object({
         firstPaymentDate: Joi.when('paymentSchedule', {
           is: 'Semi-Monthly',
           then: Joi.date().required(),
-          otherwise: Joi.forbidden(),
+          otherwise: Joi.alternatives()
+            .try(Joi.date(), Joi.string().allow('', null))
+            .optional(),
         }),
         secondPaymentDate: Joi.when('paymentSchedule', {
           is: 'Semi-Monthly',
           then: Joi.date().required(),
-          otherwise: Joi.forbidden(),
+          otherwise: Joi.alternatives()
+            .try(Joi.date(), Joi.string().allow('', null))
+            .optional(),
         }),
       }).required(),
       otherwise: Joi.forbidden(),
