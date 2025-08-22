@@ -725,7 +725,9 @@ export const updateNetTradeInInfo = async (req, res, next) => {
     const update = {
       'pricing.salesDetails.netTradeInEnabled': Boolean(enabled),
       'pricing.salesDetails.netTradeInId': enabled
-        ? netTradeInId || null
+        ? netTradeInId && netTradeInId !== 'null'
+          ? netTradeInId
+          : null
         : null,
     };
 
@@ -736,7 +738,7 @@ export const updateNetTradeInInfo = async (req, res, next) => {
     ).populate(['customerInfo']);
 
     // Link NetTradeIn back to this sale when enabled and id provided
-    if (Boolean(enabled) && netTradeInId) {
+    if (Boolean(enabled) && netTradeInId && netTradeInId !== 'null') {
       await NetTradeIn.findByIdAndUpdate(
         netTradeInId,
         { $set: { linkedSales: updated._id } },
