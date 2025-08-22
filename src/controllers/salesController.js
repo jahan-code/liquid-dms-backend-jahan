@@ -323,6 +323,11 @@ export const addSalesDetails = async (req, res, next) => {
       setPayload['pricing.paymentDetails'] = mergedDetails;
     }
 
+    // Persist reservation flag when provided
+    if (typeof pricing?.isReserved !== 'undefined') {
+      setPayload['pricing.isReserved'] = isReserved;
+    }
+
     const updateOps = { $set: setPayload };
     if (unsetPayload) updateOps.$unset = unsetPayload;
 
