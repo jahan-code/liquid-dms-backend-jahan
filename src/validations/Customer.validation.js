@@ -82,10 +82,7 @@ export const addCustomerSchema = Joi.object({
         'string.empty': errorConstants.CUSTOMER.HEAR_ABOUT_US_OTHER_REQUIRED,
         'any.required': errorConstants.CUSTOMER.HEAR_ABOUT_US_OTHER_REQUIRED,
       }),
-      otherwise: Joi.forbidden().messages({
-        'any.unknown':
-          'hearAboutUsOther should not be provided when hearAboutUs is not "Other"',
-      }),
+      otherwise: Joi.string().allow('', null).optional(),
     }),
   }).required(),
   IncomeInformation: Joi.object({

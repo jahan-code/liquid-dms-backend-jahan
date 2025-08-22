@@ -103,10 +103,7 @@ const customerInfoSchema = Joi.object({
           'string.empty': errorConstants.SALES.HEAR_ABOUT_US_OTHER_REQUIRED,
           'any.required': errorConstants.SALES.HEAR_ABOUT_US_OTHER_REQUIRED,
         }),
-        otherwise: Joi.forbidden().messages({
-          'any.unknown':
-            'hearAboutUsOther should not be provided when hearAboutUs is not "Other"',
-        }),
+        otherwise: Joi.string().allow('', null).optional(),
       }),
     }).required(),
     otherwise: Joi.forbidden(),
