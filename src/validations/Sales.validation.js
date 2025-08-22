@@ -296,7 +296,7 @@ export const addSalesDetailsSchema = Joi.object({
 // 🔹 Net Trade-In Toggle Schema
 export const updateNetTradeInInfoSchema = Joi.object({
   enabled: Joi.boolean().required(),
-  netTradeInId: Joi.string().optional(),
+  netTradeInId: Joi.string().allow('', null).optional(),
 }).required();
 
 // 🔹 Legacy Schema (for backward compatibility)
