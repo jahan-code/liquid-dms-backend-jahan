@@ -31,6 +31,23 @@ export const createNetTradeIn = async (req, res, next) => {
       vendorInfo,
     } = value;
 
+    // Ensure uniqueness of vendor email even when not adding to inventory
+    if (
+      !addToInventory &&
+      vendorInfo &&
+      vendorInfo.isExistingVendor === false
+    ) {
+      const vendorEmail = vendorInfo?.email?.trim().toLowerCase();
+      if (vendorEmail) {
+        const emailExists = await Vendor.findOne({ email: vendorEmail });
+        if (emailExists) {
+          return next(
+            new ApiError(errorConstants.VENDOR.EMAIL_ALREADY_EXISTS, 409)
+          );
+        }
+      }
+    }
+
     const featuredImageUrl = req.files?.featuredImage?.[0]?.filename
       ? getFullImageUrl(req.files.featuredImage[0].filename)
       : '';
