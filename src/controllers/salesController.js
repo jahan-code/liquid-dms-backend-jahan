@@ -327,19 +327,23 @@ export const addSalesDetails = async (req, res, next) => {
     if (unsetPayload) updateOps.$unset = unsetPayload;
 
     // Mark linked vehicle as Reserved or Sold automatically when sales details are saved
+    // Only update the vehicle that is specifically linked to this sales record via vehicleInfo
     try {
-      const vehicleId =
-        existingSales?.vehicleInfo ||
-        existingSales?.pricing?.salesDetails?.vehicleId;
-      if (vehicleId) {
+      const linkedVehicleId = existingSales?.vehicleInfo;
+      if (linkedVehicleId) {
         const newStatus = isReserved ? 'Reserved' : 'Sold';
-        await Vehicle.findByIdAndUpdate(vehicleId, {
+        await Vehicle.findByIdAndUpdate(linkedVehicleId, {
           $set: { salesStatus: newStatus },
+        });
+        logger.info({
+          message: `✅ Linked vehicle salesStatus updated to ${newStatus}`,
+          vehicleId: linkedVehicleId,
+          timestamp: new Date().toISOString(),
         });
       }
     } catch (e) {
       logger.warn({
-        message: 'Could not update vehicle salesStatus to Reserved/Sold',
+        message: `Could not update linked vehicle salesStatus to ${isReserved ? 'Reserved' : 'Sold'}`,
         error: e?.message,
       });
     }
