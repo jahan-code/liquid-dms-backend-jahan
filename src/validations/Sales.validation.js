@@ -206,6 +206,7 @@ export const createSalesSchema = Joi.object({
 export const addSalesDetailsSchema = Joi.object({
   pricing: Joi.object({
     isCashSale: Joi.boolean().required(),
+    isReserved: Joi.boolean().optional(),
     salesType: Joi.string().optional(),
     salesDetails: Joi.object({
       saleDate: Joi.date().required(),
@@ -290,14 +291,7 @@ export const addSalesDetailsSchema = Joi.object({
 // Dealer costs removed
 
 // 🔹 Update Sales Status Schema
-export const updateSalesStatusSchema = Joi.object({
-  salesStatus: enumValidator('SALES_STATUS', [
-    'Pending',
-    'Completed',
-    'Cancelled',
-    'Refunded',
-  ]).required(),
-}).required();
+// removed updateSalesStatusSchema: vehicle status is the source of truth
 
 // 🔹 Net Trade-In Toggle Schema
 export const updateNetTradeInInfoSchema = Joi.object({
@@ -313,7 +307,7 @@ export const addSalesSchema = Joi.object({
   salesDetails: salesDetailsSchema.optional(),
   cashSalesDetails: cashSalesDetailsSchema.optional(),
   buyHerePayHereDetails: buyHerePayHereDetailsSchema.optional(),
-  salesStatus: Joi.string().optional(),
+  // salesStatus removed
 }).optional();
 
 export const editSalesSchema = addSalesSchema.fork(

@@ -267,7 +267,6 @@ export const createNetTradeIn = async (req, res, next) => {
         ? {
             _id: doc.linkedSales._id,
             receiptId: doc.linkedSales.receiptId,
-            salesStatus: doc.linkedSales.salesStatus,
           }
         : null,
 
@@ -416,7 +415,6 @@ export const getNetTradeInById = async (req, res, next) => {
         ? {
             _id: doc.linkedSales._id,
             receiptId: doc.linkedSales.receiptId,
-            salesStatus: doc.linkedSales.salesStatus,
           }
         : null,
 

@@ -3,67 +3,146 @@ import Joi from 'joi';
 const nonNegativeNumber = Joi.number().min(0).default(0);
 
 const vehicleBasicDetails = Joi.object({
-  vehicleTitle: Joi.string().allow('', null),
-  vin: Joi.string().allow('', null),
-  make: Joi.string().allow('', null),
-  model: Joi.string().allow('', null),
-  style: Joi.string().allow('', null),
-  bodyType: Joi.string().allow('', null),
-  manufacturingYear: Joi.number().integer().allow(null),
-  vehicleType: Joi.string().allow('', null),
-  condition: Joi.string().allow('', null),
-  certified: Joi.string().allow('', null),
+  vehicleTitle: Joi.string().trim().allow('', null),
+  vin: Joi.string().trim().required(),
+  make: Joi.string()
+    .trim()
+    .valid(
+      'Toyota',
+      'Honda',
+      'Ford',
+      'Chevrolet',
+      'Nissan',
+      'Mercedes-Benz',
+      'BMW',
+      'Kia',
+      'Jeep',
+      'Hyundai'
+    )
+    .required(),
+  model: Joi.string().trim().required(),
+  style: Joi.string()
+    .valid(
+      'Coupe',
+      'Sedan',
+      'Hatchback',
+      'SUV',
+      'Van',
+      'Convertible',
+      'Pickup Truck',
+      'Wagon',
+      'Minivan',
+      'Roadster'
+    )
+    .required(),
+  bodyType: Joi.string().trim().allow('', null),
+  manufacturingYear: Joi.number()
+    .integer()
+    .min(1900)
+    .max(new Date().getFullYear() + 1),
+  vehicleType: Joi.string()
+    .valid(
+      'Car',
+      'Truck',
+      'Van',
+      'SUV',
+      'Motorcycle',
+      'Bus',
+      'Trailer',
+      'RV',
+      'Commercial',
+      'Other'
+    )
+    .required(),
+  condition: Joi.string().valid('New', 'Used', 'Rebuild').required(),
+  certified: Joi.string().trim().allow('', null),
 });
 
 const vehicleSpecifications = Joi.object({
-  transmission: Joi.string().allow('', null),
-  tranSpeed: Joi.number().integer().allow(null),
-  drivetrain: Joi.string().allow('', null),
-  engineCylinders: Joi.number().integer().allow(null),
-  engineSize: Joi.string().allow('', null),
-  fuelType: Joi.string().allow('', null),
-  mpgCombined: Joi.number().allow(null),
-  mpgCity: Joi.number().allow(null),
-  mpgHighway: Joi.number().allow(null),
-  towCapacity: Joi.number().allow(null),
-  passengers: Joi.number().integer().allow(null),
-  weight: Joi.number().allow(null),
-  mileage: Joi.string().allow('', null),
-  mileageIs: Joi.string().allow('', null),
+  transmission: Joi.string()
+    .valid(
+      'Automatic',
+      'Manual',
+      'CVT (Continuously Variable Transmission)',
+      'Dual-Clutch',
+      'Tiptronic',
+      'Semi-Automatic'
+    )
+    .required(),
+  tranSpeed: Joi.string().trim().allow('', null),
+  drivetrain: Joi.string()
+    .valid(
+      'FWD (Front-Wheel Drive)',
+      'RWD (Rear-Wheel Drive)',
+      'AWD (All-Wheel Drive)',
+      '4WD (Four-Wheel Drive)'
+    )
+    .required(),
+  engineCylinders: Joi.string().trim().allow('', null),
+  engineSize: Joi.number().positive(),
+  fuelType: Joi.string()
+    .valid('Gas', 'Diesel', 'Electric', 'Hybrid')
+    .required(),
+  mpgCombined: Joi.string().trim().allow('', null),
+  mpgCity: Joi.string().trim().allow('', null),
+  mpgHighway: Joi.string().trim().allow('', null),
+  towCapacity: Joi.number().min(0),
+  passengers: Joi.string().trim().allow('', null),
+  weight: Joi.string().trim().allow('', null),
+  mileage: Joi.string().trim().required(),
+  mileageIs: Joi.string().trim().allow('', null),
 });
 
 const vehicleExteriorInterior = Joi.object({
-  exteriorColor: Joi.string().allow('', null),
-  exteriorColor2: Joi.string().allow('', null),
-  colorDescription: Joi.string().allow('', null),
-  interiorColor: Joi.string().allow('', null),
-  tag: Joi.string().allow('', null),
-  decal: Joi.string().allow('', null),
-  gpsSerial: Joi.string().allow('', null),
+  exteriorColor: Joi.string()
+    .valid(
+      'White',
+      'Black',
+      'Silver',
+      'Red',
+      'Blue',
+      'Green',
+      'Yellow',
+      'Gray',
+      'Brown',
+      'Orange',
+      'Gold',
+      'Maroon',
+      'Beige'
+    )
+    .required(),
+  exteriorColor2: Joi.string().trim().allow('', null),
+  colorDescription: Joi.string().trim().allow('', null),
+  interiorColor: Joi.string()
+    .valid('Black', 'Gray', 'Beige', 'Tan', 'White', 'Brown', 'Red', 'Blue')
+    .required(),
+  tag: Joi.string().trim().required(),
+  decal: Joi.string().trim().allow('', null),
+  gpsSerial: Joi.string().trim().allow('', null),
 });
 
 const vehicleTitleRegistration = Joi.object({
-  titleApplication: Joi.string().allow('', null),
-  titleId: Joi.boolean().allow(null),
-  stateTitleIn: Joi.string().allow('', null),
-  title: Joi.string().allow('', null),
-  titleDate: Joi.date().allow(null),
-  country: Joi.string().allow('', null),
+  titleApplication: Joi.string().trim().required(),
+  titleId: Joi.boolean().required(),
+  stateTitleIn: Joi.string().trim().allow('', null),
+  title: Joi.string().trim().allow('', null),
+  titleDate: Joi.string().trim().allow('', null),
+  country: Joi.string().trim().allow('', null),
 });
 
 const vehicleInspection = Joi.object({
-  inspected: Joi.boolean().allow(null),
-  inspectionNumber: Joi.string().allow('', null),
-  inspectionDate: Joi.date().allow(null),
-  inspectedBy: Joi.string().allow('', null),
-  warranty: Joi.string().allow('', null),
-  deviceHasStarterInterrupt: Joi.boolean().allow(null),
+  inspected: Joi.boolean().required(),
+  inspectionNumber: Joi.string().trim().allow('', null),
+  inspectionDate: Joi.string().trim().allow('', null),
+  inspectedBy: Joi.string().trim().allow('', null),
+  warranty: Joi.string().trim().allow('', null),
+  deviceHasStarterInterrupt: Joi.boolean().optional(),
 });
 
 const vehicleKeySecurity = Joi.object({
-  ignitionKeyCode: Joi.string().allow('', null),
-  doorKeyCode: Joi.string().allow('', null),
-  valetKeyCode: Joi.string().allow('', null),
+  ignitionKeyCode: Joi.string().trim().allow('', null),
+  doorKeyCode: Joi.string().trim().allow('', null),
+  valetKeyCode: Joi.string().trim().allow('', null),
 });
 
 const vehicleInfo = Joi.object({
@@ -73,10 +152,10 @@ const vehicleInfo = Joi.object({
   titleRegistration: vehicleTitleRegistration,
   inspection: vehicleInspection,
   keySecurity: vehicleKeySecurity,
-  features: Joi.array().items(Joi.string()).default([]),
+  features: Joi.array().items(Joi.string()).optional(),
   images: Joi.object({
-    featuredImageUrl: Joi.string().allow('', null),
-    otherImageUrls: Joi.array().items(Joi.string()).default([]),
+    featuredImageUrl: Joi.string().trim().required(),
+    otherImageUrls: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
 });
 

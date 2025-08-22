@@ -131,7 +131,6 @@ export const createSales = async (req, res, next) => {
     const structuredResponse = {
       _id: salesObj._id,
       receiptId: salesObj.receiptId,
-      salesStatus: salesObj.salesStatus,
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
@@ -210,6 +209,7 @@ export const addSalesDetails = async (req, res, next) => {
     const { pricing } = value;
     const { salesDetails, paymentSchedule, paymentDetails } = pricing || {};
     const isCashSale = pricing?.isCashSale === true;
+    const isReserved = pricing?.isReserved === true;
 
     // 3. Find existing sales record
     const existingSales = await Sales.findById(salesId);
@@ -326,19 +326,20 @@ export const addSalesDetails = async (req, res, next) => {
     const updateOps = { $set: setPayload };
     if (unsetPayload) updateOps.$unset = unsetPayload;
 
-    // Mark linked vehicle as Sold automatically when sales details are saved
+    // Mark linked vehicle as Reserved or Sold automatically when sales details are saved
     try {
       const vehicleId =
         existingSales?.vehicleInfo ||
         existingSales?.pricing?.salesDetails?.vehicleId;
       if (vehicleId) {
+        const newStatus = isReserved ? 'Reserved' : 'Sold';
         await Vehicle.findByIdAndUpdate(vehicleId, {
-          $set: { salesStatus: 'Sold' },
+          $set: { salesStatus: newStatus },
         });
       }
     } catch (e) {
       logger.warn({
-        message: 'Could not update vehicle salesStatus to Sold',
+        message: 'Could not update vehicle salesStatus to Reserved/Sold',
         error: e?.message,
       });
     }
@@ -358,7 +359,6 @@ export const addSalesDetails = async (req, res, next) => {
     const structuredResponse = {
       _id: salesObj._id,
       receiptId: salesObj.receiptId,
-      salesStatus: salesObj.salesStatus,
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
@@ -441,7 +441,6 @@ export const getSalesById = async (req, res, next) => {
     const structuredResponse = {
       _id: salesObj._id,
       receiptId: salesObj.receiptId,
-      salesStatus: salesObj.salesStatus,
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,

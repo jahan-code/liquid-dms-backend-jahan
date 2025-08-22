@@ -159,13 +159,6 @@ const SalesSchema = new mongoose.Schema(
       },
     },
 
-    // Sales Status
-    salesStatus: {
-      type: String,
-      enum: ['Available', 'Pending', 'Sold'],
-      default: 'Available',
-    },
-
     // Total Amount (calculated)
     totalAmount: {
       type: Number,
@@ -183,7 +176,6 @@ SalesSchema.index({
   customerInfo: 1,
   vehicleInfo: 1,
   'pricing.salesType': 1,
-  salesStatus: 1,
 });
 
 // Pre-save middleware to calculate total amount
