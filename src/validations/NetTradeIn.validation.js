@@ -208,7 +208,7 @@ export const addNetTradeInSchema = Joi.object({
     city: Joi.string().optional(),
     state: Joi.string().optional(),
     primaryContactNumber: Joi.string().optional(),
-    alternativeContactNumber: Joi.string().optional(),
+    alternativeContactNumber: Joi.string().allow('', null).optional(),
     contactPerson: Joi.string().optional(),
     email: Joi.string().email().optional(),
     accountNumber: Joi.string().allow('', null).optional(),
