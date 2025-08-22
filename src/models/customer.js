@@ -51,10 +51,13 @@ const CustomerSchema = new mongoose.Schema(
       SSN: {
         type: String,
       },
-      DriverLicense: {
+      documentType: {
         type: String,
       },
-      LicenseExpiration: {
+      documentNumber: {
+        type: String,
+      },
+      documentExpiration: {
         type: Date,
       },
       SpouseName: {
