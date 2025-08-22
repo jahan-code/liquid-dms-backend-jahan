@@ -244,7 +244,9 @@ const vendorInfoSchema = Joi.object({
   }),
   accountNumber: Joi.when('isExistingVendor', {
     is: false,
-    then: optionalString('ACCOUNT_NUMBER'),
+    then: Joi.string().allow('', null).messages({
+      'string.base': errorConstants.VEHICLE.ACCOUNT_NUMBER_MUST_BE_STRING,
+    }),
     otherwise: Joi.forbidden(),
   }),
   taxIdOrSSN: Joi.when('isExistingVendor', {

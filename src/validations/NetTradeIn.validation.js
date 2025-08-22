@@ -116,7 +116,7 @@ const vehicleExteriorInterior = Joi.object({
   interiorColor: Joi.string()
     .valid('Black', 'Gray', 'Beige', 'Tan', 'White', 'Brown', 'Red', 'Blue')
     .required(),
-  tag: Joi.string().trim().required(),
+  tag: Joi.string().trim().allow('', null),
   decal: Joi.string().trim().allow('', null),
   gpsSerial: Joi.string().trim().allow('', null),
 });
@@ -211,7 +211,7 @@ export const addNetTradeInSchema = Joi.object({
     alternativeContactNumber: Joi.string().optional(),
     contactPerson: Joi.string().optional(),
     email: Joi.string().email().optional(),
-    accountNumber: Joi.string().optional(),
+    accountNumber: Joi.string().allow('', null).optional(),
     taxIdOrSSN: Joi.string().optional(),
     note: Joi.string().allow('', null).optional(),
     billofsales: Joi.string().allow('', null).optional(),
