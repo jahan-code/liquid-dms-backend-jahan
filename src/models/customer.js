@@ -71,6 +71,10 @@ const CustomerSchema = new mongoose.Schema(
         type: String,
         enum: ['Facebook', 'Twitter', 'Other'],
       },
+      hearAboutUsOther: {
+        type: String,
+        trim: true,
+      },
     },
 
     IncomeInformation: {

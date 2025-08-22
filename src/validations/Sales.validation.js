@@ -95,6 +95,19 @@ const customerInfoSchema = Joi.object({
         'Twitter',
         'Other',
       ]),
+      hearAboutUsOther: Joi.when('hearAboutUs', {
+        is: 'Other',
+        then: Joi.string().trim().required().messages({
+          'string.base':
+            errorConstants.SALES.HEAR_ABOUT_US_OTHER_MUST_BE_STRING,
+          'string.empty': errorConstants.SALES.HEAR_ABOUT_US_OTHER_REQUIRED,
+          'any.required': errorConstants.SALES.HEAR_ABOUT_US_OTHER_REQUIRED,
+        }),
+        otherwise: Joi.forbidden().messages({
+          'any.unknown':
+            'hearAboutUsOther should not be provided when hearAboutUs is not "Other"',
+        }),
+      }),
     }).required(),
     otherwise: Joi.forbidden(),
   }),

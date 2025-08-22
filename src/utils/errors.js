@@ -562,6 +562,9 @@ const errorConstants = {
     HEAR_ABOUT_US_MUST_BE_STRING: 'Hear About Us must be a string.',
     HEAR_ABOUT_US_NEGATIVE: 'Hear About Us cannot be negative.',
     HEAR_ABOUT_US_REQUIRED: 'Hear About Us is required.',
+    HEAR_ABOUT_US_OTHER_MUST_BE_STRING: 'Hear about us other must be a string.',
+    HEAR_ABOUT_US_OTHER_REQUIRED:
+      'Hear about us other is required when "Other" is selected.',
     INCOME_VERIFICATION_METHOD_INVALID:
       'Income Verification Method is invalid.',
     INCOME_VERIFICATION_METHOD_MUST_BE_NUMBER:
@@ -720,6 +723,9 @@ const errorConstants = {
     EMPLOYMENT_TYPE_MUST_BE_STRING: 'Employment type must be a string.',
     GENDER_INVALID: 'Gender is invalid.',
     HEAR_ABOUT_US_INVALID: 'Invalid option for Hear About Us.',
+    HEAR_ABOUT_US_OTHER_MUST_BE_STRING: 'Hear about us other must be a string.',
+    HEAR_ABOUT_US_OTHER_REQUIRED:
+      'Hear about us other is required when "Other" is selected.',
   },
 
   // 🔹 Message Template Errors

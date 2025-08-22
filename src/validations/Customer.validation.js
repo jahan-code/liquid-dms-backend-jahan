@@ -74,6 +74,19 @@ export const addCustomerSchema = Joi.object({
       'Twitter',
       'Other',
     ]),
+    hearAboutUsOther: Joi.when('hearAboutUs', {
+      is: 'Other',
+      then: Joi.string().trim().required().messages({
+        'string.base':
+          errorConstants.CUSTOMER.HEAR_ABOUT_US_OTHER_MUST_BE_STRING,
+        'string.empty': errorConstants.CUSTOMER.HEAR_ABOUT_US_OTHER_REQUIRED,
+        'any.required': errorConstants.CUSTOMER.HEAR_ABOUT_US_OTHER_REQUIRED,
+      }),
+      otherwise: Joi.forbidden().messages({
+        'any.unknown':
+          'hearAboutUsOther should not be provided when hearAboutUs is not "Other"',
+      }),
+    }),
   }).required(),
   IncomeInformation: Joi.object({
     EmploymentStatus: enumValidator('EMPLOYMENT_STATUS', [
