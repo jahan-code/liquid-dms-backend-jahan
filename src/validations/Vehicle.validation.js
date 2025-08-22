@@ -264,8 +264,8 @@ const vendorInfoSchema = Joi.object({
   }),
 });
 
-// 🔹 Core vehicle schema (common across Vehicle and NetTradeIn)
-export const vehicleCoreSchema = Joi.object({
+// 🔹 Final Schema
+export const addVehicleSchema = Joi.object({
   basicDetails: Joi.object({
     vehicleTitle: optionalString('VEHICLE_TITLE'),
     vin: requiredString('VIN'),
@@ -332,15 +332,12 @@ export const vehicleCoreSchema = Joi.object({
 
   features: Joi.array().items(Joi.string()).optional(),
 
+  vendorInfo: vendorInfoSchema,
+
   images: Joi.object({
     featuredImageUrl: requiredString('FEATURED_IMAGE_URL'),
     otherImageUrls: Joi.array().items(Joi.string().uri()).optional(),
   }).optional(),
-});
-
-// 🔹 Final Schema
-export const addVehicleSchema = vehicleCoreSchema.keys({
-  vendorInfo: vendorInfoSchema,
 });
 export const AddVehicleCostSchema = Joi.object({
   costDetails: Joi.object({
