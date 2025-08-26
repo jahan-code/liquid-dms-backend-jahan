@@ -275,6 +275,12 @@ const errorConstants = {
 
     WEIGHT_MUST_BE_STRING: 'Weight must be a string.',
   },
+
+  // 🔹 Accounting Validation Errors
+  ACCOUNTING: {
+    RECEIPT_NUMBER_MUST_BE_STRING: 'Receipt number must be a string.',
+    RECEIPT_NUMBER_REQUIRED: 'Receipt number is required.',
+  },
   //🔹 Campaign Login Template Errors
   CAMPAIGN_LOGIN_TEMPLATE: {
     NAME_REQUIRED: 'The campaign login template name is required.',

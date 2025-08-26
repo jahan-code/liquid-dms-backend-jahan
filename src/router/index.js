@@ -7,6 +7,7 @@ import customer from './customer.js';
 import sales from './sales.js';
 import netTradeIn from './netTradeIn.js';
 import profile from './profile.js';
+import accounting from './accounting.js';
 
 const router = Router();
 router.use('/auth', auth);
@@ -17,4 +18,5 @@ router.use('/customer', customer);
 router.use('/sales', sales);
 router.use('/net-trade-in', netTradeIn);
 router.use('/user', profile);
+router.use('/accounting', accounting);
 export default router;
