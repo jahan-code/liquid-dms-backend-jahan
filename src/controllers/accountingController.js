@@ -11,7 +11,6 @@ export const createAccounting = async (req, res, next) => {
     logger.info('🧾 Creating accounting entry');
     const payload = req.body || {};
 
-    // Derive receiptNumber and totalNumberOfPayments from nested AccountingDetails (preferred)
     const receiptNumber =
       payload?.AccountingDetails?.receiptNumber || payload?.receiptNumber;
     const totalNumberOfPayments =
@@ -22,7 +21,6 @@ export const createAccounting = async (req, res, next) => {
       return next(new ApiError('receiptNumber is required', 400));
     }
 
-    // Count existing installments for this receipt
     const existingCount = await Accounting.countDocuments({
       'AccountingDetails.receiptNumber': receiptNumber,
     });
@@ -40,48 +38,56 @@ export const createAccounting = async (req, res, next) => {
       );
     }
 
-    // Ensure nested structure exists
     payload.AccountingDetails = payload.AccountingDetails || {};
     payload.AccountingDetails.receiptNumber = receiptNumber;
     payload.AccountingDetails.installmentNumber = nextInstallment;
 
-    // Auto-calculate dueDate when not provided, based on payment schedule
-    if (!payload.AccountingDetails.dueDate) {
-      // Try to derive schedule from payload first, else from Sales
-      const scheduleFromPayload = payload.AccountingDetails.paymentSchedule;
-      let schedule = (scheduleFromPayload || '').trim();
-      let firstPaymentDate, secondPaymentDate;
+    // Always derive schedule and dates from Sales (fallbacks) and payload
+    const scheduleFromPayload = payload.AccountingDetails.paymentSchedule;
+    let schedule = (scheduleFromPayload || '').trim();
 
-      if (!schedule) {
-        const linkedSale = await Sales.findOne({ receiptId: receiptNumber });
-        if (linkedSale) {
-          schedule =
-            linkedSale?.pricing?.paymentSchedule?.paymentSchedule || '';
-          firstPaymentDate =
-            linkedSale?.pricing?.paymentSchedule?.firstPaymentDate;
-          secondPaymentDate =
-            linkedSale?.pricing?.paymentSchedule?.secondPaymentDate;
-          // Fallback for very first date
-          if (!firstPaymentDate) {
-            firstPaymentDate =
-              linkedSale?.pricing?.paymentSchedule?.firstPaymentStarts ||
-              linkedSale?.pricing?.paymentDetails?.firstPaymentDate;
-          }
-        }
-      }
+    const linkedSale = await Sales.findOne({ receiptId: receiptNumber });
+    let firstPaymentDate =
+      linkedSale?.pricing?.paymentSchedule?.firstPaymentDate || null;
+    let secondPaymentDate =
+      linkedSale?.pricing?.paymentSchedule?.secondPaymentDate || null;
+    const salesFirstStart =
+      linkedSale?.pricing?.paymentSchedule?.firstPaymentStarts || null;
+    const salesFirstPaymentDetails =
+      linkedSale?.pricing?.paymentDetails?.firstPaymentDate || null;
+    const salesNextDue =
+      linkedSale?.pricing?.paymentDetails?.nextPaymentDueDate || null;
 
-      // Find previous due date from last accounting entry for this receipt
+    if (!schedule) {
+      schedule = linkedSale?.pricing?.paymentSchedule?.paymentSchedule || '';
+    }
+    if (!firstPaymentDate)
+      firstPaymentDate = salesFirstStart || salesFirstPaymentDetails;
+
+    // If first installment, set base due date without advancing
+    if (nextInstallment === 1) {
+      const initialDue =
+        (payload.AccountingDetails.dueDate &&
+          new Date(payload.AccountingDetails.dueDate)) ||
+        (firstPaymentDate && new Date(firstPaymentDate)) ||
+        (salesNextDue && new Date(salesNextDue)) ||
+        new Date();
+      payload.AccountingDetails.dueDate = initialDue;
+    } else {
+      // Pull latest due from Accounting
       const lastEntry = await Accounting.findOne({
         'AccountingDetails.receiptNumber': receiptNumber,
       })
         .sort({ 'AccountingDetails.installmentNumber': -1, createdAt: -1 })
         .lean();
 
-      const prevDue = lastEntry?.AccountingDetails?.dueDate
-        ? new Date(lastEntry.AccountingDetails.dueDate)
-        : firstPaymentDate
-          ? new Date(firstPaymentDate)
-          : undefined;
+      // prevDue priority: last accounting due > sales.nextPaymentDueDate > firstPaymentDate
+      const prevDue =
+        (lastEntry?.AccountingDetails?.dueDate &&
+          new Date(lastEntry.AccountingDetails.dueDate)) ||
+        (salesNextDue && new Date(salesNextDue)) ||
+        (firstPaymentDate && new Date(firstPaymentDate)) ||
+        undefined;
 
       let nextDue;
       const addDays = (d, n) => {
@@ -101,27 +107,25 @@ export const createAccounting = async (req, res, next) => {
         else if (sched === 'bi-weekly' || sched === 'biweekly')
           nextDue = addDays(prevDue, 14);
         else if (sched === 'semi-monthly' || sched === 'semimonthly') {
-          // Use first/second payment days when available
           if (firstPaymentDate && secondPaymentDate) {
             const firstDay = new Date(firstPaymentDate).getDate();
             const secondDay = new Date(secondPaymentDate).getDate();
             const prevDay = prevDue.getDate();
             const base = new Date(prevDue);
             if (prevDay === firstDay) {
-              // move to second day of the same/next month
-              nextDue = new Date(
+              let candidate = new Date(
                 base.getFullYear(),
                 base.getMonth(),
                 secondDay
               );
-              if (nextDue <= prevDue)
-                nextDue = new Date(
+              if (candidate <= prevDue)
+                candidate = new Date(
                   base.getFullYear(),
                   base.getMonth() + 1,
                   secondDay
                 );
+              nextDue = candidate;
             } else {
-              // move to first day of next month
               nextDue = new Date(
                 base.getFullYear(),
                 base.getMonth() + 1,
@@ -129,11 +133,9 @@ export const createAccounting = async (req, res, next) => {
               );
             }
           } else {
-            // Fallback: every ~15 days
             nextDue = addDays(prevDue, 15);
           }
         } else {
-          // Default to monthly
           nextDue = addMonths(prevDue, 1);
         }
       }
@@ -141,18 +143,26 @@ export const createAccounting = async (req, res, next) => {
       if (nextDue) {
         payload.AccountingDetails.dueDate = nextDue;
       }
-
-      // Ensure schedule stored if derived
-      if (schedule && !payload.AccountingDetails.paymentSchedule) {
-        payload.AccountingDetails.paymentSchedule = schedule;
-      }
     }
 
     const entry = await Accounting.create(payload);
+
+    // Update Sales.nextPaymentDueDate to the applied due date
+    if (linkedSale && payload?.AccountingDetails?.dueDate) {
+      await Sales.updateOne(
+        { _id: linkedSale._id },
+        {
+          $set: {
+            'pricing.paymentDetails.nextPaymentDueDate':
+              payload.AccountingDetails.dueDate,
+          },
+        }
+      );
+    }
+
     return SuccessHandler(entry, 201, 'Accounting entry created', res);
   } catch (err) {
     logger.error('Create accounting failed', err);
-    // Return generic error (no special-case for duplicate key)
     return next(new ApiError(err?.message || 'Internal Server Error', 500));
   }
 };
@@ -213,6 +223,17 @@ export const getSalesByCustomerId = async (req, res, next) => {
       latestDueDate = lastEntry?.AccountingDetails?.dueDate || null;
     }
 
+    // Normalize totalNumberOfPayments to be at least installmentCount
+    const storedNum = salesObj.pricing?.paymentSchedule?.numberOfPayments;
+    const totalNumberOfPayments =
+      typeof storedNum === 'number'
+        ? Math.max(storedNum, installmentCount)
+        : installmentCount || null;
+    const remainingPayments =
+      totalNumberOfPayments != null
+        ? Math.max(totalNumberOfPayments - installmentCount, 0)
+        : null;
+
     const structuredResponse = {
       receiptId: salesObj.receiptId,
       stockId: salesObj.vehicleInfo?.stockId || null,
@@ -223,12 +244,12 @@ export const getSalesByCustomerId = async (req, res, next) => {
         salesObj.pricing?.paymentSchedule?.paymentSchedule || null,
       financingCalculationMethod:
         salesObj.pricing?.paymentSchedule?.financingCalculationMethod || null,
-      totalNumberOfPayments:
-        salesObj.pricing?.paymentSchedule?.numberOfPayments || null,
+      totalNumberOfPayments,
       nextPaymentDueDate:
         salesObj.pricing?.paymentDetails?.nextPaymentDueDate || null,
       installmentCount,
       latestDueDate,
+      remainingPayments,
     };
 
     return SuccessHandler(

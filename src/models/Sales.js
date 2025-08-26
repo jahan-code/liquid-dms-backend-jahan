@@ -107,7 +107,6 @@ const SalesSchema = new mongoose.Schema(
         },
         financingCalculationMethod: {
           type: String,
-          enum: ['Simple Interest', 'Payment Amount'],
         },
         numberOfPayments: {
           type: Number,
