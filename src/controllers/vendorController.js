@@ -10,6 +10,7 @@ import ApiError from '../utils/ApiError.js';
 import user from '../models/user.js';
 import extractCategoryCode from '../utils/extractCategory.js';
 import paginate from '../utils/paginate.js';
+import { generateVendorId } from '../utils/idGenerator.js';
 
 const addVendor = async (req, res, next) => {
   try {
@@ -26,9 +27,6 @@ const addVendor = async (req, res, next) => {
     }
 
     const categoryCode = extractCategoryCode(value.category);
-    const count = await vendor.countDocuments({
-      vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
-    });
     const existingVendor = await vendor.findOne({ email: value.email });
     if (existingVendor) {
       logger.warn({
@@ -39,7 +37,9 @@ const addVendor = async (req, res, next) => {
         new ApiError(errorConstants.VENDOR.EMAIL_ALREADY_EXISTS, 409)
       ); // 409 Conflict
     }
-    const newVendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+
+    // Use counter-based vendor ID generation
+    const newVendorId = await generateVendorId(categoryCode);
 
     // ✅ Create and save vendor
     const newVendor = await vendor.create({
@@ -227,11 +227,7 @@ const editVendor = async (req, res, next) => {
     // If category is changed, regenerate vendorId
     if (value.category && value.category !== existingVendor.category) {
       const categoryCode = extractCategoryCode(value.category);
-      const count = await vendor.countDocuments({
-        vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
-      });
-
-      value.vendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+      value.vendorId = await generateVendorId(categoryCode);
     }
 
     // Update vendor

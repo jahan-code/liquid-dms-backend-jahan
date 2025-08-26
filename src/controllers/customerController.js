@@ -4,7 +4,7 @@ import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import { addCustomerSchema } from '../validations/Customer.validation.js';
-import generateCustomerId from '../utils/generateCustomerId.js';
+import { generateCustomerId } from '../utils/idGenerator.js';
 import paginate from '../utils/paginate.js';
 
 export const addCustomer = async (req, res, next) => {

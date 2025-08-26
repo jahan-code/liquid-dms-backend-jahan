@@ -14,11 +14,15 @@ import {
   addVehicleNotesSchema,
 } from '../validations/Vehicle.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
-import getNextStockIdForPrefix from '../utils/generateStockId.js';
+import { generateStockId, generateVendorId } from '../utils/idGenerator.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import mongoose from 'mongoose';
 import paginate from '../utils/paginate.js';
 import { getFullImageUrl } from '../utils/url.js';
+import {
+  checkFloorPlanStatusForVehicle,
+  checkFloorPlanStatusById,
+} from '../utils/floorPlanUtils.js';
 
 // 🔧 Convert file path to public URL
 
@@ -90,11 +94,7 @@ export const addVehicle = async (req, res, next) => {
       vendorInfo.billofsales = billofsalesUrl;
       categoryCode = extractCategoryCode(vendorInfo.category);
 
-      const count = await Vendor.countDocuments({
-        vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
-      });
-
-      const generatedVendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+      const generatedVendorId = await generateVendorId(categoryCode);
       vendor = new Vendor({
         ...vendorInfo,
         vendorId: generatedVendorId,
@@ -119,9 +119,7 @@ export const addVehicle = async (req, res, next) => {
 
     // 🆔 Generate stockId (atomic, shared with NetTradeIn)
     const vehicleTypeCode = basicDetails?.vehicleType?.toUpperCase(); // e.g., SUV
-    const stockId = await getNextStockIdForPrefix(
-      `${categoryCode}-${vehicleTypeCode}`
-    );
+    const stockId = await generateStockId(`${categoryCode}-${vehicleTypeCode}`);
 
     // 🚙 Save Vehicle
     const newVehicle = new Vehicle({
@@ -392,7 +390,10 @@ export const addVehicleCost = async (req, res, next) => {
       return next(new ApiError('Vehicle not found', 404));
     }
 
-    // 5. Reorder vehicle object for response
+    // 5. Check and update floor plan status after vehicle update
+    await checkFloorPlanStatusForVehicle(vehicleId);
+
+    // 6. Reorder vehicle object for response
     const vehicleObject = updatedVehicle.toObject();
     const responseVehicle = {
       _id: vehicleObject._id,
@@ -400,7 +401,7 @@ export const addVehicleCost = async (req, res, next) => {
       ...vehicleObject,
     };
 
-    // 6. Respond
+    // 7. Respond
     return SuccessHandler(
       {
         vehicle: responseVehicle,
@@ -859,11 +860,19 @@ export const deleteVehicleById = async (req, res, next) => {
 
     const { id: vehicleId } = req.query;
 
-    // 2. Delete the vehicle
+    // 2. Get floor plan info before deleting vehicle
+    const floorPlanId = deletedVehicle.floorPlanDetails?.floorPlan;
+
+    // 3. Delete the vehicle
     const deletedVehicle = await Vehicle.findByIdAndDelete(vehicleId);
 
     if (!deletedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
+    }
+
+    // 4. Check floor plan status after deleting vehicle
+    if (floorPlanId) {
+      await checkFloorPlanStatusById(floorPlanId);
     }
 
     return SuccessHandler(null, 200, 'Vehicle deleted successfully', res);
@@ -985,7 +994,7 @@ export const editVehicle = async (req, res, next) => {
     if (oldCategory !== newCategory || oldVehicleType !== newVehicleType) {
       const categoryCode = extractCategoryCode(vendor.category);
       const vehicleTypeCode = basicDetails.vehicleType.toUpperCase();
-      updatedStockId = await getNextStockIdForPrefix(
+      updatedStockId = await generateStockId(
         `${categoryCode}-${vehicleTypeCode}`
       );
     }

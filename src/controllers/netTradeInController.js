@@ -11,7 +11,7 @@ import {
   editNetTradeInSchema,
 } from '../validations/NetTradeIn.validation.js';
 import extractCategoryCode from '../utils/extractCategory.js';
-import getNextStockIdForPrefix from '../utils/generateStockId.js';
+import { generateStockId, generateVendorId } from '../utils/idGenerator.js';
 
 export const createNetTradeIn = async (req, res, next) => {
   try {
@@ -87,10 +87,7 @@ export const createNetTradeIn = async (req, res, next) => {
           );
 
         const categoryCode = extractCategoryCode(vendorInfo?.category);
-        const count = await Vendor.countDocuments({
-          vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
-        });
-        const generatedVendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+        const generatedVendorId = await generateVendorId(categoryCode);
 
         vendorDoc = new Vendor({
           category: vendorInfo?.category,
@@ -121,7 +118,7 @@ export const createNetTradeIn = async (req, res, next) => {
       const vehicleTypeCode = (
         vehicleInfo?.basicDetails?.vehicleType || ''
       ).toUpperCase();
-      const stockId = await getNextStockIdForPrefix(
+      const stockId = await generateStockId(
         `${categoryCodeForStock}-${vehicleTypeCode}`
       );
 
@@ -556,10 +553,7 @@ export const updateNetTradeIn = async (req, res, next) => {
             vendorInfo?.category || vendorDoc?.category
           );
           if (!vendorDoc) {
-            const count = await Vendor.countDocuments({
-              vendorId: new RegExp(`^VEN-${categoryCode}-\\d{4}$`, 'i'),
-            });
-            const generatedVendorId = `VEN-${categoryCode}-${String(count + 1).padStart(4, '0')}`;
+            const generatedVendorId = await generateVendorId(categoryCode);
             vendorDoc = await Vendor.create({
               ...vendorInfo,
               email: newEmail || vendorInfo?.email,
@@ -587,10 +581,8 @@ export const updateNetTradeIn = async (req, res, next) => {
         const code = extractCategoryCode(newVendorCategory);
         const expectedVendorIdRegex = new RegExp(`^VEN-${code}-\\d{4}$`, 'i');
         if (!expectedVendorIdRegex.test(vendorDoc.vendorId || '')) {
-          const countForCode = await Vendor.countDocuments({
-            vendorId: new RegExp(`^VEN-${code}-\\d{4}$`, 'i'),
-          });
-          vendorDoc.vendorId = `VEN-${code}-${String(countForCode + 1).padStart(4, '0')}`;
+          const generatedVendorId = await generateVendorId(code);
+          vendorDoc.vendorId = generatedVendorId;
           await vendorDoc.save();
         }
       }
@@ -604,7 +596,7 @@ export const updateNetTradeIn = async (req, res, next) => {
           existing.vehicleInfo?.basicDetails?.vehicleType ||
           ''
         ).toUpperCase();
-        const stockId = await getNextStockIdForPrefix(
+        const stockId = await generateStockId(
           `${categoryCodeForStock}-${vehicleTypeCode}`
         );
         vehicleDoc = await Vehicle.create({
@@ -667,7 +659,7 @@ export const updateNetTradeIn = async (req, res, next) => {
           changedType ||
           !expectedStockIdRegex.test(stockId || '')
         ) {
-          stockId = await getNextStockIdForPrefix(
+          stockId = await generateStockId(
             `${categoryCodeForStock}-${vehicleTypeCode}`
           );
         }

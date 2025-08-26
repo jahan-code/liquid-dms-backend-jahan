@@ -19,6 +19,13 @@ const vehicleSchema = new mongoose.Schema(
       default: 'Available',
     },
 
+    // Reference to Sales record when vehicle is sold
+    salesId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Sales',
+      default: null,
+    },
+
     basicDetails: {
       vehicleTitle: String,
       vin: String,

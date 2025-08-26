@@ -5,6 +5,7 @@ import logger from '../functions/logger.js';
 import errorConstants from '../utils/errors.js';
 import Sales from '../models/Sales.js';
 import Customer from '../models/customer.js';
+import { checkFloorPlanStatus } from '../utils/floorPlanUtils.js';
 
 export const createAccounting = async (req, res, next) => {
   try {
@@ -159,6 +160,9 @@ export const createAccounting = async (req, res, next) => {
         }
       );
     }
+
+    // Check and update floor plan status automatically (optimized)
+    await checkFloorPlanStatus(receiptNumber);
 
     return SuccessHandler(entry, 201, 'Accounting entry created', res);
   } catch (err) {

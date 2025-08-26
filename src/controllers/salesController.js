@@ -11,8 +11,8 @@ import {
 } from '../validations/Sales.validation.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import NetTradeIn from '../models/netTradeIn.js';
-import generateCustomerId from '../utils/generateCustomerId.js';
-import generateReceiptId from '../utils/generateReceiptId.js';
+import { generateCustomerId, generateReceiptId } from '../utils/idGenerator.js';
+import { checkFloorPlanStatusById } from '../utils/floorPlanUtils.js';
 
 // ✅ Step 1: Create Sales Record Controller
 export const createSales = async (req, res, next) => {
@@ -120,6 +120,27 @@ export const createSales = async (req, res, next) => {
     });
 
     const salesResponse = await sales.save();
+
+    // Update vehicle's salesId and status when sales record is created
+    if (vehicle && vehicle._id) {
+      try {
+        await Vehicle.findByIdAndUpdate(vehicle._id, {
+          $set: {
+            salesId: salesResponse._id,
+            salesStatus: 'Sold',
+          },
+        });
+        logger.info({
+          message: `✅ Vehicle ${vehicle._id} linked to sales record ${salesResponse._id}`,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (vehicleUpdateError) {
+        logger.warn({
+          message: `⚠️ Could not update vehicle salesId: ${vehicleUpdateError.message}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
 
     // Populate customer details only
     await salesResponse.populate(['customerInfo']);
@@ -686,7 +707,36 @@ export const deleteSales = async (req, res, next) => {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
     }
 
+    // Unlink vehicle from this sales record before deleting
+    if (existingSales.vehicleInfo) {
+      try {
+        await Vehicle.findByIdAndUpdate(existingSales.vehicleInfo, {
+          $set: {
+            salesId: null,
+            salesStatus: 'Available',
+          },
+        });
+        logger.info({
+          message: `✅ Vehicle ${existingSales.vehicleInfo} unlinked from sales record ${id}`,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (vehicleUpdateError) {
+        logger.warn({
+          message: `⚠️ Could not unlink vehicle: ${vehicleUpdateError.message}`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
     const deletedSales = await Sales.findByIdAndDelete(id);
+
+    // Check and update floor plan status after sales deletion
+    if (existingSales.vehicleInfo) {
+      const vehicle = await Vehicle.findById(existingSales.vehicleInfo);
+      if (vehicle && vehicle.floorPlanDetails?.floorPlan) {
+        await checkFloorPlanStatusById(vehicle.floorPlanDetails.floorPlan);
+      }
+    }
 
     logger.info({
       message: `✅ Sales deleted successfully with ID: ${id}`,
