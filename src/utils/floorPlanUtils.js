@@ -58,8 +58,11 @@ export const checkFloorPlanStatus = async (receiptNumber) => {
             const vPaidInstallments = await Accounting.countDocuments({
               'AccountingDetails.receiptNumber': vehicleSales.receiptId,
             });
-
-            if (vPaidInstallments < vTotalInstallments) {
+            // Treat zero scheduled payments as still active (not complete)
+            if (
+              vTotalInstallments === 0 ||
+              vPaidInstallments < vTotalInstallments
+            ) {
               allComplete = false;
               break;
             }
@@ -115,8 +118,8 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
         const paidInstallments = await Accounting.countDocuments({
           'AccountingDetails.receiptNumber': vehicleSales.receiptId,
         });
-
-        if (paidInstallments < totalInstallments) {
+        // Treat zero scheduled payments as still active (not complete)
+        if (totalInstallments === 0 || paidInstallments < totalInstallments) {
           allComplete = false;
           break;
         }
