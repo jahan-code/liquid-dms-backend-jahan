@@ -84,6 +84,12 @@ export const getFloorPlanById = async (req, res, next) => {
     }
 
     const floorPlan = await FloorPlan.findById(id);
+    logger.info({
+      message: '📦 Loaded floor plan',
+      id,
+      status: floorPlan?.CompanyDetails?.status,
+      updatedAt: floorPlan?.updatedAt,
+    });
 
     if (!floorPlan) {
       logger.warn({
@@ -170,6 +176,11 @@ export const showAllFloorPlans = async (req, res, next) => {
 
     // 📦 Fetch all floor plans from the database
     const allFloorPlans = await FloorPlan.find();
+    logger.info({
+      message: '📄 Floor plan list snapshot',
+      ids: allFloorPlans.map((f) => f._id.toString()),
+      statuses: allFloorPlans.map((f) => f.CompanyDetails?.status),
+    });
 
     if (allFloorPlans.length === 0) {
       logger.warn({
