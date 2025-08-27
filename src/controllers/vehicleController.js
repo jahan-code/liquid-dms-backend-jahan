@@ -405,17 +405,10 @@ export const addVehicleCost = async (req, res, next) => {
     }
 
     // 5.a Force-persist Active on the linked floor plan (guard against any race/merge issues)
-    try {
-      const linkedId = updateData['floorPlanDetails.floorPlan'];
-      if (linkedId) {
-        await FloorPlan.findByIdAndUpdate(linkedId, {
-          'CompanyDetails.status': 'Active',
-        });
-      }
-    } catch (err) {
-      logger.warn({
-        message: 'Failed to force-activate floor plan after linking',
-        error: err?.message,
+    const linkedId = updateData['floorPlanDetails.floorPlan'];
+    if (linkedId) {
+      await FloorPlan.findByIdAndUpdate(linkedId, {
+        'CompanyDetails.status': 'Active',
       });
     }
 

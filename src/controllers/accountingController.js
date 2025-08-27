@@ -207,7 +207,7 @@ export const getSalesByCustomerId = async (req, res, next) => {
         message: `❌ Sales not found for customer ID: ${customerId}`,
         timestamp: new Date().toISOString(),
       });
-      return next(new ApiError('Sales not found for this customer', 404));
+      return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
     }
 
     // Shape response
