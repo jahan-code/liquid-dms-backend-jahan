@@ -12,18 +12,10 @@ export const updateProfileAndPasswordSchema = Joi.object({
     'string.email': 'Please provide a valid email address',
     'string.empty': 'Email cannot be empty',
   }),
-  gender: Joi.string().valid('Male', 'Female', 'Other').optional().messages({
-    'any.only': 'Gender must be Male, Female, or Other',
-  }),
-  phone: Joi.string().trim().optional().messages({
-    'string.empty': 'Phone number cannot be empty',
-  }),
-  address: Joi.string().trim().optional().messages({
-    'string.empty': 'Address cannot be empty',
-  }),
-  zipCode: Joi.string().trim().optional().messages({
-    'string.empty': 'ZIP code cannot be empty',
-  }),
+  gender: Joi.string().valid('Male', 'Female', 'Other').allow('').optional(),
+  phone: Joi.string().trim().allow('').optional(),
+  address: Joi.string().trim().allow('').optional(),
+  zipCode: Joi.string().trim().allow('').optional(),
   language: Joi.string().trim().optional().messages({
     'string.empty': 'Language cannot be empty',
   }),

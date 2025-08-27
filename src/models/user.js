@@ -21,19 +21,19 @@ const userSchema = new Schema(
     gender: {
       type: String,
       enum: ['Male', 'Female', 'Other'],
-      default: 'Male',
+      // no default; optional
     },
     phone: {
       type: String,
-      default: '',
+      // no default; optional
     },
     address: {
       type: String,
-      default: '',
+      // no default; optional
     },
     zipCode: {
       type: String,
-      default: '',
+      // no default; optional
     },
     language: {
       type: String,
