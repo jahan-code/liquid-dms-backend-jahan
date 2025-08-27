@@ -38,7 +38,7 @@ export const generateCustomerId = async (firstName) => {
   const counterKey = 'customer';
   const sequence = await getNextCounter(counterKey);
   const cleanFirstName = firstName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  return `CUS-${cleanFirstName}-${sequence}`;
+  return `CUS-${cleanFirstName}-${String(sequence).padStart(4, '0')}`;
 };
 
 /**
