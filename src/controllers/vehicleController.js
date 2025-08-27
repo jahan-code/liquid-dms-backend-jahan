@@ -269,12 +269,7 @@ export const addVehicleCost = async (req, res, next) => {
                 $regex: new RegExp(`^${escaped}$`, 'i'),
               },
             });
-            logger.info({
-              message: `🔎 Existing floor plan lookup`,
-              companyNameRaw: rawName,
-              regex: `^${escaped}$`,
-              foundId: existingFloorPlan?._id?.toString() || null,
-            });
+
             if (!existingFloorPlan) {
               return next(
                 new ApiError(
@@ -287,10 +282,6 @@ export const addVehicleCost = async (req, res, next) => {
             // Ensure existing floor plan becomes Active when a vehicle uses it
             await FloorPlan.findByIdAndUpdate(floorPlanId, {
               'CompanyDetails.status': 'Active',
-            });
-            logger.info({
-              message: '✅ Set existing floor plan Active on link',
-              floorPlanId: floorPlanId.toString(),
             });
           } else {
             return next(
@@ -322,16 +313,12 @@ export const addVehicleCost = async (req, res, next) => {
               };
             }
 
-            const updatedLinked = await FloorPlan.findByIdAndUpdate(
+            await FloorPlan.findByIdAndUpdate(
               linkedId,
               value.floorPlanDetails.newFloorPlan || {},
               { new: true }
             );
-            logger.info({
-              message: '✏️ Updated linked floor plan with new fields',
-              floorPlanId: String(linkedId),
-              updated: Boolean(updatedLinked),
-            });
+
             floorPlanId = linkedId;
           } else {
             // Create a brand new floor plan (first-time link for this vehicle)
@@ -423,13 +410,8 @@ export const addVehicleCost = async (req, res, next) => {
     // 5.a Force-persist Active on the linked floor plan (guard against any race/merge issues)
     const linkedId = updateData['floorPlanDetails.floorPlan'];
     if (linkedId) {
-      const activationResult = await FloorPlan.findByIdAndUpdate(linkedId, {
+      await FloorPlan.findByIdAndUpdate(linkedId, {
         'CompanyDetails.status': 'Active',
-      });
-      logger.info({
-        message: '🔐 Forced floor plan activation after vehicle update',
-        floorPlanId: String(linkedId),
-        ok: Boolean(activationResult),
       });
     }
 
@@ -903,17 +885,15 @@ export const deleteVehicleById = async (req, res, next) => {
 
     const { id: vehicleId } = req.query;
 
-    // 2. Get floor plan info before deleting vehicle
-    const floorPlanId = deletedVehicle.floorPlanDetails?.floorPlan;
-
-    // 3. Delete the vehicle
+    // 2. Delete the vehicle and retrieve the deleted document
     const deletedVehicle = await Vehicle.findByIdAndDelete(vehicleId);
 
     if (!deletedVehicle) {
       return next(new ApiError('Vehicle not found', 404));
     }
 
-    // 4. Check floor plan status after deleting vehicle
+    // 3. Check floor plan status after deleting vehicle
+    const floorPlanId = deletedVehicle.floorPlanDetails?.floorPlan;
     if (floorPlanId) {
       await checkFloorPlanStatusById(floorPlanId);
     }

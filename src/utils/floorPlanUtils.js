@@ -91,19 +91,10 @@ export const checkFloorPlanStatus = async (receiptNumber) => {
  */
 export const checkFloorPlanStatusById = async (floorPlanId) => {
   try {
-    logger.info({
-      message: '🔍 Checking floor plan status by ID',
-      floorPlanId: String(floorPlanId),
-    });
     // Find all vehicles using this floor plan
     const vehicles = await Vehicle.find({
       'floorPlanDetails.floorPlan': floorPlanId,
       'floorPlanDetails.isFloorPlanned': true,
-    });
-    logger.info({
-      message: '📊 Vehicles using plan',
-      floorPlanId: String(floorPlanId),
-      count: vehicles.length,
     });
 
     // If no vehicles, set floor plan to inactive
@@ -111,9 +102,7 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
       await FloorPlan.findByIdAndUpdate(floorPlanId, {
         'CompanyDetails.status': 'Inactive',
       });
-      logger.info(
-        `Floor plan ${floorPlanId} set to Inactive - no vehicles assigned`
-      );
+
       return;
     }
 
@@ -127,12 +116,7 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
         const paidInstallments = await Accounting.countDocuments({
           'AccountingDetails.receiptNumber': vehicleSales.receiptId,
         });
-        logger.info({
-          message: '🧮 Vehicle installment status',
-          vehicleId: String(vehicle._id),
-          totalInstallments,
-          paidInstallments,
-        });
+
         // Treat zero scheduled payments as still active (not complete)
         if (totalInstallments === 0 || paidInstallments < totalInstallments) {
           allComplete = false;
@@ -140,11 +124,7 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
         }
       } else {
         // No sales yet for this vehicle → not complete, keep floor plan Active
-        logger.info({
-          message:
-            'ℹ️ Vehicle has no Sales yet; treating as active (not complete)',
-          vehicleId: String(vehicle._id),
-        });
+
         allComplete = false;
         break;
       }
@@ -157,20 +137,12 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
         await FloorPlan.findByIdAndUpdate(floorPlanId, {
           'CompanyDetails.status': 'Inactive',
         });
-        logger.info(
-          `Floor plan ${floorPlan.CompanyDetails.companyName} set to Inactive - all installments completed`
-        );
       } else if (
         !allComplete &&
         floorPlan.CompanyDetails.status === 'Inactive'
       ) {
         await FloorPlan.findByIdAndUpdate(floorPlanId, {
           'CompanyDetails.status': 'Active',
-        });
-        logger.info({
-          message: '✅ Floor plan set to Active - active installments present',
-          floorPlanId: String(floorPlanId),
-          companyName: floorPlan.CompanyDetails.companyName,
         });
       }
     }
