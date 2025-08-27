@@ -6,6 +6,8 @@ import errorConstants from '../utils/errors.js';
 import Sales from '../models/Sales.js';
 import Customer from '../models/customer.js';
 import { checkFloorPlanStatus } from '../utils/floorPlanUtils.js';
+import paginate from '../utils/paginate.js';
+import mongoose from 'mongoose';
 
 export const createAccounting = async (req, res, next) => {
   try {
@@ -270,5 +272,56 @@ export const getSalesByCustomerId = async (req, res, next) => {
         500
       )
     );
+  }
+};
+
+// ✅ List all accounting entries (paginated)
+export const getAllAccountings = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const { skip, limit: parsedLimit } = paginate(page, limit);
+
+    const [accountings, total] = await Promise.all([
+      Accounting.find({}).sort({ createdAt: -1 }).skip(skip).limit(parsedLimit),
+      Accounting.countDocuments({}),
+    ]);
+
+    const response = {
+      totalAccountings: total,
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / parsedLimit),
+      accountings,
+    };
+
+    return SuccessHandler(
+      response,
+      200,
+      'Accounting entries fetched successfully',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get all accountings error:', error);
+    next(new ApiError(error.message || 'Internal Server Error', 500));
+  }
+};
+
+// ✅ Get single accounting by Mongo _id
+export const getAccountingById = async (req, res, next) => {
+  try {
+    const id = req.query.id;
+    if (!id) return next(new ApiError('Accounting ID is required', 400));
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new ApiError('Invalid accounting ID format', 400));
+    }
+
+    const doc = await Accounting.findById(id);
+    if (!doc) {
+      return next(new ApiError('Accounting not found', 404));
+    }
+
+    return SuccessHandler(doc, 200, 'Accounting fetched successfully', res);
+  } catch (error) {
+    logger.error('❌ Get accounting by ID error:', error);
+    next(new ApiError(error.message || 'Internal Server Error', 500));
   }
 };

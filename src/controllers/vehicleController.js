@@ -272,6 +272,10 @@ export const addVehicleCost = async (req, res, next) => {
               );
             }
             floorPlanId = existingFloorPlan._id;
+            // Ensure existing floor plan becomes Active when a vehicle uses it
+            await FloorPlan.findByIdAndUpdate(floorPlanId, {
+              'CompanyDetails.status': 'Active',
+            });
           } else {
             return next(
               new ApiError(
@@ -349,9 +353,13 @@ export const addVehicleCost = async (req, res, next) => {
               };
             }
 
-            const newFloorPlan = new FloorPlan(
-              value.floorPlanDetails.newFloorPlan
-            );
+            const newFloorPlan = new FloorPlan({
+              ...value.floorPlanDetails.newFloorPlan,
+              CompanyDetails: {
+                ...value.floorPlanDetails.newFloorPlan.CompanyDetails,
+                status: 'Active', // Vehicle-created floor plan should start Active
+              },
+            });
             const savedFloorPlan = await newFloorPlan.save();
             floorPlanId = savedFloorPlan._id;
 

@@ -37,8 +37,12 @@ export const addFloorPlan = async (req, res, next) => {
         new ApiError(errorConstants.FLOOR_PLAN.COMPANY_ALREADY_EXISTS, 409)
       ); // 409 Conflict
     }
+    // Ensure new floor plans created from the FloorPlan module start as Inactive
     const floorPlan = new FloorPlan({
-      CompanyDetails,
+      CompanyDetails: {
+        ...CompanyDetails,
+        status: 'Inactive',
+      },
       Rate,
       Fees,
       term,
