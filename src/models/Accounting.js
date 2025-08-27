@@ -22,6 +22,11 @@ const AccountingSchema = new mongoose.Schema(
         required: false,
         trim: true,
       },
+      stockId: {
+        type: String,
+        required: false,
+        trim: true,
+      },
       make: {
         type: String,
         required: false,

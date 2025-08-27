@@ -10,6 +10,7 @@ export const addAccountingSchema = Joi.object({
     }),
     customerId: Joi.string().trim().optional(),
     vin: Joi.string().trim().optional(),
+    stockId: Joi.string().trim().optional(),
     make: Joi.string().trim().optional(),
     salesType: Joi.string().trim().optional(),
     paymentSchedule: Joi.string().trim().optional(),

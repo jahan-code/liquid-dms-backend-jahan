@@ -49,7 +49,9 @@ export const createAccounting = async (req, res, next) => {
     const scheduleFromPayload = payload.AccountingDetails.paymentSchedule;
     let schedule = (scheduleFromPayload || '').trim();
 
-    const linkedSale = await Sales.findOne({ receiptId: receiptNumber });
+    const linkedSale = await Sales.findOne({
+      receiptId: receiptNumber,
+    }).populate('vehicleInfo');
     let firstPaymentDate =
       linkedSale?.pricing?.paymentSchedule?.firstPaymentDate || null;
     let secondPaymentDate =
@@ -60,6 +62,11 @@ export const createAccounting = async (req, res, next) => {
       linkedSale?.pricing?.paymentDetails?.firstPaymentDate || null;
     const salesNextDue =
       linkedSale?.pricing?.paymentDetails?.nextPaymentDueDate || null;
+
+    // Persist stockId from linked sale's vehicle if available
+    if (linkedSale?.vehicleInfo?.stockId) {
+      payload.AccountingDetails.stockId = linkedSale.vehicleInfo.stockId;
+    }
 
     if (!schedule) {
       schedule = linkedSale?.pricing?.paymentSchedule?.paymentSchedule || '';
