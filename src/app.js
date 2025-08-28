@@ -7,12 +7,10 @@ import express from 'express';
 import cors from 'cors';
 
 import { connectRedis } from './config/redis.js';
-import { getSessionMiddleware } from './utils/session.js';
 
 import ApiErrorMiddleware from './middleware/ApiError.middleware.js';
 import requestValidator from './middleware/requestValidator.middleware.js';
 import router from './router/index.js';
-import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -31,15 +29,11 @@ const startServer = async () => {
         credentials: true,
       })
     );
-    app.use(cookieParser());
+    // Cookie parser removed; cookies no longer used
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
-    const sessionMiddleware = await getSessionMiddleware(); // ✅ wait for the middleware
-    app.use(sessionMiddleware); // ✅ apply it to Express
-    app.use((req, res, next) => {
-      console.log('🍪 Incoming cookies:', req.headers.cookie);
-      next();
-    });
+    // Session middleware removed as sessions are not used
+    // Cookie logging removed
     // Ensure uploads dir and default profile image exist
     const uploadsDir = path.join(process.cwd(), 'src', 'uploads');
     if (!fs.existsSync(uploadsDir)) {

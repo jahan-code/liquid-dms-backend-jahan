@@ -5,7 +5,7 @@ import sendEmail from '../utils/sendEmail.js';
 import SuccessHandler from '../utils/SuccessHandler.js';
 import errorConstants from '../utils/errors.js';
 import ApiError from '../utils/ApiError.js';
-import generateAndSetJwtCookie from '../utils/jwt.js';
+import generateJwt from '../utils/jwt.js';
 
 // Helper function to normalize email consistently
 const normalizeEmail = (email) => {
@@ -292,7 +292,7 @@ const login = async (req, res, next) => {
       fullname: user.fullname,
       vendors: user.vendors, // Assuming vendorId is part of the User model
     };
-    const token = generateAndSetJwtCookie(user, res); // ✅ pass the full user object here
+    const token = generateJwt(user);
     userResponse.token = token;
     return SuccessHandler(
       userResponse,
