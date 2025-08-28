@@ -100,6 +100,8 @@ const validationSchemas = {
   //Accounting
   '/accounting/add-accounting': { POST: addAccountingSchema },
   '/accounting/by-customer': { GET: null },
+  '/accounting/accountings': { GET: null },
+  '/accounting/accounting/accountingDetails': { GET: null },
 };
 
 export { validationSchemas };
