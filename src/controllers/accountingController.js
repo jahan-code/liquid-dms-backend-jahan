@@ -288,22 +288,52 @@ export const getAllAccountings = async (req, res, next) => {
     const { page = 1, limit = 10 } = req.query;
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
-    const [accountings, total] = await Promise.all([
-      Accounting.find({}).sort({ createdAt: -1 }).skip(skip).limit(parsedLimit),
-      Accounting.countDocuments({}),
+    // Build aggregation to get only the most recent installment per receiptNumber
+    const baseSort = {
+      'AccountingDetails.receiptNumber': 1,
+      'AccountingDetails.installmentNumber': -1,
+      createdAt: -1,
+    };
+
+    const pipeline = [
+      { $sort: baseSort },
+      {
+        $group: {
+          _id: '$AccountingDetails.receiptNumber',
+          doc: { $first: '$$ROOT' },
+        },
+      },
+      { $replaceRoot: { newRoot: '$doc' } },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: parsedLimit },
+    ];
+
+    const countPipeline = [
+      {
+        $group: { _id: '$AccountingDetails.receiptNumber' },
+      },
+      { $count: 'count' },
+    ];
+
+    const [accountings, countResult] = await Promise.all([
+      Accounting.aggregate(pipeline),
+      Accounting.aggregate(countPipeline),
     ]);
+
+    const total = countResult?.[0]?.count || 0;
 
     const response = {
       totalAccountings: total,
       currentPage: Number(page),
-      totalPages: Math.ceil(total / parsedLimit),
+      totalPages: Math.ceil(total / parsedLimit) || 0,
       accountings,
     };
 
     return SuccessHandler(
       response,
       200,
-      'Accounting entries fetched successfully',
+      'Latest installment per receipt fetched successfully',
       res
     );
   } catch (error) {
