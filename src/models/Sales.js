@@ -26,6 +26,8 @@ const SalesSchema = new mongoose.Schema(
     // Pricing (grouped isCashSale, salesType, schedule, details)
     pricing: {
       isCashSale: { type: Boolean, default: null },
+      // Reservation flag to mark a sale as reserved before completion
+      isReserved: { type: Boolean, default: false },
       salesType: {
         type: String,
         enum: ['Cash Sales', 'Buy Here Pay Here'],

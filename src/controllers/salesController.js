@@ -115,6 +115,7 @@ export const createSales = async (req, res, next) => {
       pricing: {
         isCashSale: req.body?.pricing?.isCashSale ?? undefined,
         salesType: req.body?.pricing?.salesType ?? undefined,
+        isReserved: req.body?.pricing?.isReserved ?? false,
       },
       // Sales status is stored on Vehicle; keep Sales minimal
     });
@@ -173,6 +174,7 @@ export const createSales = async (req, res, next) => {
       pricing: {
         isCashSale: salesObj.pricing?.isCashSale,
         salesType: salesObj.pricing?.salesType,
+        isReserved: salesObj.pricing?.isReserved,
         salesDetails: salesObj.pricing?.salesDetails || {},
         // Buy Here Pay Here specific data
         ...(!salesObj.pricing?.isCashSale && {
@@ -407,6 +409,7 @@ export const addSalesDetails = async (req, res, next) => {
       pricing: {
         isCashSale: salesObj.pricing?.isCashSale,
         salesType: salesObj.pricing?.salesType,
+        isReserved: salesObj.pricing?.isReserved,
         salesDetails: salesObj.pricing?.salesDetails,
         // Buy Here Pay Here specific data
         ...(!salesObj.pricing?.isCashSale && {
