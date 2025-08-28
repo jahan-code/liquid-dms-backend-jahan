@@ -304,6 +304,68 @@ export const getAllAccountings = async (req, res, next) => {
         },
       },
       { $replaceRoot: { newRoot: '$doc' } },
+      // Compute installment count per receiptNumber
+      {
+        $lookup: {
+          from: 'accountings',
+          let: { receipt: '$AccountingDetails.receiptNumber' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$AccountingDetails.receiptNumber', '$$receipt'],
+                },
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'installmentCounts',
+        },
+      },
+      {
+        $addFields: {
+          installmentCount: {
+            $ifNull: [{ $arrayElemAt: ['$installmentCounts.count', 0] }, 0],
+          },
+        },
+      },
+      // Derive status: cleared if all installments completed, else pending
+      {
+        $addFields: {
+          status: {
+            $cond: [
+              {
+                $and: [
+                  {
+                    $gte: [
+                      {
+                        $ifNull: [
+                          '$AccountingDetails.totalNumberOfPayments',
+                          -1,
+                        ],
+                      },
+                      0,
+                    ],
+                  },
+                  {
+                    $gte: [
+                      '$installmentCount',
+                      {
+                        $ifNull: [
+                          '$AccountingDetails.totalNumberOfPayments',
+                          999999,
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              'cleared',
+              'pending',
+            ],
+          },
+        },
+      },
       { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: parsedLimit },
