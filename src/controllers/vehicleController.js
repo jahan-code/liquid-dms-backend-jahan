@@ -1,4 +1,6 @@
 import Vehicle from '../models/vehicle.js';
+import Sales from '../models/Sales.js';
+import NetTradeIn from '../models/netTradeIn.js';
 import Vendor from '../models/vendor.js';
 import FloorPlan from '../models/floorPlan.js';
 import ApiError from '../utils/ApiError.js';
@@ -892,7 +894,63 @@ export const deleteVehicleById = async (req, res, next) => {
       return next(new ApiError('Vehicle not found', 404));
     }
 
-    // 3. Check floor plan status after deleting vehicle
+    // 3. Cascade delete: remove linked Sales and NetTradeIn, if present
+    try {
+      // Prefer direct link via salesId; fallback to lookup by vehicleInfo
+      let linkedSales = null;
+      if (deletedVehicle.salesId) {
+        linkedSales = await Sales.findById(deletedVehicle.salesId);
+      }
+      if (!linkedSales) {
+        linkedSales = await Sales.findOne({ vehicleInfo: deletedVehicle._id });
+      }
+
+      if (linkedSales) {
+        // If sales holds a netTradeIn reference, delete that NetTradeIn as well
+        const netTradeInId =
+          linkedSales?.pricing?.salesDetails?.netTradeInId || null;
+        if (netTradeInId) {
+          try {
+            await NetTradeIn.findByIdAndDelete(netTradeInId);
+            logger.info({
+              message: `🗑️ NetTradeIn deleted due to vehicle deletion`,
+              netTradeInId: String(netTradeInId),
+              salesId: String(linkedSales._id),
+              vehicleId: String(deletedVehicle._id),
+              timestamp: new Date().toISOString(),
+            });
+          } catch (ntErr) {
+            logger.warn({
+              message: 'Could not delete linked NetTradeIn on vehicle deletion',
+              error: ntErr?.message,
+            });
+          }
+        }
+
+        // Delete the sales itself
+        try {
+          await Sales.findByIdAndDelete(linkedSales._id);
+          logger.info({
+            message: `🗑️ Sales deleted due to vehicle deletion`,
+            salesId: String(linkedSales._id),
+            vehicleId: String(deletedVehicle._id),
+            timestamp: new Date().toISOString(),
+          });
+        } catch (salesErr) {
+          logger.warn({
+            message: 'Could not delete linked Sales on vehicle deletion',
+            error: salesErr?.message,
+          });
+        }
+      }
+    } catch (cascadeErr) {
+      logger.warn({
+        message: 'Cascade delete (sales/netTradeIn) failed during vehicle deletion',
+        error: cascadeErr?.message,
+      });
+    }
+
+    // 4. Check floor plan status after deleting vehicle
     const floorPlanId = deletedVehicle.floorPlanDetails?.floorPlan;
     if (floorPlanId) {
       await checkFloorPlanStatusById(floorPlanId);
