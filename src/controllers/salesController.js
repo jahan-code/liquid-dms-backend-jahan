@@ -122,17 +122,16 @@ export const createSales = async (req, res, next) => {
 
     const salesResponse = await sales.save();
 
-    // Update vehicle's salesId and status when sales record is created
+    // Link vehicle to this sales record but keep status Pending until details are added
     if (vehicle && vehicle._id) {
       try {
         await Vehicle.findByIdAndUpdate(vehicle._id, {
           $set: {
             salesId: salesResponse._id,
-            salesStatus: 'Sold',
           },
         });
         logger.info({
-          message: `✅ Vehicle ${vehicle._id} linked to sales record ${salesResponse._id}`,
+          message: `✅ Vehicle ${vehicle._id} linked to sales record ${salesResponse._id} (status remains Pending)`,
           timestamp: new Date().toISOString(),
         });
       } catch (vehicleUpdateError) {
