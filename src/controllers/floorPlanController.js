@@ -27,6 +27,7 @@ export const addFloorPlan = async (req, res, next) => {
     const { CompanyDetails, Rate, Fees, term, additionalNotes } = value;
     const existingFloorPlan = await FloorPlan.findOne({
       'CompanyDetails.companyName': value.CompanyDetails.companyName,
+      isDeleted: false,
     });
     if (existingFloorPlan) {
       logger.warn({
@@ -83,7 +84,7 @@ export const getFloorPlanById = async (req, res, next) => {
       return next(new ApiError('Floor plan ID is required', 400));
     }
 
-    const floorPlan = await FloorPlan.findById(id);
+    const floorPlan = await FloorPlan.findOne({ _id: id, isDeleted: false });
 
     if (!floorPlan) {
       logger.warn({
@@ -129,8 +130,8 @@ export const editFloorPlan = async (req, res, next) => {
       return next(new ApiError(error.details[0].message, 400));
     }
 
-    const updatedFloorPlan = await FloorPlan.findByIdAndUpdate(
-      id,
+    const updatedFloorPlan = await FloorPlan.findOneAndUpdate(
+      { _id: id, isDeleted: false },
       { $set: value },
       { new: true }
     );
@@ -169,7 +170,7 @@ export const showAllFloorPlans = async (req, res, next) => {
     logger.info('📄 Show all floor plans request received');
 
     // 📦 Fetch all floor plans from the database
-    const allFloorPlans = await FloorPlan.find();
+    const allFloorPlans = await FloorPlan.find({ isDeleted: false });
 
     if (allFloorPlans.length === 0) {
       logger.warn({
@@ -226,20 +227,17 @@ export const deleteFloorPlan = async (req, res, next) => {
       );
     }
 
-    // Remove floor plan reference from all vehicles before deletion
-    await Vehicle.updateMany(
-      { 'floorPlanDetails.floorPlan': id },
+    // Soft delete: mark Inactive and isDeleted=true; do NOT unlink vehicles
+    const deletedFloorPlan = await FloorPlan.findByIdAndUpdate(
+      id,
       {
         $set: {
-          'floorPlanDetails.floorPlan': null,
-          'floorPlanDetails.isFloorPlanned': false,
-          'floorPlanDetails.isExistingFloor': false,
+          'CompanyDetails.status': 'Inactive',
+          isDeleted: true,
         },
-      }
+      },
+      { new: true }
     );
-
-    // Delete the floor plan
-    const deletedFloorPlan = await FloorPlan.findByIdAndDelete(id);
 
     logger.info({
       message: `✅ Floor plan deleted successfully with ID: ${id}`,
@@ -249,7 +247,7 @@ export const deleteFloorPlan = async (req, res, next) => {
     return SuccessHandler(
       { deletedFloorPlan },
       200,
-      'Floor plan deleted successfully',
+      'Floor plan deleted successfully (soft deleted)',
       res
     );
   } catch (error) {
@@ -273,14 +271,14 @@ export const showAllFloorPlansPaginated = async (req, res, next) => {
     // Use your reusable paginate utility
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
-    // Fetch paginated floor plans, most recent first
-    const allFloorPlans = await FloorPlan.find()
+    // Fetch paginated floor plans, most recent first (exclude soft-deleted)
+    const allFloorPlans = await FloorPlan.find({ isDeleted: false })
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 }); // Sort by newest first
 
     // Get total count for pagination info
-    const total = await FloorPlan.countDocuments();
+    const total = await FloorPlan.countDocuments({ isDeleted: false });
 
     // Create paginated response
     const paginatedResponse = {

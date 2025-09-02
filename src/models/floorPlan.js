@@ -18,6 +18,13 @@ const floorPlanSchema = new mongoose.Schema({
     dateOpened: { type: Date },
   },
 
+  // Soft delete flag
+  isDeleted: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+
   Rate: {
     apr: { type: Number, default: 0 },
     interestCalculationDays: { type: Number, default: 0 },

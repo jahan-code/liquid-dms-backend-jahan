@@ -130,9 +130,13 @@ export const checkFloorPlanStatusById = async (floorPlanId) => {
       }
     }
 
-    // Update floor plan status based on completion
+    // Update floor plan status based on completion (skip soft-deleted)
     const floorPlan = await FloorPlan.findById(floorPlanId);
     if (floorPlan) {
+      if (floorPlan.isDeleted) {
+        // Never reactivate soft-deleted floor plans
+        return;
+      }
       if (allComplete && floorPlan.CompanyDetails.status === 'Active') {
         await FloorPlan.findByIdAndUpdate(floorPlanId, {
           'CompanyDetails.status': 'Inactive',
@@ -169,6 +173,7 @@ export const checkFloorPlanStatusForVehicle = async (vehicleId) => {
     // This handles cases where vehicle was moved from one floor plan to another
     const allFloorPlans = await FloorPlan.find({
       'CompanyDetails.status': 'Active',
+      isDeleted: false,
     });
 
     for (const floorPlan of allFloorPlans) {
