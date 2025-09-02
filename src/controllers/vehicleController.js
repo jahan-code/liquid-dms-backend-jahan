@@ -277,10 +277,6 @@ export const addVehicleCost = async (req, res, next) => {
               );
             }
             floorPlanId = existingFloorPlan._id;
-            // Ensure existing floor plan becomes Active when a vehicle uses it
-            await FloorPlan.findByIdAndUpdate(floorPlanId, {
-              'CompanyDetails.status': 'Active',
-            });
           } else {
             return next(
               new ApiError(
@@ -406,13 +402,7 @@ export const addVehicleCost = async (req, res, next) => {
       return next(new ApiError('Vehicle not found', 404));
     }
 
-    // 5.a Force-persist Active on the linked floor plan (guard against any race/merge issues)
-    const linkedId = updateData['floorPlanDetails.floorPlan'];
-    if (linkedId) {
-      await FloorPlan.findByIdAndUpdate(linkedId, {
-        'CompanyDetails.status': 'Active',
-      });
-    }
+    // 5.a Removed force-activation of linked floor plan
 
     // 5. Check and update floor plan status after vehicle update
     await checkFloorPlanStatusForVehicle(vehicleId);

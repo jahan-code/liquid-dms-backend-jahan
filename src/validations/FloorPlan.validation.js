@@ -65,9 +65,8 @@ const contactPersonValidator = Joi.string()
       'Contact person name can only contain letters, spaces, hyphens, and periods',
   });
 
-const statusValidator = enumValidator('STATUS', ['Active', 'Inactive']).default(
-  'Active'
-);
+// Make status optional and free-form string (no Active/Inactive enforcement)
+const statusValidator = optionalString('STATUS');
 
 const aprValidator = Joi.number()
   .min(0)
@@ -135,7 +134,7 @@ const companyDetailsSchema = Joi.object({
   zip: zipValidator.required(),
   phone: phoneValidator.required(),
   contactPerson: contactPersonValidator.required(),
-  status: statusValidator.required(),
+  status: statusValidator, // optional, no enum
   dateOpened: Joi.date().allow('').optional(),
 }).required();
 

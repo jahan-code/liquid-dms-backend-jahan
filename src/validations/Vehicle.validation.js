@@ -372,7 +372,8 @@ export const AddVehicleCostSchema = Joi.object({
         zip: Joi.string().required(),
         phone: Joi.string().required(),
         contactPerson: Joi.string().required(),
-        status: Joi.string().valid('Active', 'Inactive').default('Active'),
+        // Make status optional and free-form (no Active/Inactive enforcement)
+        status: Joi.string().allow('', null).optional(),
         dateOpened: Joi.date().allow('').optional(),
       }).required(),
       Rate: Joi.object({
