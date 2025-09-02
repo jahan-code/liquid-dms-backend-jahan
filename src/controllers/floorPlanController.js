@@ -1,5 +1,4 @@
 import FloorPlan from '../models/floorPlan.js';
-import Vehicle from '../models/vehicle.js';
 import ApiError from '../utils/ApiError.js';
 import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';

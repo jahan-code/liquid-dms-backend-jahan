@@ -315,6 +315,12 @@ const vehicleSchema = new mongoose.Schema(
     billofsales: {
       type: String,
     },
+    // Soft delete flag
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   { timestamps: true }
 );
