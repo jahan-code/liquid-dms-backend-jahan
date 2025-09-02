@@ -241,8 +241,41 @@ export const getAllCustomersWithoutPagination = async (req, res, next) => {
       return next(new ApiError('No customers found', 404));
     }
 
+    // Map customer IDs for bulk sales lookup
+    const customerIds = customers.map((c) => c._id);
+    const sales = await Sales.find({ customerInfo: { $in: customerIds } })
+      .select('customerInfo vehicleInfo createdAt')
+      .sort({ createdAt: -1 });
+
+    const latestSaleByCustomer = new Map();
+    for (const s of sales) {
+      const key = String(s.customerInfo);
+      if (!latestSaleByCustomer.has(key)) {
+        latestSaleByCustomer.set(key, s);
+      }
+    }
+
+    const vehicleIds = Array.from(latestSaleByCustomer.values())
+      .map((s) => s.vehicleInfo)
+      .filter(Boolean);
+    const vehicles = vehicleIds.length
+      ? await Vehicle.find({ _id: { $in: vehicleIds } })
+          .select('_id salesStatus isDeleted')
+          .lean()
+      : [];
+    const vehicleStatusById = new Map(
+      vehicles.map((v) => [String(v._id), v.salesStatus])
+    );
+
+    const customersWithStatus = customers.map((c) => {
+      const sale = latestSaleByCustomer.get(String(c._id));
+      const vehicleId = sale?.vehicleInfo ? String(sale.vehicleInfo) : null;
+      const salesStatus = vehicleId ? vehicleStatusById.get(vehicleId) || null : null;
+      return { ...c.toObject(), salesStatus };
+    });
+
     return SuccessHandler(
-      customers,
+      customersWithStatus,
       200,
       'Customers fetched successfully',
       res
