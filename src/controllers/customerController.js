@@ -1,4 +1,6 @@
 import Customer from '../models/customer.js';
+import Sales from '../models/Sales.js';
+import Vehicle from '../models/vehicle.js';
 import ApiError from '../utils/ApiError.js';
 import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';
@@ -171,14 +173,51 @@ export const getAllCustomers = async (req, res, next) => {
       return next(new ApiError('No customers found', 404));
     }
 
-    // Send paginated response
+    // Map customer IDs for bulk sales lookup
+    const customerIds = customers.map((c) => c._id);
+    // Get latest sales per customer (by createdAt desc)
+    const sales = await Sales.find({ customerInfo: { $in: customerIds } })
+      .select('customerInfo vehicleInfo createdAt')
+      .sort({ createdAt: -1 });
+
+    // Keep only the most recent sale per customer
+    const latestSaleByCustomer = new Map();
+    for (const s of sales) {
+      const key = String(s.customerInfo);
+      if (!latestSaleByCustomer.has(key)) {
+        latestSaleByCustomer.set(key, s);
+      }
+    }
+
+    // Fetch vehicles for those latest sales to get salesStatus
+    const vehicleIds = Array.from(latestSaleByCustomer.values())
+      .map((s) => s.vehicleInfo)
+      .filter(Boolean);
+    const vehicles = vehicleIds.length
+      ? await Vehicle.find({ _id: { $in: vehicleIds } })
+          .select('_id salesStatus isDeleted')
+          .lean()
+      : [];
+    const vehicleStatusById = new Map(
+      vehicles.map((v) => [String(v._id), v.salesStatus])
+    );
+
+    // Attach salesStatus summary to each customer
+    const customersWithStatus = customers.map((c) => {
+      const sale = latestSaleByCustomer.get(String(c._id));
+      const vehicleId = sale?.vehicleInfo ? String(sale.vehicleInfo) : null;
+      const salesStatus = vehicleId ? vehicleStatusById.get(vehicleId) || null : null;
+      return { ...c.toObject(), salesStatus };
+    });
+
+    // Send paginated response with salesStatus
     return SuccessHandler(
       {
         total: totalCustomers,
         page: parseInt(page, 10),
         limit: parsedLimit,
         totalPages: Math.ceil(totalCustomers / parsedLimit),
-        customers,
+        customers: customersWithStatus,
       },
       200,
       'Customers fetched successfully',

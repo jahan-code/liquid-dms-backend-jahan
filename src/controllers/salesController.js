@@ -458,10 +458,7 @@ export const getSalesById = async (req, res, next) => {
       return next(new ApiError('Sales ID is required', 400));
     }
 
-    const sales = await Sales.findById(id).populate([
-      'customerInfo',
-      { path: 'vehicleInfo', select: 'salesStatus stockId' },
-    ]);
+    const sales = await Sales.findById(id).populate(['customerInfo']);
 
     if (!sales) {
       logger.warn({
@@ -489,10 +486,6 @@ export const getSalesById = async (req, res, next) => {
         createdAt: salesObj.customerInfo?.createdAt,
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
-      vehicleInfo: salesObj.vehicleInfo ? String(salesObj.vehicleInfo?._id || salesObj.vehicleInfo) : null,
-
-      // Vehicle status
-      vehicleStatus: salesObj.vehicleInfo?.salesStatus || null,
 
       // Pricing Section - Conditional based on sales type
       pricing: {
@@ -665,10 +658,7 @@ export const showAllSales = async (req, res, next) => {
   try {
     logger.info('📄 Show all sales request received');
 
-    const allSales = await Sales.find().populate([
-      'customerInfo',
-      { path: 'vehicleInfo', select: 'salesStatus stockId' },
-    ]);
+    const allSales = await Sales.find().populate(['customerInfo']);
 
     if (allSales.length === 0) {
       logger.warn({
@@ -678,17 +668,12 @@ export const showAllSales = async (req, res, next) => {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
     }
 
-    // Attach vehicle status per sale
-    const shaped = allSales.map((s) => {
-      const obj = s.toObject();
-      return {
-        ...obj,
-        vehicleStatus: obj.vehicleInfo?.salesStatus || null,
-        vehicleInfo: obj.vehicleInfo?._id ? String(obj.vehicleInfo._id) : obj.vehicleInfo ? String(obj.vehicleInfo) : null,
-      };
-    });
-
-    return SuccessHandler(shaped, 200, 'All sales records fetched successfully', res);
+    return SuccessHandler(
+      allSales,
+      200,
+      'All sales records fetched successfully',
+      res
+    );
   } catch (error) {
     logger.error('❌ Show all sales error:', error);
     next(
