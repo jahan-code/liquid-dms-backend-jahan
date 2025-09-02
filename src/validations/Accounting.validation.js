@@ -28,3 +28,21 @@ export const addAccountingSchema = Joi.object({
     note: Joi.string().trim().allow('', null).optional(),
   }).optional(),
 });
+
+export const getAccountingByIdSchema = Joi.object({
+  id: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Invalid accounting ID format',
+      'any.required': 'Accounting ID is required',
+    }),
+});
+
+export const getAccountingByStockIdSchema = Joi.object({
+  id: Joi.string().trim().min(1).required().messages({
+    'string.base': 'Stock ID must be a string',
+    'string.empty': 'Stock ID is required',
+    'any.required': 'Stock ID is required',
+  }),
+});

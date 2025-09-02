@@ -424,3 +424,68 @@ export const getAccountingById = async (req, res, next) => {
     next(new ApiError(error.message || 'Internal Server Error', 500));
   }
 };
+
+// ✅ Get all accounting receipts by Vehicle ID
+export const getAccountingByVehicleId = async (req, res, next) => {
+  try {
+    const stockId = (req.query.id || '').trim();
+    if (!stockId) return next(new ApiError('Stock ID is required', 400));
+
+    // Direct query by AccountingDetails.stockId if stored
+    const direct = await Accounting.find({
+      'AccountingDetails.stockId': stockId,
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // If found directly, return
+    if (direct && direct.length > 0) {
+      return SuccessHandler(
+        { receipts: direct, count: direct.length, stockId },
+        200,
+        'Accounting receipts fetched by stock ID',
+        res
+      );
+    }
+
+    // Fallback: resolve sales by vehicle stockId -> receiptIds -> accounting
+    const sales = await Sales.find({})
+      .populate({ path: 'vehicleInfo', select: 'stockId' })
+      .lean();
+    const receiptIds = (sales || [])
+      .filter((s) => s?.vehicleInfo?.stockId === stockId)
+      .map((s) => s?.receiptId)
+      .filter(Boolean);
+
+    if (receiptIds.length === 0) {
+      return SuccessHandler(
+        { receipts: [], count: 0, stockId },
+        200,
+        'No receipts found for stock ID',
+        res
+      );
+    }
+
+    const accountings = await Accounting.find({
+      'AccountingDetails.receiptNumber': { $in: receiptIds },
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const response = {
+      receipts: accountings,
+      count: accountings.length,
+      stockId,
+    };
+
+    return SuccessHandler(
+      response,
+      200,
+      'Accounting receipts fetched by vehicle ID',
+      res
+    );
+  } catch (error) {
+    logger.error('❌ Get accounting by vehicle ID error:', error);
+    next(new ApiError(error.message || 'Internal Server Error', 500));
+  }
+};

@@ -35,7 +35,10 @@ import {
   editNetTradeInSchema,
 } from './NetTradeIn.validation.js';
 import { updateProfileAndPasswordSchema } from './profile.validation.js';
-import { addAccountingSchema } from './Accounting.validation.js';
+import {
+  addAccountingSchema,
+  getAccountingByStockIdSchema,
+} from './Accounting.validation.js';
 
 const validationSchemas = {
   // Authentication
@@ -98,10 +101,11 @@ const validationSchemas = {
   '/net-trade-in/net-trade-ins': { GET: null },
   '/net-trade-in/delete-net-trade-in': { DELETE: null },
   //Accounting
+
   '/accounting/add-accounting': { POST: addAccountingSchema },
   '/accounting/by-customer': { GET: null },
+  '/accounting/by-vehicle': { GET: getAccountingByStockIdSchema },
   '/accounting/accountings': { GET: null },
-  '/accounting/accounting/accountingDetails': { GET: null },
 };
 
 export { validationSchemas };

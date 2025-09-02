@@ -3,7 +3,7 @@ import {
   createAccounting,
   getSalesByCustomerId,
   getAllAccountings,
-  getAccountingById,
+  getAccountingByVehicleId,
 } from '../controllers/accountingController.js';
 
 const router = Router();
@@ -12,6 +12,6 @@ const router = Router();
 router.post('/add-accounting', createAccounting);
 router.get('/by-customer', getSalesByCustomerId);
 router.get('/accountings', getAllAccountings);
-router.get('/accounting/accountingDetails', getAccountingById);
+router.get('/by-vehicle', getAccountingByVehicleId);
 
 export default router;
