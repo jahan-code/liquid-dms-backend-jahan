@@ -172,7 +172,6 @@ export const createSales = async (req, res, next) => {
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
 
-      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Vehicle Reference (ID only)
       vehicleInfo: salesObj.vehicleInfo ? String(salesObj.vehicleInfo) : null,
@@ -491,7 +490,7 @@ export const getSalesById = async (req, res, next) => {
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
-
+      isExistingCustomer: salesObj.isExistingCustomer,
       // Customer Information Section
       customerInfo: {
         _id: salesObj.customerInfo?._id,
