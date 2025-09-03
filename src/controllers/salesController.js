@@ -112,12 +112,12 @@ export const createSales = async (req, res, next) => {
       receiptId: receiptId,
       customerInfo: customer ? customer._id : undefined,
       vehicleInfo: vehicle ? vehicle._id : undefined,
+      isExistingCustomer: Boolean(customerInfo?.isExistingCustomer),
       pricing: {
         isCashSale: req.body?.pricing?.isCashSale ?? undefined,
         salesType: req.body?.pricing?.salesType ?? undefined,
         isReserved: req.body?.pricing?.isReserved ?? false,
       },
-      isExistingCustomer: Boolean(customerInfo?.isExistingCustomer),
       // Sales status is stored on Vehicle; keep Sales minimal
     });
 
@@ -156,7 +156,6 @@ export const createSales = async (req, res, next) => {
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
-      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Customer Information Section
       customerInfo: {
@@ -167,6 +166,8 @@ export const createSales = async (req, res, next) => {
         createdAt: salesObj.customerInfo?.createdAt,
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
+
+      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Vehicle Reference (ID only)
       vehicleInfo: salesObj.vehicleInfo ? String(salesObj.vehicleInfo) : null,
@@ -411,8 +412,9 @@ export const addSalesDetails = async (req, res, next) => {
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
 
-      // Pricing Section - Conditional based on sales type
       isExistingCustomer: salesObj.isExistingCustomer,
+
+      // Pricing Section - Conditional based on sales type
       pricing: {
         isCashSale: salesObj.pricing?.isCashSale,
         salesType: salesObj.pricing?.salesType,

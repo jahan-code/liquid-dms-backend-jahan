@@ -9,12 +9,6 @@ const SalesSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Flags and meta
-    isExistingCustomer: {
-      type: Boolean,
-      default: null,
-    },
-
     vehicleInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Vehicle',
@@ -176,6 +170,11 @@ const SalesSchema = new mongoose.Schema(
       type: Number,
       min: 0,
       default: 0,
+    },
+    // Persist whether sale used an existing customer or a new one
+    isExistingCustomer: {
+      type: Boolean,
+      default: null,
     },
   },
   {
