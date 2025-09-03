@@ -361,6 +361,8 @@ export const AddVehicleCostSchema = Joi.object({
   }).optional(),
   // Allow client to set overall total cost at top-level
   totalcost: Joi.number().min(0).optional(),
+  // Allow client to set overall total interest rate at top-level
+  totalinterestRate: Joi.number().min(0).optional(),
   floorPlanDetails: Joi.object({
     isFloorPlanned: Joi.boolean().optional(),
     isExistingFloor: Joi.boolean().optional(), // <-- make this optional for validation and DB

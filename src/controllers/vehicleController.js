@@ -242,6 +242,10 @@ export const addVehicleCost = async (req, res, next) => {
     if (typeof value.totalcost === 'number') {
       updateData.totalcost = value.totalcost;
     }
+    // Persist top-level totalinterestRate if provided
+    if (typeof value.totalinterestRate === 'number') {
+      updateData.totalinterestRate = value.totalinterestRate;
+    }
 
     if (value.floorPlanDetails) {
       // Remove deprecated fields if present
