@@ -583,9 +583,7 @@ export const editSales = async (req, res, next) => {
           'CustomerInformation.email': customerInfo.CustomerInformation?.email,
         });
         if (existingCustomer) {
-          return next(
-            new ApiError(errorConstants.SALES.EMAIL_ALREADY_EXISTS, 409)
-          );
+          return next(new ApiError(errorConstants.CUSTOMER.ALREADY_EXISTS, 409));
         }
 
         // Generate customer ID using the same utility as customerController
@@ -599,7 +597,15 @@ export const editSales = async (req, res, next) => {
           IncomeInformation: customerInfo.IncomeInformation,
         });
 
-        await customer.save();
+        try {
+          await customer.save();
+        } catch (e) {
+          const isDup = e?.code === 11000 || /E11000 duplicate key/i.test(String(e?.message || ''));
+          if (isDup) {
+            return next(new ApiError(errorConstants.CUSTOMER.ALREADY_EXISTS, 409));
+          }
+          throw e;
+        }
       }
 
       // Only set when we actually handled customer
