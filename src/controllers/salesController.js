@@ -1,4 +1,5 @@
 import Sales from '../models/Sales.js';
+import mongoose from 'mongoose';
 import Customer from '../models/customer.js';
 import Vehicle from '../models/vehicle.js';
 import ApiError from '../utils/ApiError.js';
@@ -794,7 +795,10 @@ export const updateNetTradeInInfo = async (req, res, next) => {
     logger.info('🔁 Update net trade-in info request received');
 
     const { id } = req.query;
-    if (!id) return next(new ApiError('Sales ID is required', 400));
+    // Validate Sales ID strictly to prevent CastError
+    if (!id || id === 'null' || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
+      return next(new ApiError('Valid Sales ID is required', 400));
+    }
 
     const { enabled, netTradeInId } = req.body || {};
     if (enabled === undefined)
