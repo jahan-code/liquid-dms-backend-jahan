@@ -791,6 +791,7 @@ export const getAllVehicles = async (req, res, next) => {
         _id: vehicleObject._id,
         stockId: vehicleObject.stockId,
         ...vehicleObject,
+        totalinterestRate: vehicleObject.totalinterestRate,
         vendorInfo: {
           isExistingVendor: vehicleObject.vendorInfo?.isExistingVendor,
         },
