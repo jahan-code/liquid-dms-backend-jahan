@@ -159,6 +159,9 @@ export const createSales = async (req, res, next) => {
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
 
+      // Persisted flag
+      isExistingCustomer: salesObj.isExistingCustomer,
+
       // Customer Information Section
       customerInfo: {
         _id: salesObj.customerInfo?._id,
@@ -168,8 +171,6 @@ export const createSales = async (req, res, next) => {
         createdAt: salesObj.customerInfo?.createdAt,
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
-
-      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Vehicle Reference (ID only)
       vehicleInfo: salesObj.vehicleInfo ? String(salesObj.vehicleInfo) : null,
