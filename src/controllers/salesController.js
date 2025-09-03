@@ -403,6 +403,7 @@ export const addSalesDetails = async (req, res, next) => {
     const structuredResponse = {
       _id: salesObj._id,
       receiptId: salesObj.receiptId,
+      isExistingCustomer: salesObj.isExistingCustomer,
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
@@ -417,7 +418,6 @@ export const addSalesDetails = async (req, res, next) => {
         updatedAt: salesObj.customerInfo?.updatedAt,
       },
 
-      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Pricing Section - Conditional based on sales type
       pricing: {
