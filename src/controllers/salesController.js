@@ -41,6 +41,7 @@ export const createSales = async (req, res, next) => {
         customerId: customerInfo.customerId,
       });
       if (!customer) {
+
         logger.warn({
           message: `❌ Customer not found: ${customerInfo.customerId}`,
           timestamp: new Date().toISOString(),

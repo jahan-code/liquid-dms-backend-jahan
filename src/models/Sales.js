@@ -65,10 +65,6 @@ const SalesSchema = new mongoose.Schema(
             calculatedAmount: { type: Number, min: 0 },
           },
         ],
-        dealerServiceFee: {
-          type: Number,
-          min: 0,
-        },
         // netTradeIn numeric amount removed per requirement. Use netTradeInId link only.
         netTradeInEnabled: {
           type: Boolean,
@@ -205,7 +201,7 @@ SalesSchema.pre('save', function (next) {
   total += sd.governmentFees ?? 0;
   total += sd.salesTax ?? 0;
   total += sd.otherTaxes ?? 0;
-  total += sd.dealerServiceFee ?? 0;
+  // dealerServiceFee removed
   // netTradeIn numeric value removed; do not subtract
   total -= sd.deposit ?? 0;
 
