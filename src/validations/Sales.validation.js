@@ -171,10 +171,7 @@ const salesDetailsSchema = Joi.object({
   pickUpNote: optionalString('PICKUP_NOTE'),
 });
 
-// 🔹 Cash Sales Details Schema
-const cashSalesDetailsSchema = Joi.object({
-  serviceContract: optionalNumber('SERVICE_CONTRACT'),
-});
+// 🔹 Cash Sales Details Schema removed (legacy support dropped)
 
 // 🔹 Buy Here Pay Here Details Schema
 const buyHerePayHereDetailsSchema = Joi.object({
@@ -252,7 +249,7 @@ export const addSalesDetailsSchema = Joi.object({
       dateDepositReceived: Joi.date().optional(),
       enterYourInitials: Joi.string().optional(),
       pickUpNote: Joi.string().allow('', null).optional(),
-      serviceContract: Joi.number().min(0).optional(),
+      // serviceContract removed
       // Allow client to set final total that becomes totalAmount
       total: Joi.number().min(0).optional(),
     }).required(),
@@ -317,7 +314,6 @@ export const addSalesSchema = Joi.object({
   vehicleInfo: vehicleInfoSchema.optional(),
   salesType: Joi.string().optional(),
   salesDetails: salesDetailsSchema.optional(),
-  cashSalesDetails: cashSalesDetailsSchema.optional(),
   buyHerePayHereDetails: buyHerePayHereDetailsSchema.optional(),
   // salesStatus removed
 }).optional();

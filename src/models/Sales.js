@@ -92,11 +92,6 @@ const SalesSchema = new mongoose.Schema(
         pickUpNote: {
           type: String,
         },
-        // Cash sales specific fields
-        serviceContract: {
-          type: Number,
-          min: 0,
-        },
         // Optional client-provided total for UI; server may override
         total: {
           type: Number,
@@ -205,9 +200,7 @@ SalesSchema.pre('save', function (next) {
   // netTradeIn numeric value removed; do not subtract
   total -= sd.deposit ?? 0;
 
-  if (pricing.isCashSale === true) {
-    total += sd.serviceContract ?? 0;
-  } else if (pricing.isCashSale === false) {
+  if (pricing.isCashSale === false) {
     total += pricing.paymentDetails?.ertFee ?? 0;
   }
 
