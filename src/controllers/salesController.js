@@ -117,6 +117,7 @@ export const createSales = async (req, res, next) => {
         salesType: req.body?.pricing?.salesType ?? undefined,
         isReserved: req.body?.pricing?.isReserved ?? false,
       },
+      isExistingCustomer: Boolean(customerInfo?.isExistingCustomer),
       // Sales status is stored on Vehicle; keep Sales minimal
     });
 
@@ -155,6 +156,7 @@ export const createSales = async (req, res, next) => {
       totalAmount: salesObj.totalAmount,
       createdAt: salesObj.createdAt,
       updatedAt: salesObj.updatedAt,
+      isExistingCustomer: salesObj.isExistingCustomer,
 
       // Customer Information Section
       customerInfo: {
@@ -410,6 +412,7 @@ export const addSalesDetails = async (req, res, next) => {
       },
 
       // Pricing Section - Conditional based on sales type
+      isExistingCustomer: salesObj.isExistingCustomer,
       pricing: {
         isCashSale: salesObj.pricing?.isCashSale,
         salesType: salesObj.pricing?.salesType,
@@ -496,6 +499,7 @@ export const getSalesById = async (req, res, next) => {
       pricing: {
         isCashSale: salesObj.pricing?.isCashSale,
         salesType: salesObj.pricing?.salesType,
+        isReserved: salesObj.pricing?.isReserved,
         salesDetails: salesObj.pricing?.salesDetails || {},
         // Buy Here Pay Here specific data
         ...(!salesObj.pricing?.isCashSale && {
@@ -673,8 +677,20 @@ export const showAllSales = async (req, res, next) => {
       return next(new ApiError(errorConstants.SALES.SALES_NOT_FOUND, 404));
     }
 
+    // Normalize response to always include pricing.isReserved explicitly
+    const normalized = allSales.map((s) => {
+      const o = s.toObject();
+      return {
+        ...o,
+        pricing: {
+          ...o.pricing,
+          isReserved: o.pricing?.isReserved,
+        },
+      };
+    });
+
     return SuccessHandler(
-      allSales,
+      normalized,
       200,
       'All sales records fetched successfully',
       res

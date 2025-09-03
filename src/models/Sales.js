@@ -9,6 +9,12 @@ const SalesSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Flags and meta
+    isExistingCustomer: {
+      type: Boolean,
+      default: null,
+    },
+
     vehicleInfo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Vehicle',
