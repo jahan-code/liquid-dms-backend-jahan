@@ -350,6 +350,11 @@ export const addSalesDetails = async (req, res, next) => {
       setPayload['pricing.isReserved'] = isReserved;
     }
 
+    // Always persist totalAmount from payload if provided
+    if (typeof salesDetails?.total === 'number' && !Number.isNaN(salesDetails.total)) {
+      setPayload.totalAmount = Math.max(0, Number(salesDetails.total));
+    }
+
     const updateOps = { $set: setPayload };
     if (unsetPayload) updateOps.$unset = unsetPayload;
 

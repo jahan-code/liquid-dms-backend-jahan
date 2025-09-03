@@ -94,6 +94,8 @@ const validationSchemas = {
   '/sales/get-sales': { GET: null },
   '/sales/delete-sales': { DELETE: null },
   '/sales/sales': { GET: null },
+  // Dashboard
+  '/dashboard/summary': { GET: null },
   //NetTradeIn
   '/net-trade-in/add-net-trade-in': { POST: addNetTradeInSchema },
   '/net-trade-in/edit-net-trade-in': { PUT: editNetTradeInSchema },

@@ -101,6 +101,11 @@ const SalesSchema = new mongoose.Schema(
           type: Number,
           min: 0,
         },
+        // Optional client-provided total for UI; server may override
+        total: {
+          type: Number,
+          min: 0,
+        },
       },
       // Payment Schedule (Buy Here Pay Here only)
       paymentSchedule: {
@@ -183,6 +188,12 @@ SalesSchema.index({
 SalesSchema.pre('save', function (next) {
   const sd = this.pricing?.salesDetails || {};
   const pricing = this.pricing || {};
+
+  // If client provided a salesDetails.total, prefer that as the totalAmount
+  if (typeof sd.total === 'number' && !Number.isNaN(sd.total)) {
+    this.totalAmount = Math.max(0, Number(sd.total));
+    return next();
+  }
 
   let total = 0;
   total += sd.vehiclePrice ?? 0;

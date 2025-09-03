@@ -238,6 +238,11 @@ export const addVehicleCost = async (req, res, next) => {
         updateData[`costDetails.${key}`] = value.costDetails[key];
       });
     }
+    // Persist top-level totalcost if provided
+    if (typeof value.totalcost === 'number') {
+      updateData.totalcost = value.totalcost;
+    }
+
     if (value.floorPlanDetails) {
       // Remove deprecated fields if present
       if (value.floorPlanDetails.dateOpened === '') {

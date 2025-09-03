@@ -254,6 +254,8 @@ export const addSalesDetailsSchema = Joi.object({
       enterYourInitials: Joi.string().optional(),
       pickUpNote: Joi.string().allow('', null).optional(),
       serviceContract: Joi.number().min(0).optional(),
+      // Allow client to set final total that becomes totalAmount
+      total: Joi.number().min(0).optional(),
     }).required(),
     paymentSchedule: Joi.when('isCashSale', {
       is: false,

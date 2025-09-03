@@ -359,6 +359,8 @@ export const AddVehicleCostSchema = Joi.object({
       )
       .optional(),
   }).optional(),
+  // Allow client to set overall total cost at top-level
+  totalcost: Joi.number().min(0).optional(),
   floorPlanDetails: Joi.object({
     isFloorPlanned: Joi.boolean().optional(),
     isExistingFloor: Joi.boolean().optional(), // <-- make this optional for validation and DB
@@ -401,10 +403,10 @@ export const AddVehicleCostSchema = Joi.object({
     }).optional(), // New floor plan data
   }).optional(),
 })
-  .or('costDetails', 'floorPlanDetails')
+  .or('costDetails', 'floorPlanDetails', 'totalcost')
   .messages({
     'object.missing':
-      'At least one of costDetails or floorPlanDetails is required.',
+      'At least one of costDetails, floorPlanDetails, or totalcost is required.',
   });
 
 export const vehicleIdQuerySchema = Joi.object({
