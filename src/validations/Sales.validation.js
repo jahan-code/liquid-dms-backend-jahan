@@ -169,36 +169,29 @@ const salesDetailsSchema = Joi.object({
   dateDepositReceived: Joi.date().default(Date.now),
   enterYourInitials: optionalString('INITIALS'),
   pickUpNote: optionalString('PICKUP_NOTE'),
+  // New locations for BHPH fields (optional in legacy schema)
+  apr: optionalNumber('APR'),
+  totalLoanAmount: optionalNumber('TOTAL_LOAN_AMOUNT'),
 });
 
 // 🔹 Cash Sales Details Schema removed (legacy support dropped)
 
 // 🔹 Buy Here Pay Here Details Schema
 const buyHerePayHereDetailsSchema = Joi.object({
-  apr: Joi.number().min(0).max(100).default(0).messages({
-    'number.base': errorConstants.SALES.APR_MUST_BE_NUMBER,
-    'number.min': errorConstants.SALES.APR_TOO_LOW,
-    'number.max': errorConstants.SALES.APR_TOO_HIGH,
-  }),
   serviceContract: optionalNumber('SERVICE_CONTRACT'),
   ertFee: optionalNumber('ERT_FEE'),
   paymentSchedule: Joi.string().trim().required().default('Monthly'),
-  financingCalculationMethod: enumValidator('FINANCING_CALCULATION_METHOD', [
-    'Simple Interest',
-    'Add-On Interest',
-    'Rule of 78s',
-  ]).default('Simple Interest'),
   numberOfPayments: Joi.number().integer().min(1).default(12).messages({
     'number.base': errorConstants.SALES.NUMBER_OF_PAYMENTS_MUST_BE_NUMBER,
     'number.integer': errorConstants.SALES.NUMBER_OF_PAYMENTS_INTEGER,
     'number.min': errorConstants.SALES.NUMBER_OF_PAYMENTS_TOO_LOW,
   }),
   firstPaymentStarts: Joi.date().default(Date.now),
-  totalLoanAmount: optionalNumber('TOTAL_LOAN_AMOUNT'),
+  // totalLoanAmount moved to salesDetails in legacy
   downPayment1: optionalNumber('DOWN_PAYMENT'),
   firstPaymentDate: Joi.date().default(Date.now),
   nextPaymentDueDate: Joi.date().default(Date.now),
-  amountToFinance: optionalNumber('AMOUNT_TO_FINANCE'),
+  installmentAmount: optionalNumber('INSTALLMENT_AMOUNT'),
   note: optionalString('NOTE'),
 });
 
@@ -251,13 +244,23 @@ export const addSalesDetailsSchema = Joi.object({
       pickUpNote: Joi.string().allow('', null).optional(),
       // serviceContract removed
       // Allow client to set final total that becomes totalAmount
+      apr: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+        is: false,
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+      }),
+      totalLoanAmount: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+        is: false,
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+      }),
       total: Joi.number().min(0).optional(),
     }).required(),
     paymentSchedule: Joi.when('isCashSale', {
       is: false,
       then: Joi.object({
         paymentSchedule: Joi.string().trim().required(),
-        financingCalculationMethod: Joi.string().trim().required(),
+        // financingCalculationMethod removed
         numberOfPayments: Joi.number().min(1).required(),
         firstPaymentStarts: Joi.date().required(),
         firstPaymentDate: Joi.when('paymentSchedule', {
@@ -280,13 +283,11 @@ export const addSalesDetailsSchema = Joi.object({
     paymentDetails: Joi.when('isCashSale', {
       is: false,
       then: Joi.object({
-        totalLoanAmount: Joi.number().min(0).required(),
         downPayment1: Joi.number().min(0).required(),
-        amountToFinance: Joi.number().min(0).required(),
+        installmentAmount: Joi.number().min(0).required(),
         firstPaymentDate: Joi.date().required(),
         nextPaymentDueDate: Joi.date().required(),
         note: Joi.string().optional(),
-        apr: Joi.number().min(0).required(),
         // BHPH-only field
       }).required(),
       otherwise: Joi.forbidden(),
