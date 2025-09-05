@@ -231,7 +231,7 @@ export const addSalesDetailsSchema = Joi.object({
         .default([]),
       // dealerServiceFee removed
       netTradeIn: Joi.forbidden(),
-      deposit: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+      deposit: Joi.number().min(0).when(Joi.ref('...isCashSale'), {
         is: true,
         then: Joi.required(),
         otherwise: Joi.optional(),
@@ -244,12 +244,12 @@ export const addSalesDetailsSchema = Joi.object({
       pickUpNote: Joi.string().allow('', null).optional(),
       // serviceContract removed
       // Allow client to set final total that becomes totalAmount
-      apr: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+      apr: Joi.number().min(0).when(Joi.ref('...isCashSale'), {
         is: false,
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
-      totalLoanAmount: Joi.number().min(0).when(Joi.ref('..isCashSale'), {
+      totalLoanAmount: Joi.number().min(0).when(Joi.ref('...isCashSale'), {
         is: false,
         then: Joi.required(),
         otherwise: Joi.forbidden(),

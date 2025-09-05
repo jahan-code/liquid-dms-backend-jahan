@@ -44,6 +44,57 @@ export const getDashboardSummary = async (req, res, next) => {
 		const totalCustomers = await Customer.countDocuments();
 		const inactiveCustomers = Math.max(0, totalCustomers - activeCustomers);
 
+		// Inline: Sales time-series for charts
+		const now = new Date();
+		const startOfToday = new Date(now);
+		startOfToday.setHours(0, 0, 0, 0);
+
+		const startOfWeek = new Date(now);
+		startOfWeek.setDate(now.getDate() - 6);
+		startOfWeek.setHours(0, 0, 0, 0);
+
+		const startOf30 = new Date(now);
+		startOf30.setDate(now.getDate() - 29);
+		startOf30.setHours(0, 0, 0, 0);
+
+		const startOfSixMonths = new Date(now);
+		startOfSixMonths.setMonth(now.getMonth() - 5, 1);
+		startOfSixMonths.setHours(0, 0, 0, 0);
+
+		const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+		const sumExpr = { $sum: { $ifNull: ['$totalAmount', 0] } };
+
+		const [seriesToday, seriesLastWeek, seriesLast30Days, seriesLastSixMonths, seriesThisYear] = await Promise.all([
+			Sales.aggregate([
+				{ $match: { createdAt: { $gte: startOfToday } } },
+				{ $group: { _id: { $dateToString: { format: '%H:00', date: '$createdAt' } }, total: sumExpr } },
+				{ $sort: { _id: 1 } },
+			]),
+			Sales.aggregate([
+				{ $match: { createdAt: { $gte: startOfWeek } } },
+				{ $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: sumExpr } },
+				{ $sort: { _id: 1 } },
+			]),
+			Sales.aggregate([
+				{ $match: { createdAt: { $gte: startOf30 } } },
+				{ $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: sumExpr } },
+				{ $sort: { _id: 1 } },
+			]),
+			Sales.aggregate([
+				{ $match: { createdAt: { $gte: startOfSixMonths } } },
+				{ $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: sumExpr } },
+				{ $sort: { _id: 1 } },
+			]),
+			Sales.aggregate([
+				{ $match: { createdAt: { $gte: startOfYear } } },
+				{ $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: sumExpr } },
+				{ $sort: { _id: 1 } },
+			]),
+		]);
+
+		const mapSeries = (arr) => arr.map((d) => ({ label: d._id, total: d.total }));
+
 		return SuccessHandler(
 			{
 				totalVehicles,
@@ -55,6 +106,13 @@ export const getDashboardSummary = async (req, res, next) => {
 				profitMargin,
 				activeCustomers,
 				inactiveCustomers,
+				salesSeries: {
+					today: mapSeries(seriesToday),
+					lastWeek: mapSeries(seriesLastWeek),
+					last30Days: mapSeries(seriesLast30Days),
+					lastSixMonths: mapSeries(seriesLastSixMonths),
+					thisYear: mapSeries(seriesThisYear),
+				},
 			},
 			200,
 			'Dashboard summary fetched successfully',
