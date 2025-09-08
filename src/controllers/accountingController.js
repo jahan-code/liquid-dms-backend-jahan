@@ -252,6 +252,7 @@ export const getSalesByCustomerId = async (req, res, next) => {
       stockId: salesObj.vehicleInfo?.stockId || null,
       vin: salesObj.vehicleInfo?.basicDetails?.vin || null,
       make: salesObj.vehicleInfo?.basicDetails?.make || null,
+      billAmount: salesObj.pricing?.salesDetails?.billAmount ?? null,
       salesType: salesObj.pricing?.salesType || null,
       paymentSchedule:
         salesObj.pricing?.paymentSchedule?.paymentSchedule || null,
