@@ -279,6 +279,13 @@ export const addSalesDetails = async (req, res, next) => {
       delete sanitizedIncoming.netTradeIn;
     }
     const mergedInput = { ...existingDetails, ...sanitizedIncoming };
+    // Merge billAmount into salesDetails to avoid conflicting update operators
+    if (
+      typeof salesDetails?.billAmount === 'number' &&
+      !Number.isNaN(salesDetails.billAmount)
+    ) {
+      mergedInput.billAmount = Math.max(0, Number(salesDetails.billAmount));
+    }
 
     let setPayload;
     let unsetPayload;
@@ -362,17 +369,7 @@ export const addSalesDetails = async (req, res, next) => {
       setPayload.totalAmount = Math.max(0, Number(salesDetails.total));
     }
 
-    // Persist billAmount from pricing.salesDetails if provided
-    if (
-      typeof salesDetails?.billAmount === 'number' &&
-      !Number.isNaN(salesDetails.billAmount)
-    ) {
-      // ensure it exists under pricing.salesDetails
-      setPayload['pricing.salesDetails.billAmount'] = Math.max(
-        0,
-        Number(salesDetails.billAmount)
-      );
-    }
+    // billAmount already merged into pricing.salesDetails above
 
     const updateOps = { $set: setPayload };
     if (unsetPayload) updateOps.$unset = unsetPayload;
