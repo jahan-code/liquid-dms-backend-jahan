@@ -214,6 +214,7 @@ export const addSalesDetailsSchema = Joi.object({
       governmentFees: Joi.number().min(0).required(),
       salesTax: Joi.number().min(0).required(),
       otherTaxes: Joi.number().min(0).optional(),
+      billAmount: Joi.number().min(0).optional(),
       otherTaxesBreakdown: Joi.array()
         .items(
           Joi.object({
@@ -294,6 +295,7 @@ export const addSalesDetailsSchema = Joi.object({
     }),
   }).required(),
   salesType: Joi.string().optional(),
+  // billAmount moved under pricing.salesDetails
 })
   .required()
   .unknown(true);

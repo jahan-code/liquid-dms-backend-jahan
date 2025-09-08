@@ -106,6 +106,12 @@ const SalesSchema = new mongoose.Schema(
           type: Number,
           min: 0,
         },
+        // Bill amount moved under salesDetails
+        billAmount: {
+          type: Number,
+          min: 0,
+          default: 0,
+        },
         // Optional client-provided total for UI; server may override
         total: {
           type: Number,

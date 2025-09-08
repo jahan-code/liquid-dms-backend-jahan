@@ -362,6 +362,18 @@ export const addSalesDetails = async (req, res, next) => {
       setPayload.totalAmount = Math.max(0, Number(salesDetails.total));
     }
 
+    // Persist billAmount from pricing.salesDetails if provided
+    if (
+      typeof salesDetails?.billAmount === 'number' &&
+      !Number.isNaN(salesDetails.billAmount)
+    ) {
+      // ensure it exists under pricing.salesDetails
+      setPayload['pricing.salesDetails.billAmount'] = Math.max(
+        0,
+        Number(salesDetails.billAmount)
+      );
+    }
+
     const updateOps = { $set: setPayload };
     if (unsetPayload) updateOps.$unset = unsetPayload;
 
