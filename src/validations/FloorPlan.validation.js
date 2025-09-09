@@ -127,6 +127,7 @@ const companyDetailsSchema = Joi.object({
   phone: phoneValidator.required(),
   contactPerson: contactPersonValidator.required(),
   status: statusValidator, // optional, no enum
+  totalInterestRate: Joi.number().min(0).allow(null, ''),
   dateOpened: Joi.date().allow('').optional(),
 }).required();
 
