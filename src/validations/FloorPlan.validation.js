@@ -79,16 +79,8 @@ const aprValidator = Joi.number()
   .default(0.0);
 
 const interestCalculationDaysValidator = Joi.number()
-  .integer()
-  .min(1)
-  .max(365)
-  .messages({
-    'number.base': errorConstants.FLOOR_PLAN.INTEREST_DAYS_MUST_BE_NUMBER,
-    'number.min': errorConstants.FLOOR_PLAN.INTEREST_DAYS_TOO_LOW,
-    'number.max': errorConstants.FLOOR_PLAN.INTEREST_DAYS_TOO_HIGH,
-    'number.integer': errorConstants.FLOOR_PLAN.INTEREST_DAYS_INTEGER,
-  })
-  .default(30);
+  .allow('', null)
+  .optional();
 
 const feesTypeValidator = enumValidator('FEES_TYPE', [
   'One Time',
