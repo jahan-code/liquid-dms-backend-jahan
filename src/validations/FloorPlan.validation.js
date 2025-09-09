@@ -140,7 +140,7 @@ const companyDetailsSchema = Joi.object({
 
 const rateSchema = Joi.object({
   apr: aprValidator.required(),
-  interestCalculationDays: interestCalculationDaysValidator.required(),
+  interestCalculationDays: interestCalculationDaysValidator.optional(),
 }).required();
 
 const feesSchema = Joi.object({
