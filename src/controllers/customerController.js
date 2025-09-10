@@ -179,7 +179,7 @@ export const getAllCustomers = async (req, res, next) => {
     // Map customer IDs for bulk sales lookup
     const customerIds = customers.map((c) => c._id);
     // Get latest sales per customer (by createdAt desc)
-    const sales = await Sales.find({ customerInfo: { $in: customerIds } })
+    const sales = await Sales.find({ customerInfo: { $in: customerIds }, createdBy: req.user?.userId })
       .select('customerInfo vehicleInfo createdAt')
       .sort({ createdAt: -1 });
 
@@ -246,7 +246,7 @@ export const getAllCustomersWithoutPagination = async (req, res, next) => {
 
     // Map customer IDs for bulk sales lookup
     const customerIds = customers.map((c) => c._id);
-    const sales = await Sales.find({ customerInfo: { $in: customerIds } })
+    const sales = await Sales.find({ customerInfo: { $in: customerIds }, createdBy: req.user?.userId })
       .select('customerInfo vehicleInfo createdAt')
       .sort({ createdAt: -1 });
 
