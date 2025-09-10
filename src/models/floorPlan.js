@@ -62,6 +62,7 @@ const floorPlanSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
 });
 
 // Friendly duplicate key error handling for FloorPlan

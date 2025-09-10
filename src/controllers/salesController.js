@@ -114,6 +114,7 @@ export const createSales = async (req, res, next) => {
       receiptId: receiptId,
       customerInfo: customer ? customer._id : undefined,
       vehicleInfo: vehicle ? vehicle._id : undefined,
+      createdBy: req.user?.userId,
       isExistingCustomer: Boolean(customerInfo?.isExistingCustomer),
       pricing: {
         isCashSale: req.body?.pricing?.isCashSale ?? undefined,

@@ -319,6 +319,8 @@ const vehicleSchema = new mongoose.Schema(
     billofsales: {
       type: String,
     },
+    // Owner
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
     // Soft delete flag
     isDeleted: {
       type: Boolean,

@@ -118,7 +118,7 @@ const NetTradeInSchema = new mongoose.Schema(
     },
 
     addToInventory: { type: Boolean, default: false },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
   },
   { timestamps: true }
 );

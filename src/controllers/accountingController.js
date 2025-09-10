@@ -155,6 +155,8 @@ export const createAccounting = async (req, res, next) => {
       }
     }
 
+    // set ownership
+    payload.createdBy = req.user?.userId;
     const entry = await Accounting.create(payload);
 
     // Update Sales.nextPaymentDueDate to the applied due date
@@ -205,7 +207,7 @@ export const getSalesByCustomerId = async (req, res, next) => {
     }
 
     // Then find sales record that references this customer
-    const sales = await Sales.findOne({ customerInfo: customer._id })
+    const sales = await Sales.findOne({ customerInfo: customer._id, createdBy: req.user?.userId })
       .sort({ createdAt: -1 }) // Get the most recent sales record
       .populate(['customerInfo', 'vehicleInfo']);
 
@@ -435,6 +437,7 @@ export const getAccountingByVehicleId = async (req, res, next) => {
     // Direct query by AccountingDetails.stockId if stored
     const direct = await Accounting.find({
       'AccountingDetails.stockId': stockId,
+      createdBy: req.user?.userId,
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -469,6 +472,7 @@ export const getAccountingByVehicleId = async (req, res, next) => {
 
     const accountings = await Accounting.find({
       'AccountingDetails.receiptNumber': { $in: receiptIds },
+      createdBy: req.user?.userId,
     })
       .sort({ createdAt: -1 })
       .lean();

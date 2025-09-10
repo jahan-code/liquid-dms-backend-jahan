@@ -83,4 +83,8 @@ const AccountingSchema = new mongoose.Schema(
   }
 );
 
+AccountingSchema.add({
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
+});
+
 export default mongoose.model('Accounting', AccountingSchema);

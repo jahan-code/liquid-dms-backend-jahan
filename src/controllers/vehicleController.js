@@ -136,6 +136,7 @@ export const addVehicle = async (req, res, next) => {
       vendorInfo: {
         isExistingVendor: vendorInfo.isExistingVendor,
       },
+      createdBy: req.user?.userId,
     });
 
     await newVehicle.save();
@@ -774,7 +775,7 @@ export const getAllVehicles = async (req, res, next) => {
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
     // Fetch all vehicles regardless of completion status
-    const vehicles = await Vehicle.find({ isDeleted: false })
+    const vehicles = await Vehicle.find({ isDeleted: false, createdBy: req.user?.userId })
       .populate([
         { path: 'vendor', select: '-taxIdOrSSN' },
         { path: 'floorPlanDetails.floorPlan' },
@@ -783,7 +784,7 @@ export const getAllVehicles = async (req, res, next) => {
       .limit(parsedLimit)
       .sort({ createdAt: -1 });
 
-    const total = await Vehicle.countDocuments({ isDeleted: false });
+    const total = await Vehicle.countDocuments({ isDeleted: false, createdBy: req.user?.userId });
 
     const vehiclesWithFlags = vehicles.map((vehicle) => {
       const vehicleObject = vehicle.toObject();
