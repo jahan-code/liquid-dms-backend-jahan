@@ -91,7 +91,8 @@ export const addVehicle = async (req, res, next) => {
       vendorInfo.billofsales = billofsalesUrl;
       categoryCode = extractCategoryCode(vendorInfo.category);
 
-      const generatedVendorId = await generateVendorId(categoryCode);
+      // New vendorId format uses state + year + serial
+      const generatedVendorId = await generateVendorId(vendorInfo.state, req.user?.userId);
       vendor = new Vendor({
         ...vendorInfo,
         vendorId: generatedVendorId,

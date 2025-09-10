@@ -8,7 +8,7 @@ import errorConstants from '../utils/errors.js';
 import logger from '../functions/logger.js';
 import ApiError from '../utils/ApiError.js';
 import user from '../models/user.js';
-import extractCategoryCode from '../utils/extractCategory.js';
+// import extractCategoryCode from '../utils/extractCategory.js';
 import paginate from '../utils/paginate.js';
 import { generateVendorId } from '../utils/idGenerator.js';
 
@@ -26,7 +26,7 @@ const addVendor = async (req, res, next) => {
       return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
     }
 
-    const categoryCode = extractCategoryCode(value.category);
+    // category is no longer used for vendorId generation; keep for record only
     const existingVendor = await vendor.findOne({ email: value.email, createdBy: req.user.userId });
     if (existingVendor) {
       logger.warn({
@@ -38,8 +38,8 @@ const addVendor = async (req, res, next) => {
       ); // 409 Conflict
     }
 
-    // Use counter-based vendor ID generation
-    const newVendorId = await generateVendorId(categoryCode, req.user.userId);
+    // Use new vendor ID format: STATE-YYYY-#### (state from value.state)
+    const newVendorId = await generateVendorId(value.state, req.user.userId);
 
     // ✅ Create and save vendor
     const newVendor = await vendor.create({
@@ -225,9 +225,8 @@ const editVendor = async (req, res, next) => {
     }
 
     // If category is changed, regenerate vendorId
-    if (value.category && value.category !== existingVendor.category) {
-      const categoryCode = extractCategoryCode(value.category);
-      value.vendorId = await generateVendorId(categoryCode);
+    if (value.state && value.state !== existingVendor.state) {
+      value.vendorId = await generateVendorId(value.state, req.user.userId);
     }
 
     // Update vendor

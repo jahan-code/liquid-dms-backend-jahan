@@ -18,15 +18,25 @@ export const getNextCounter = async (counterKey) => {
   return counter.seq;
 };
 
+// Normalize state to uppercase letters only, fallback to 'NA'
+const normalizeState = (state) => {
+  const s = String(state || '').toUpperCase().replace(/[^A-Z]/g, '');
+  return s || 'NA';
+};
+
 /**
- * Generate Vendor ID with counter (enhances existing logic)
- * @param {string} category - Vendor category (e.g., 'AU', 'COM', 'IND')
+ * Generate Vendor ID: STATE-YYYY-#### (serial per tenant)
+ * @param {string} state - Vendor state (e.g., 'TX', 'California')
+ * @param {string} tenantId - Current user's ObjectId string
  * @returns {Promise<string>} - Generated vendor ID
  */
-export const generateVendorId = async (category, tenantId) => {
-  const counterKey = `vendor:${tenantId}:${category}`;
+export const generateVendorId = async (state, tenantId) => {
+  const year = new Date().getFullYear();
+  const stateCode = normalizeState(state);
+  // Keep serial continuous per tenant (not split by state/year) to preserve existing numbering
+  const counterKey = `vendor:${tenantId}`;
   const sequence = await getNextCounter(counterKey);
-  return `VEN-${category}-${String(sequence).padStart(4, '0')}`;
+  return `${stateCode}-${year}-${String(sequence).padStart(4, '0')}`;
 };
 
 /**

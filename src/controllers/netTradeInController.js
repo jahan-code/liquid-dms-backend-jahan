@@ -86,8 +86,7 @@ export const createNetTradeIn = async (req, res, next) => {
             new ApiError(errorConstants.VENDOR.EMAIL_ALREADY_EXISTS, 409)
           );
 
-        const categoryCode = extractCategoryCode(vendorInfo?.category);
-        const generatedVendorId = await generateVendorId(categoryCode);
+        const generatedVendorId = await generateVendorId(vendorInfo?.state, req.user?.userId);
 
         vendorDoc = new Vendor({
           category: vendorInfo?.category,
@@ -578,11 +577,9 @@ export const updateNetTradeIn = async (req, res, next) => {
         }
 
         // Ensure vendorId prefix matches current category code; regenerate if mismatched or category changed
-        const newVendorCategory = vendorDoc?.category || prevVendorCategory;
-        const code = extractCategoryCode(newVendorCategory);
-        const expectedVendorIdRegex = new RegExp(`^VEN-${code}-\\d{4}$`, 'i');
+        const expectedVendorIdRegex = new RegExp(`^[A-Z]+-\\d{4}-\\d{4}$`, 'i');
         if (!expectedVendorIdRegex.test(vendorDoc.vendorId || '')) {
-          const generatedVendorId = await generateVendorId(code);
+          const generatedVendorId = await generateVendorId(vendorDoc?.state, req.user?.userId);
           vendorDoc.vendorId = generatedVendorId;
           await vendorDoc.save();
         }
