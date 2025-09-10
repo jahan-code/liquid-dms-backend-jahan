@@ -107,7 +107,7 @@ export const createSales = async (req, res, next) => {
     }
 
     // Generate receipt ID
-    const receiptId = await generateReceiptId();
+    const receiptId = await generateReceiptId(req.user?.userId);
 
     // Create sales record
     const sales = new Sales({
@@ -242,7 +242,7 @@ export const addSalesDetails = async (req, res, next) => {
     const isReserved = pricing?.isReserved === true;
 
     // 3. Find existing sales record
-    const existingSales = await Sales.findById(salesId);
+    const existingSales = await Sales.findOne({ _id: salesId, createdBy: req.user?.userId });
     if (!existingSales) {
       logger.warn({
         message: `❌ Sales record not found: ${salesId}`,
@@ -482,7 +482,7 @@ export const getSalesById = async (req, res, next) => {
       return next(new ApiError('Sales ID is required', 400));
     }
 
-    const sales = await Sales.findById(id).populate(['customerInfo']);
+    const sales = await Sales.findOne({ _id: id, createdBy: req.user?.userId }).populate(['customerInfo']);
 
     if (!sales) {
       logger.warn({

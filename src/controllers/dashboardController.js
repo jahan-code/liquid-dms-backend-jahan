@@ -8,23 +8,25 @@ import Customer from '../models/customer.js';
 export const getDashboardSummary = async (req, res, next) => {
 	try {
 		// Total vehicles (excluding soft-deleted)
-		const totalVehicles = await Vehicle.countDocuments({ isDeleted: false });
+		const totalVehicles = await Vehicle.countDocuments({ isDeleted: false, createdBy: req.user?.userId });
 
 		// Total sales: sum of totalAmount on all sales
 		const salesAgg = await Sales.aggregate([
+			{ $match: { createdBy: req.user?.userId } },
 			{ $group: { _id: null, total: { $sum: { $ifNull: ['$totalAmount', 0] } } } },
 		]);
 		const totalSales = salesAgg[0]?.total || 0;
 
 		// Payment collected: sum of Accounting.billDetails.amount
 		const paymentsAgg = await Accounting.aggregate([
+			{ $match: { createdBy: req.user?.userId } },
 			{ $group: { _id: null, total: { $sum: { $ifNull: ['$billDetails.amount', 0] } } } },
 		]);
 		const totalPayments = paymentsAgg[0]?.total || 0;
 
 		// Vendor payments: sum of Vehicle.totalcost (exclude soft-deleted)
 		const vendorAgg = await Vehicle.aggregate([
-			{ $match: { isDeleted: { $ne: true } } },
+			{ $match: { isDeleted: { $ne: true }, createdBy: req.user?.userId } },
 			{ $group: { _id: null, total: { $sum: { $ifNull: ['$totalcost', 0] } } } },
 		]);
 		const vendorPayments = vendorAgg[0]?.total || 0;
@@ -39,9 +41,9 @@ export const getDashboardSummary = async (req, res, next) => {
 		const profitMargin = totalSales > 0 ? (grossProfit / totalSales) * 100 : 0;
 
 		// Active/Inactive customers
-		const activeCustomerIds = await Sales.distinct('customerInfo', { customerInfo: { $ne: null } });
+		const activeCustomerIds = await Sales.distinct('customerInfo', { customerInfo: { $ne: null }, createdBy: req.user?.userId });
 		const activeCustomers = Array.isArray(activeCustomerIds) ? activeCustomerIds.length : 0;
-		const totalCustomers = await Customer.countDocuments();
+		const totalCustomers = await Customer.countDocuments({ createdBy: req.user?.userId });
 		const inactiveCustomers = Math.max(0, totalCustomers - activeCustomers);
 
 		// Inline: Sales time-series for charts
@@ -67,27 +69,27 @@ export const getDashboardSummary = async (req, res, next) => {
 
 		const [seriesToday, seriesLastWeek, seriesLast30Days, seriesLastSixMonths, seriesThisYear] = await Promise.all([
 			Sales.aggregate([
-				{ $match: { createdAt: { $gte: startOfToday } } },
+				{ $match: { createdAt: { $gte: startOfToday }, createdBy: req.user?.userId } },
 				{ $group: { _id: { $dateToString: { format: '%H:00', date: '$createdAt' } }, total: sumExpr } },
 				{ $sort: { _id: 1 } },
 			]),
 			Sales.aggregate([
-				{ $match: { createdAt: { $gte: startOfWeek } } },
+				{ $match: { createdAt: { $gte: startOfWeek }, createdBy: req.user?.userId } },
 				{ $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: sumExpr } },
 				{ $sort: { _id: 1 } },
 			]),
 			Sales.aggregate([
-				{ $match: { createdAt: { $gte: startOf30 } } },
+				{ $match: { createdAt: { $gte: startOf30 }, createdBy: req.user?.userId } },
 				{ $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, total: sumExpr } },
 				{ $sort: { _id: 1 } },
 			]),
 			Sales.aggregate([
-				{ $match: { createdAt: { $gte: startOfSixMonths } } },
+				{ $match: { createdAt: { $gte: startOfSixMonths }, createdBy: req.user?.userId } },
 				{ $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: sumExpr } },
 				{ $sort: { _id: 1 } },
 			]),
 			Sales.aggregate([
-				{ $match: { createdAt: { $gte: startOfYear } } },
+				{ $match: { createdAt: { $gte: startOfYear }, createdBy: req.user?.userId } },
 				{ $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, total: sumExpr } },
 				{ $sort: { _id: 1 } },
 			]),

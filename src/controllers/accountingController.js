@@ -299,6 +299,7 @@ export const getAllAccountings = async (req, res, next) => {
     };
 
     const pipeline = [
+      { $match: { createdBy: req.user?.userId } },
       { $sort: baseSort },
       {
         $group: {
@@ -375,9 +376,8 @@ export const getAllAccountings = async (req, res, next) => {
     ];
 
     const countPipeline = [
-      {
-        $group: { _id: '$AccountingDetails.receiptNumber' },
-      },
+      { $match: { createdBy: req.user?.userId } },
+      { $group: { _id: '$AccountingDetails.receiptNumber' } },
       { $count: 'count' },
     ];
 
@@ -416,7 +416,7 @@ export const getAccountingById = async (req, res, next) => {
       return next(new ApiError('Invalid accounting ID format', 400));
     }
 
-    const doc = await Accounting.findById(id);
+    const doc = await Accounting.findOne({ _id: id, createdBy: req.user?.userId });
     if (!doc) {
       return next(new ApiError('Accounting not found', 404));
     }

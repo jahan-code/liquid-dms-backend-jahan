@@ -29,6 +29,7 @@ export const addCustomer = async (req, res, next) => {
     // 🔎 Check if customer already exists by email
     const existingCustomer = await Customer.findOne({
       'CustomerInformation.email': value.CustomerInformation.email,
+      createdBy: req.user?.userId,
     });
 
     if (existingCustomer) {
@@ -38,13 +39,14 @@ export const addCustomer = async (req, res, next) => {
       });
       return next(new ApiError(errorConstants.CUSTOMER.ALREADY_EXISTS, 409));
     }
-    const customId = await generateCustomerId(CustomerInformation.firstName);
+    const customId = await generateCustomerId(CustomerInformation.firstName, req.user?.userId);
 
     // ✅ Create new customer
     const newCustomer = new Customer({
       CustomerInformation,
       IncomeInformation,
       customerId: customId,
+      createdBy: req.user?.userId,
     });
 
     const customerResponse = await newCustomer.save();
@@ -74,7 +76,7 @@ export const getCustomerById = async (req, res, next) => {
       throw new ApiError(400, 'Customer ID is required');
     }
 
-    const customer = await Customer.findById(customerId);
+    const customer = await Customer.findOne({ _id: customerId, createdBy: req.user?.userId });
 
     if (!customer) {
       throw new ApiError(404, 'Customer not found');
@@ -104,7 +106,7 @@ export const editCustomerById = async (req, res, next) => {
     }
 
     // 🔍 Find the customer first
-    const customer = await Customer.findById(customerId);
+    const customer = await Customer.findOne({ _id: customerId, createdBy: req.user?.userId });
 
     if (!customer) {
       return next(new ApiError('Customer not found', 404));
@@ -116,6 +118,7 @@ export const editCustomerById = async (req, res, next) => {
     const existingEmailCustomer = await Customer.findOne({
       'CustomerInformation.email': newEmail,
       _id: { $ne: customerId }, // ✅ Exclude current customer
+      createdBy: req.user?.userId,
     });
 
     if (existingEmailCustomer) {
@@ -161,10 +164,10 @@ export const getAllCustomers = async (req, res, next) => {
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
     // Get total count of customers
-    const totalCustomers = await Customer.countDocuments();
+    const totalCustomers = await Customer.countDocuments({ createdBy: req.user?.userId });
 
     // Fetch paginated customers, most recent first
-    const customers = await Customer.find()
+    const customers = await Customer.find({ createdBy: req.user?.userId })
       .sort({ createdAt: -1 }) // Sort by most recent
       .skip(skip)
       .limit(parsedLimit);
@@ -235,7 +238,7 @@ export const getAllCustomers = async (req, res, next) => {
 };
 export const getAllCustomersWithoutPagination = async (req, res, next) => {
   try {
-    const customers = await Customer.find().sort({ createdAt: -1 });
+    const customers = await Customer.find({ createdBy: req.user?.userId }).sort({ createdAt: -1 });
 
     if (!customers || customers.length === 0) {
       return next(new ApiError('No customers found', 404));
@@ -298,7 +301,7 @@ export const deleteCustomerById = async (req, res, next) => {
       return next(new ApiError('Customer ID is required', 400));
     }
 
-    const deletedCustomer = await Customer.findByIdAndDelete(customerId);
+    const deletedCustomer = await Customer.findOneAndDelete({ _id: customerId, createdBy: req.user?.userId });
 
     if (!deletedCustomer) {
       return next(new ApiError('Customer not found', 404));

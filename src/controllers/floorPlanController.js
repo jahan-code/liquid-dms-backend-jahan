@@ -47,6 +47,7 @@ export const addFloorPlan = async (req, res, next) => {
       Fees,
       term,
       additionalNotes,
+      createdBy: req.user?.userId,
     });
     // 🏢 Create new FloorPlan
     const FloorPlanResponse = await floorPlan.save();
@@ -83,7 +84,7 @@ export const getFloorPlanById = async (req, res, next) => {
       return next(new ApiError('Floor plan ID is required', 400));
     }
 
-    const floorPlan = await FloorPlan.findOne({ _id: id, isDeleted: false });
+    const floorPlan = await FloorPlan.findOne({ _id: id, isDeleted: false, createdBy: req.user?.userId });
 
     if (!floorPlan) {
       logger.warn({
@@ -130,7 +131,7 @@ export const editFloorPlan = async (req, res, next) => {
     }
 
     const updatedFloorPlan = await FloorPlan.findOneAndUpdate(
-      { _id: id, isDeleted: false },
+      { _id: id, isDeleted: false, createdBy: req.user?.userId },
       { $set: value },
       { new: true }
     );
@@ -169,7 +170,7 @@ export const showAllFloorPlans = async (req, res, next) => {
     logger.info('📄 Show all floor plans request received');
 
     // 📦 Fetch all floor plans from the database
-    const allFloorPlans = await FloorPlan.find({ isDeleted: false });
+    const allFloorPlans = await FloorPlan.find({ isDeleted: false, createdBy: req.user?.userId });
 
     if (allFloorPlans.length === 0) {
       logger.warn({
@@ -215,7 +216,7 @@ export const deleteFloorPlan = async (req, res, next) => {
     }
 
     // Check if floor plan exists before deletion
-    const existingFloorPlan = await FloorPlan.findById(id);
+    const existingFloorPlan = await FloorPlan.findOne({ _id: id, createdBy: req.user?.userId });
     if (!existingFloorPlan) {
       logger.warn({
         message: `❌ Floor plan not found for deletion with ID: ${id}`,
@@ -271,13 +272,13 @@ export const showAllFloorPlansPaginated = async (req, res, next) => {
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
     // Fetch paginated floor plans, most recent first (exclude soft-deleted)
-    const allFloorPlans = await FloorPlan.find({ isDeleted: false })
+    const allFloorPlans = await FloorPlan.find({ isDeleted: false, createdBy: req.user?.userId })
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 }); // Sort by newest first
 
     // Get total count for pagination info
-    const total = await FloorPlan.countDocuments({ isDeleted: false });
+    const total = await FloorPlan.countDocuments({ isDeleted: false, createdBy: req.user?.userId });
 
     // Create paginated response
     const paginatedResponse = {

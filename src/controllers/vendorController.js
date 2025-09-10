@@ -27,7 +27,7 @@ const addVendor = async (req, res, next) => {
     }
 
     const categoryCode = extractCategoryCode(value.category);
-    const existingVendor = await vendor.findOne({ email: value.email });
+    const existingVendor = await vendor.findOne({ email: value.email, createdBy: req.user.userId });
     if (existingVendor) {
       logger.warn({
         message: `❌ Email already exists: ${value.email}`,
@@ -39,7 +39,7 @@ const addVendor = async (req, res, next) => {
     }
 
     // Use counter-based vendor ID generation
-    const newVendorId = await generateVendorId(categoryCode);
+    const newVendorId = await generateVendorId(categoryCode, req.user.userId);
 
     // ✅ Create and save vendor
     const newVendor = await vendor.create({
@@ -104,13 +104,13 @@ const showAllVendors = async (req, res, next) => {
     const { skip, limit: parsedLimit } = paginate(page, limit);
 
     const vendors = await vendor
-      .find()
+      .find({ createdBy: req.user.userId })
       .select('-taxIdOrSSN')
       .skip(skip)
       .limit(parsedLimit)
       .sort({ createdAt: -1 }); // Optional: sort by newest first
 
-    const total = await vendor.countDocuments();
+    const total = await vendor.countDocuments({ createdBy: req.user.userId });
     const showVendorsResponse = {
       totalVendors: total,
       currentPage: Number(page),
@@ -146,7 +146,7 @@ const getVendorById = async (req, res, next) => {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
     }
 
-    const foundVendor = await vendor.findById(id);
+    const foundVendor = await vendor.findOne({ _id: id, createdBy: req.user.userId });
 
     if (!foundVendor) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
@@ -205,14 +205,14 @@ const editVendor = async (req, res, next) => {
       return next(new ApiError(errorConstants.GENERAL.VALIDATION_ERROR, 400));
     }
 
-    const existingVendor = await vendor.findById(id);
+    const existingVendor = await vendor.findOne({ _id: id, createdBy: req.user.userId });
     if (!existingVendor) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
     }
 
     // If email is being updated, ensure it's unique
     if (value.email && value.email !== existingVendor.email) {
-      const emailExists = await vendor.findOne({ email: value.email });
+      const emailExists = await vendor.findOne({ email: value.email, createdBy: req.user.userId });
       if (emailExists) {
         logger.warn({
           message: `❌ Email already exists: ${value.email}`,
@@ -231,7 +231,7 @@ const editVendor = async (req, res, next) => {
     }
 
     // Update vendor
-    const updatedVendor = await vendor.findByIdAndUpdate(id, value, {
+    const updatedVendor = await vendor.findOneAndUpdate({ _id: id, createdBy: req.user.userId }, value, {
       new: true,
       runValidators: true,
     });
@@ -287,13 +287,13 @@ const deleteVendor = async (req, res, next) => {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_ID_REQUIRED, 400));
     }
 
-    const existingVendor = await vendor.findById(id);
+    const existingVendor = await vendor.findOne({ _id: id, createdBy: req.user.userId });
     if (!existingVendor) {
       return next(new ApiError(errorConstants.VENDOR.VENDOR_NOT_FOUND, 404));
     }
 
     // Delete vendor
-    await vendor.findByIdAndDelete(id);
+    await vendor.findOneAndDelete({ _id: id, createdBy: req.user.userId });
 
     // Remove vendor from user's vendors list
     await user.findByIdAndUpdate(
@@ -351,7 +351,7 @@ const getVendorsByCategory = async (req, res, next) => {
 
     // Find vendors by category and return only vendorId and name
     const vendors = await vendor
-      .find({ category })
+      .find({ category, createdBy: req.user.userId })
       .select('vendorId name category')
       .sort({ name: 1 }); // Sort alphabetically by name
 

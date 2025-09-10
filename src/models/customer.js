@@ -116,4 +116,9 @@ const CustomerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Ownership
+CustomerSchema.add({
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
+});
+
 export default mongoose.model('Customer', CustomerSchema);

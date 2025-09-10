@@ -119,7 +119,8 @@ export const createNetTradeIn = async (req, res, next) => {
         vehicleInfo?.basicDetails?.vehicleType || ''
       ).toUpperCase();
       const stockId = await generateStockId(
-        `${categoryCodeForStock}-${vehicleTypeCode}`
+        `${categoryCodeForStock}-${vehicleTypeCode}`,
+        req.user?.userId
       );
 
       const newVehicle = new Vehicle({
@@ -307,7 +308,7 @@ export const createNetTradeIn = async (req, res, next) => {
 
 export const listNetTradeIns = async (req, res, next) => {
   try {
-    const items = await NetTradeIn.find()
+    const items = await NetTradeIn.find({ createdBy: req.user?.userId })
       .populate('linkedSales')
       .populate({ path: 'linkedVehicle', populate: { path: 'vendor' } })
       .sort({ createdAt: -1 });
@@ -325,7 +326,7 @@ export const listNetTradeIns = async (req, res, next) => {
 export const getNetTradeInById = async (req, res, next) => {
   try {
     const { id } = req.query;
-    const item = await NetTradeIn.findById(id)
+    const item = await NetTradeIn.findOne({ _id: id, createdBy: req.user?.userId })
       .populate('linkedSales')
       .populate({ path: 'linkedVehicle', populate: { path: 'vendor' } });
     if (!item) return next(new ApiError('Net Trade-In not found', 404));
@@ -449,7 +450,7 @@ export const getNetTradeInById = async (req, res, next) => {
 export const deleteNetTradeIn = async (req, res, next) => {
   try {
     const { id } = req.query;
-    const deleted = await NetTradeIn.findByIdAndDelete(id);
+    const deleted = await NetTradeIn.findOneAndDelete({ _id: id, createdBy: req.user?.userId });
     if (!deleted) return next(new ApiError('Net Trade-In not found', 404));
     return SuccessHandler(null, 200, 'Net Trade-In deleted', res);
   } catch (err) {
@@ -468,7 +469,7 @@ export const updateNetTradeIn = async (req, res, next) => {
     });
     if (error) return next(new ApiError(error.details[0].message, 400));
 
-    const existing = await NetTradeIn.findById(id).populate({
+    const existing = await NetTradeIn.findOne({ _id: id, createdBy: req.user?.userId }).populate({
       path: 'linkedVehicle',
       populate: { path: 'vendor' },
     });
@@ -553,7 +554,7 @@ export const updateNetTradeIn = async (req, res, next) => {
             vendorInfo?.category || vendorDoc?.category
           );
           if (!vendorDoc) {
-            const generatedVendorId = await generateVendorId(categoryCode);
+            const generatedVendorId = await generateVendorId(categoryCode, req.user?.userId);
             vendorDoc = await Vendor.create({
               ...vendorInfo,
               email: newEmail || vendorInfo?.email,

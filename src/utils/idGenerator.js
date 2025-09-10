@@ -23,8 +23,8 @@ export const getNextCounter = async (counterKey) => {
  * @param {string} category - Vendor category (e.g., 'AU', 'COM', 'IND')
  * @returns {Promise<string>} - Generated vendor ID
  */
-export const generateVendorId = async (category) => {
-  const counterKey = `vendor:${category}`;
+export const generateVendorId = async (category, tenantId) => {
+  const counterKey = `vendor:${tenantId}:${category}`;
   const sequence = await getNextCounter(counterKey);
   return `VEN-${category}-${String(sequence).padStart(4, '0')}`;
 };
@@ -34,8 +34,8 @@ export const generateVendorId = async (category) => {
  * @param {string} firstName - Customer's first name
  * @returns {Promise<string>} - Generated customer ID
  */
-export const generateCustomerId = async (firstName) => {
-  const counterKey = 'customer';
+export const generateCustomerId = async (firstName, tenantId) => {
+  const counterKey = `customer:${tenantId}`;
   const sequence = await getNextCounter(counterKey);
   const cleanFirstName = firstName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   return `CUS-${cleanFirstName}-${String(sequence).padStart(4, '0')}`;
@@ -45,9 +45,9 @@ export const generateCustomerId = async (firstName) => {
  * Generate Receipt ID with counter (enhances existing logic)
  * @returns {Promise<string>} - Generated receipt ID
  */
-export const generateReceiptId = async () => {
+export const generateReceiptId = async (tenantId) => {
   const currentYear = new Date().getFullYear();
-  const counterKey = `receipt:${currentYear}`;
+  const counterKey = `receipt:${tenantId}:${currentYear}`;
   const sequence = await getNextCounter(counterKey);
   return `RC-${currentYear}-${String(sequence).padStart(4, '0')}`;
 };
@@ -57,8 +57,8 @@ export const generateReceiptId = async () => {
  * @param {string} prefix - Stock ID prefix (e.g., 'AU-SUV', 'COM-CAR')
  * @returns {Promise<string>} - Generated stock ID
  */
-export const generateStockId = async (prefix) => {
-  const counterKey = `stock:${prefix}`;
+export const generateStockId = async (prefix, tenantId) => {
+  const counterKey = `stock:${tenantId}:${prefix}`;
   const sequence = await getNextCounter(counterKey);
   return `${prefix}-${String(sequence).padStart(4, '0')}`;
 };

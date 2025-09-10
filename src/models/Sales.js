@@ -166,6 +166,8 @@ const SalesSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    // Ownership
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user', index: true },
     // Persist whether sale used an existing customer or a new one
     isExistingCustomer: {
       type: Boolean,
