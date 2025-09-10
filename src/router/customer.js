@@ -8,7 +8,7 @@ import {
   getAllCustomersWithoutPagination,
   getCustomerById,
 } from '../controllers/customerController.js';
-import verifyToken from '../middleware/auth.middleware.js';
+import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
