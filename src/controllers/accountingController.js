@@ -196,8 +196,8 @@ export const getSalesByCustomerId = async (req, res, next) => {
       return next(new ApiError('Customer ID is required', 400));
     }
 
-    // First find the customer by customerId
-    const customer = await Customer.findOne({ customerId: customerId });
+    // First find the customer by customerId for this user only
+    const customer = await Customer.findOne({ customerId: customerId, createdBy: req.user?.userId });
     if (!customer) {
       logger.warn({
         message: `❌ Customer not found for customer ID: ${customerId}`,
