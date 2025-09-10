@@ -40,6 +40,7 @@ export const createSales = async (req, res, next) => {
     if (customerInfo.isExistingCustomer) {
       customer = await Customer.findOne({
         customerId: customerInfo.customerId,
+        createdBy: req.user?.userId,
       });
       if (!customer) {
 
@@ -53,6 +54,7 @@ export const createSales = async (req, res, next) => {
       // 🆕 Handle New Customer
       const existingCustomer = await Customer.findOne({
         'CustomerInformation.email': customerInfo.CustomerInformation.email,
+        createdBy: req.user?.userId,
       });
       if (existingCustomer) {
         logger.warn({
@@ -64,7 +66,8 @@ export const createSales = async (req, res, next) => {
 
       // Generate customer ID using the same utility as customerController
       const newCustomerId = await generateCustomerId(
-        customerInfo.CustomerInformation.firstName
+        customerInfo.CustomerInformation.firstName,
+        req.user?.userId
       );
 
       // Create new customer
@@ -72,6 +75,7 @@ export const createSales = async (req, res, next) => {
         customerId: newCustomerId,
         CustomerInformation: customerInfo.CustomerInformation,
         IncomeInformation: customerInfo.IncomeInformation,
+        createdBy: req.user?.userId,
       });
 
       await customer.save();
