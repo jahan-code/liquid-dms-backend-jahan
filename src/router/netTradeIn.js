@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middleware/auth.middleware.js';
-import upload, { convertImages } from '../middleware/upload.middleware.js';
+import upload from '../middleware/upload.middleware.js';
 import {
   createNetTradeIn,
   listNetTradeIns,
@@ -20,7 +20,6 @@ router.post(
     { name: 'otherImages[]', maxCount: 10 },
     { name: 'billofsales', maxCount: 1 },
   ]),
-  convertImages,
   createNetTradeIn
 );
 
@@ -33,7 +32,6 @@ router.put(
     { name: 'otherImages[]', maxCount: 10 },
     { name: 'billofsales', maxCount: 1 },
   ]),
-  convertImages,
   updateNetTradeIn
 );
 
