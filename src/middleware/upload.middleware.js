@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import sharp from 'sharp';
 
 // Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +37,7 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   const field = file.fieldname;
 
-  const imageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const imageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
   const pdfTypes = ['application/pdf'];
 
   if (
@@ -105,3 +106,51 @@ const upload = multer({
 });
 
 export default upload;
+
+// 🔄 Image conversion middleware: convert images to AVIF with WEBP fallback
+export const convertImages = async (req, res, next) => {
+  try {
+    const filesByField = req.files || {};
+    const allFiles = [];
+    Object.keys(filesByField).forEach((key) => {
+      const list = Array.isArray(filesByField[key]) ? filesByField[key] : [filesByField[key]];
+      allFiles.push(...list);
+    });
+
+    for (const file of allFiles) {
+      try {
+        if (!file || !file.mimetype || !file.mimetype.startsWith('image/')) continue;
+        const inputPath = file.path;
+        const { dir, name } = path.parse(inputPath);
+        const avifPath = path.join(dir, `${name}.avif`);
+        const webpPath = path.join(dir, `${name}.webp`);
+
+        let finalPath = null;
+        try {
+          await sharp(inputPath).avif({ quality: 50 }).toFile(avifPath);
+          finalPath = avifPath;
+        } catch {
+          await sharp(inputPath).webp({ quality: 75 }).toFile(webpPath);
+          finalPath = webpPath;
+        }
+
+        if (finalPath) {
+          try {
+            fs.unlinkSync(inputPath);
+          } catch {
+            // ignore unlink errors
+          }
+          file.filename = path.basename(finalPath);
+          file.path = finalPath;
+          file.mimetype = finalPath.endsWith('.avif') ? 'image/avif' : 'image/webp';
+        }
+      } catch {
+        // Skip individual file conversion errors
+      }
+    }
+
+    next();
+  } catch {
+    next();
+  }
+};

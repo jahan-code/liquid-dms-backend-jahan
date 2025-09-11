@@ -12,7 +12,7 @@ import {
   getVehicleById,
   deleteVehicleById,
 } from '../controllers/vehicleController.js';
-import upload from '../middleware/upload.middleware.js';
+import upload, { convertImages } from '../middleware/upload.middleware.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -26,6 +26,7 @@ router.post(
     { name: 'otherImages[]', maxCount: 10 }, // <-- Add this line!
     { name: 'billofsales', maxCount: 1 },
   ]),
+  convertImages,
   addVehicle
 );
 router.put(
@@ -37,6 +38,7 @@ router.put(
     { name: 'otherImages[]', maxCount: 10 }, // <-- Add this line!
     { name: 'billofsales', maxCount: 1 },
   ]),
+  convertImages,
   editVehicle
 );
 router.put('/Cost', verifyToken, addVehicleCost);
@@ -48,6 +50,7 @@ router.put(
     { name: 'transferDocument', maxCount: 5 },
     { name: 'transferDocument[]', maxCount: 5 }, // Support multiple files and both field names
   ]),
+  convertImages,
   addVehiclePreviousOwner
 );
 router.put(
@@ -57,6 +60,7 @@ router.put(
     { name: 'uploadedNotes', maxCount: 5 },
     { name: 'uploadedNotes[]', maxCount: 5 }, // Support multiple files and both field names
   ]),
+  convertImages,
   addVehicleNotes
 );
 router.patch('/complete', verifyToken, markVehicleAsCompleted);
