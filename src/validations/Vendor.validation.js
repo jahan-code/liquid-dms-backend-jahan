@@ -14,19 +14,18 @@ const nameSchema = Joi.string().required().messages({
   'any.required': errorConstants.VENDOR.NAME_REQUIRED,
 });
 
-const streetSchema = Joi.string().required().messages({
+const streetSchema = Joi.string().allow('', null).optional().messages({
   'string.base': errorConstants.VENDOR.STREET_MUST_BE_STRING,
-  'string.empty': errorConstants.VENDOR.ADDRESS_REQUIRED,
-  'any.required': errorConstants.VENDOR.ADDRESS_REQUIRED,
 });
 
 const zipSchema = Joi.string()
   .pattern(/^\d{5}$/)
-  .required()
+  .allow('', null)
+  .optional()
+
+  
   .messages({
     'string.base': errorConstants.VENDOR.ZIP_MUST_BE_STRING,
-
-    'any.required': errorConstants.VENDOR.ZIP_REQUIRED,
     'string.pattern.base': errorConstants.VENDOR.ZIP_INVALID_FORMAT,
   });
 
@@ -36,65 +35,11 @@ const citySchema = Joi.string().required().messages({
   'any.required': errorConstants.VENDOR.CITY_REQUIRED,
 });
 
-const stateSchema = Joi.string()
-  .valid(
-    'Alabama',
-    'Alaska',
-    'Arizona',
-    'Arkansas',
-    'California',
-    'Colorado',
-    'Connecticut',
-    'Delaware',
-    'Florida',
-    'Georgia',
-    'Hawaii',
-    'Idaho',
-    'Illinois',
-    'Indiana',
-    'Iowa',
-    'Kansas',
-    'Kentucky',
-    'Louisiana',
-    'Maine',
-    'Maryland',
-    'Massachusetts',
-    'Michigan',
-    'Minnesota',
-    'Mississippi',
-    'Missouri',
-    'Montana',
-    'Nebraska',
-    'Nevada',
-    'New Hampshire',
-    'New Jersey',
-    'New Mexico',
-    'New York',
-    'North Carolina',
-    'North Dakota',
-    'Ohio',
-    'Oklahoma',
-    'Oregon',
-    'Pennsylvania',
-    'Rhode Island',
-    'South Carolina',
-    'South Dakota',
-    'Tennessee',
-    'Texas',
-    'Utah',
-    'Vermont',
-    'Virginia',
-    'Washington',
-    'West Virginia',
-    'Wisconsin',
-    'Wyoming'
-  )
-  .required()
-  .messages({
-    'string.base': errorConstants.VENDOR.STATE_MUST_BE_STRING,
-    'any.only': errorConstants.VENDOR.STATE_INVALID,
-    'any.required': errorConstants.VENDOR.STATE_REQUIRED,
-  });
+const stateSchema = Joi.string().required().messages({
+  'string.base': errorConstants.VENDOR.STATE_MUST_BE_STRING,
+  'string.empty': errorConstants.VENDOR.STATE_REQUIRED,
+  'any.required': errorConstants.VENDOR.STATE_REQUIRED,
+});
 
 const phoneSchema = Joi.string().required().messages({
   'string.base': errorConstants.VENDOR.PHONE_MUST_BE_STRING,

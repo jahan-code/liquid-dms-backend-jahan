@@ -203,7 +203,7 @@ export const addNetTradeInSchema = Joi.object({
     // New vendor optional fields (will be used if creating a vendor)
     category: Joi.string().optional(),
     name: Joi.string().optional(),
-    street: Joi.string().optional(),
+    street: Joi.string().allow('', null).optional(),
     zip: Joi.string().optional(),
     city: Joi.string().optional(),
     state: Joi.string().optional(),
